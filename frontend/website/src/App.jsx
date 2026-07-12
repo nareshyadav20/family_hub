@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import Navbar from './components/Navbar';
@@ -18,10 +18,6 @@ import MemberDirectory from './pages/private/MemberDirectory';
 import Documents from './pages/private/Documents';
 import Announcements from './pages/private/Announcements';
 
-// Auth context (simple mock)
-const AuthContext = React.createContext(null);
-export const useAuth = () => React.useContext(AuthContext);
-
 function PublicLayout({ children }) {
   return (
     <>
@@ -33,31 +29,17 @@ function PublicLayout({ children }) {
 }
 
 function PrivateRoute({ children }) {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const token = localStorage.getItem('token');
+  if (!token) return <Navigate to="/login" replace />;
   return children;
 }
 
 export default function App() {
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('fh_user')); } catch { return null; }
-  });
-
-  const login = (userData) => {
-    localStorage.setItem('fh_user', JSON.stringify(userData));
-    setUser(userData);
-  };
-  const logout = () => {
-    localStorage.removeItem('fh_user');
-    setUser(null);
-  };
-
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
           <Route path="/tree" element={<PublicLayout><FamilyTree /></PublicLayout>} />
           <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
@@ -77,6 +59,5 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthContext.Provider>
   );
 }

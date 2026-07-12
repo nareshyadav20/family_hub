@@ -29,7 +29,7 @@ export default function MainLayout({ navItems, bottomNav }) {
         <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-none pb-4 relative flex flex-col">
           <div className="space-y-1">
             {navItems.map((item, idx) => {
-              const isActive = item.href === '/' ? location.pathname === '/' : location.pathname.startsWith(item.href);
+              const isActive = item.href === '/member/dashboard' ? (location.pathname === '/member/dashboard' || location.pathname === '/member/dashboard/') : location.pathname.startsWith(item.href);
               return (
                 <Link 
                   key={idx} 
@@ -54,6 +54,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                <Link 
                  key={idx} 
                  to={item.href} 
+                 onClick={(e) => { if (item.title === 'Sign Out') { e.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href = '/member/login'; } }}
                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                >
                  {React.cloneElement(item.icon, { className: "opacity-60" })}

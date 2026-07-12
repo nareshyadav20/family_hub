@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
 import { LayoutDashboard, Image, Calendar, Users, Folder, Megaphone, LogOut, Menu, X, ChevronRight, Bell, Globe } from 'lucide-react';
 
 const privateNav = [
@@ -14,11 +13,16 @@ const privateNav = [
 
 export default function PrivateLayout({ children, title, subtitle }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout } = useAuth();
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => { 
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login'); 
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC', fontFamily: 'Inter,sans-serif' }}>

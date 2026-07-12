@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../App';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Phone, CheckCircle } from 'lucide-react';
 
 export default function Login() {
@@ -12,14 +11,14 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [form, setForm] = useState({ email: '', password: '', name: '', phone: '' });
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      login({ name: 'Arjun Smith', email: form.email, role: 'member' });
+      localStorage.setItem('token', 'mock_website_token');
+      localStorage.setItem('user', JSON.stringify({ name: 'Arjun Smith', email: form.email, role: 'member' }));
       navigate('/private');
     }, 1500);
   };
@@ -34,7 +33,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      login({ name: 'Arjun Smith', email: form.email, role: 'member' });
+      localStorage.setItem('token', 'mock_website_token');
+      localStorage.setItem('user', JSON.stringify({ name: 'Arjun Smith', email: form.email, role: 'member' }));
       navigate('/private');
     }, 1500);
   };

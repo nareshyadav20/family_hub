@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
 import { Menu, X, Home, Info, GitFork, Image, Calendar, BookOpen, Phone, LogIn, UserPlus, ChevronDown, Bell, User, LogOut } from 'lucide-react';
 
 const navLinks = [
@@ -17,7 +16,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, logout } = useAuth();
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -28,8 +28,9 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
     setShowUserMenu(false);
   };
 

@@ -26,7 +26,7 @@ export default function MainLayout({ portalName = "Admin", navItems, bottomNav }
         
         <nav className="flex-1 overflow-y-auto pt-2 pb-6 px-4 space-y-[2px] scrollbar-none">
           {navItems.map((item, idx) => {
-            const isActive = item.href === '/' ? location.pathname === '/' : location.pathname.startsWith(item.href);
+            const isActive = item.href === '/admin/dashboard' ? (location.pathname === '/admin/dashboard' || location.pathname === '/admin/dashboard/') : location.pathname.startsWith(item.href);
             return (
               <Link 
                 key={idx} 
@@ -71,7 +71,7 @@ export default function MainLayout({ portalName = "Admin", navItems, bottomNav }
                  </button>
               </div>
               <div className="h-[1px] w-full bg-slate-200 dark:bg-slate-800"></div>
-              <button onClick={() => window.location.href = '/login'} className="flex items-center gap-2.5 text-[14px] font-medium text-slate-600 dark:text-slate-400 hover:text-red-500 transition-colors">
+              <button onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/admin/login' }} className="flex items-center gap-2.5 text-[14px] font-medium text-slate-600 dark:text-slate-400 hover:text-red-500 transition-colors">
                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                  Logout
               </button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Members from './pages/Members';
@@ -24,38 +24,38 @@ import Finance from './pages/Finance';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
 
-import { 
+import {
   LayoutDashboard, Users, UserPlus, GitFork, CalendarDays, Calendar as CalIcon,
-  Image as ImageIcon, Library, Megaphone, MessageSquare, BarChart, 
+  Image as ImageIcon, Library, Megaphone, MessageSquare, BarChart,
   Bell, Folder, PieChart, FileText, UserCircle, Settings as SettingsIcon, LogOut,
   Vault, Briefcase, ShieldCheck, Sparkles, DollarSign, History
 } from 'lucide-react';
 
 const navSidebarItems = [
-  { title: "Dashboard", href: "/", icon: <LayoutDashboard size={18} /> },
-  { title: "AI Assistant", href: "/assistant", icon: <Sparkles size={18} /> },
-  { title: "Messages", href: "/messages", icon: <MessageSquare size={18} /> },
-  { title: "Members", href: "/members", icon: <Users size={18} /> },
-  { title: "Join Requests", href: "/requests", icon: <UserPlus size={18} /> },
-  { title: "Family Tree", href: "/tree", icon: <GitFork size={18} /> },
-  { title: "Family History", href: "/history", icon: <History size={18} /> },
-  { title: "Events", href: "/events", icon: <CalendarDays size={18} /> },
-  { title: "Calendar", href: "/calendar", icon: <CalIcon size={18} /> },
-  { title: "Gallery", href: "/gallery", icon: <ImageIcon size={18} /> },
-  { title: "Finance", href: "/finance", icon: <DollarSign size={18} /> },
-  { title: "Assets", href: "/assets", icon: <Briefcase size={18} /> },
-  { title: "Digital Vault", href: "/vault", icon: <Folder size={18} /> },
-  { title: "Documents", href: "/documents", icon: <FileText size={18} /> },
-  { title: "Announcements", href: "/announcements", icon: <Megaphone size={18} /> },
-  { title: "Polls", href: "/polls", icon: <BarChart size={18} /> },
-  { title: "Analytics", href: "/analytics", icon: <PieChart size={18} /> },
-  { title: "Notifications", href: "/notifications", icon: <Bell size={18} /> },
-  { title: "Settings", href: "/settings", icon: <SettingsIcon size={18} /> },
+  { title: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard size={18} /> },
+  { title: "AI Assistant", href: "/admin/dashboard/assistant", icon: <Sparkles size={18} /> },
+  { title: "Messages", href: "/admin/dashboard/messages", icon: <MessageSquare size={18} /> },
+  { title: "Members", href: "/admin/dashboard/members", icon: <Users size={18} /> },
+  { title: "Join Requests", href: "/admin/dashboard/requests", icon: <UserPlus size={18} /> },
+  { title: "Family Tree", href: "/admin/dashboard/tree", icon: <GitFork size={18} /> },
+  { title: "Family History", href: "/admin/dashboard/history", icon: <History size={18} /> },
+  { title: "Events", href: "/admin/dashboard/events", icon: <CalendarDays size={18} /> },
+  { title: "Calendar", href: "/admin/dashboard/calendar", icon: <CalIcon size={18} /> },
+  { title: "Gallery", href: "/admin/dashboard/gallery", icon: <ImageIcon size={18} /> },
+  { title: "Finance", href: "/admin/dashboard/finance", icon: <DollarSign size={18} /> },
+  { title: "Assets", href: "/admin/dashboard/assets", icon: <Briefcase size={18} /> },
+  { title: "Digital Vault", href: "/admin/dashboard/vault", icon: <Folder size={18} /> },
+  { title: "Documents", href: "/admin/dashboard/documents", icon: <FileText size={18} /> },
+  { title: "Announcements", href: "/admin/dashboard/announcements", icon: <Megaphone size={18} /> },
+  { title: "Polls", href: "/admin/dashboard/polls", icon: <BarChart size={18} /> },
+  { title: "Analytics", href: "/admin/dashboard/analytics", icon: <PieChart size={18} /> },
+  { title: "Notifications", href: "/admin/dashboard/notifications", icon: <Bell size={18} /> },
+  { title: "Settings", href: "/admin/dashboard/settings", icon: <SettingsIcon size={18} /> },
 ];
 
 const bottomNavItems = [
-  { title: "Profile", href: "/profile", icon: <UserCircle size={18} /> },
-  { title: "Sign Out", href: "/login", icon: <LogOut size={18} /> },
+  { title: "Profile", href: "/admin/dashboard/profile", icon: <UserCircle size={18} /> },
+  { title: "Sign Out", href: "/admin/login", icon: <LogOut size={18} /> },
 ];
 
 function ComingSoon({ title }) {
@@ -70,14 +70,45 @@ function ComingSoon({ title }) {
   );
 }
 
+function ProtectedAdminRoute({ children }) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  let isValid = false;
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN')) {
+        isValid = true;
+      }
+    } catch (e) {}
+  }
+  
+  if (!isValid) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return <Navigate to="/admin/login" replace />;
+  }
+  return children;
+}
+
+function PublicRoute({ children }) {
+  const token = localStorage.getItem('token');
+  if (token) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        
-        <Route path="/" element={<MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} />}>
+        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/admin/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+
+        <Route path="/admin/dashboard" element={<ProtectedAdminRoute><MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} /></ProtectedAdminRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="assistant" element={<AIAssistant />} />
           <Route path="messages" element={<Messages />} />
@@ -98,7 +129,7 @@ function App() {
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
-          
+
           <Route path="albums" element={<ComingSoon title="Albums" />} />
           <Route path="reports" element={<ComingSoon title="Reports" />} />
           <Route path="*" element={<ComingSoon title="Page Not Found" />} />

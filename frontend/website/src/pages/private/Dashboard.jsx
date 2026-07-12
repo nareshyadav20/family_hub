@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../App';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Users, Image, Calendar, Folder, Megaphone, Bell, TrendingUp, Heart, BookOpen, ChevronRight, ArrowRight } from 'lucide-react';
 
@@ -34,7 +33,8 @@ const quickLinks = [
 ];
 
 export default function PrivateDashboard() {
-  const { user } = useAuth();
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
