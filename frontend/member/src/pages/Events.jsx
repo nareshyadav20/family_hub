@@ -1,79 +1,103 @@
 import React, { useState } from 'react';
-import { CalendarDays, Clock, MapPin, Users, ChevronRight, Plus, Check } from 'lucide-react';
-
-const events = [
-  { id: 1, title: 'Annual Family Reunion 2026', date: 'Aug 15, 2026', time: '10:00 AM', location: 'Central Park, New York', attendees: 45, type: 'Reunion', status: 'upcoming', cover: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&q=80', rsvp: false, description: 'Our biggest family event of the year! Theme: Roots & Branches. Games, food, and a special tribute to Grandpa.' },
-  { id: 2, title: "Grandpa Robert's 80th Birthday Bash", date: 'Sep 2, 2026', time: '6:00 PM', location: 'Family Estate, Los Angeles', attendees: 120, type: 'Birthday', status: 'upcoming', cover: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&q=80', rsvp: true, description: 'A grand surprise birthday celebration for Grandpa! Dinner, live music, and a special video tribute from the family.' },
-  { id: 3, title: '10th Anniversary Dinner', date: 'Oct 12, 2026', time: '7:00 PM', location: 'The Ritz Carlton, Mumbai', attendees: 30, type: 'Anniversary', status: 'upcoming', cover: 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&q=80', rsvp: false, description: 'Join us in celebrating 10 wonderful years of James and Sarah\'s marriage over a fine dining experience.' },
-  { id: 4, title: 'Diwali Family Night', date: 'Nov 1, 2026', time: '8:00 PM', location: 'Smith Residence, Delhi', attendees: 28, type: 'Festival', status: 'upcoming', cover: 'https://images.unsplash.com/photo-1574175174819-9a2f64fa2b5d?w=600&q=80', rsvp: false, description: 'Light diyas, burst crackers, enjoy sweets and fireworks together this Diwali!' },
-  { id: 5, title: 'Christmas Family Brunch', date: 'Dec 25, 2025', time: '11:00 AM', location: 'Robert & Martha\'s Home', attendees: 22, type: 'Holiday', status: 'past', cover: 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?w=600&q=80', rsvp: true, description: 'Annual Christmas brunch with the whole family. Gift exchange and carol singing!' },
-];
-
-const TYPE_COLORS = {
-  Reunion: 'bg-blue-100 text-blue-700',
-  Birthday: 'bg-purple-100 text-purple-700',
-  Anniversary: 'bg-pink-100 text-pink-700',
-  Festival: 'bg-amber-100 text-amber-700',
-  Holiday: 'bg-emerald-100 text-emerald-700',
-};
+import { Card, CardContent } from '@/components/ui/Card';
+import { Calendar as CalendarIcon, MapPin, Clock, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 export default function Events() {
-  const [rsvpd, setRsvpd] = useState(events.filter(e => e.rsvp).map(e => e.id));
-  const [tab, setTab] = useState('upcoming');
+  const [activeTab, setActiveTab] = useState('upcoming');
 
-  const filtered = events.filter(e => e.status === tab);
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      // Re-using the unified admin fetch endpoint for data continuity 
+      // (in a full production app, this would be grouped slightly differently)
+      const res = await axios.get('http://localhost:5000/api/v1/admin/events');
+      return res.data;
+    }
+  });
+
+  const now = new Date();
+  
+  // Members do NOT see Draft events. Only Publisher events.
+  const upcomingEvents = events.filter(e => new Date(e.eventDate) >= now && e.status === 'Publish');
+  const pastEvents = events.filter(e => new Date(e.eventDate) < now && e.status === 'Publish');
+
+  const activeEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Events</h1>
-          <p className="text-slate-500 text-sm mt-1">Stay connected through shared celebrations.</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+         <div>
+           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Events</h1>
+           <p className="text-muted-foreground text-sm mt-1">Discover upcoming family gatherings and celebrations.</p>
+         </div>
+      </div>
+      
+      <div className="flex gap-4 border-b border-slate-200 dark:border-slate-800 pb-px">
+         <button onClick={() => setActiveTab('upcoming')} className={`pb-3 border-b-2 font-bold px-2 transition-colors ${activeTab === 'upcoming' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Upcoming ({upcomingEvents.length})</button>
+         <button onClick={() => setActiveTab('past')} className={`pb-3 border-b-2 font-medium px-2 transition-colors ${activeTab === 'past' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Past Events ({pastEvents.length})</button>
+      </div>
+
+      {isLoading ? (
+         <div className="py-20 text-center font-bold text-slate-400">Loading Events...</div>
+      ) : activeEvents.length === 0 ? (
+         <div className="py-20 text-center text-slate-400 font-semibold bg-slate-50 dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+           No events scheduled. Check back later!
+         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           {activeEvents.map((e) => {
+             const dateObj = new Date(e.eventDate);
+             const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+             const day = dateObj.getDate();
+             
+             return (
+               <Card key={e.id} className="border-0 shadow-sm dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
+                 <div className="h-40 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                    {e.bannerImage ? (
+                       <img src={e.bannerImage} alt={e.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out" />
+                    ) : ( 
+                       <ImageIcon size={40} className="transform group-hover:scale-105 transition-transform duration-700 opacity-50" />
+                    )}
+                    
+                    <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md dark:bg-slate-900/95 rounded-xl p-2 shadow-lg text-center min-w-[55px] border border-white/50">
+                      <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{month}</div>
+                      <div className="text-2xl font-black text-slate-800 dark:text-white leading-none mt-0.5">{day}</div>
+                    </div>
+                    
+                    <div className="absolute top-4 right-4 z-20">
+                       <span className="px-3 py-1 bg-black/50 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20 shadow-sm">
+                         {e.category}
+                       </span>
+                    </div>
+                 </div>
+                 
+                 <CardContent className="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{e.name}</h3>
+                      
+                      <div className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                        <div className="flex items-center gap-3"><Clock className="h-4 w-4 shrink-0 text-slate-400" /> {dateObj.toLocaleDateString()} at {e.startTime}</div>
+                        <div className="flex items-center gap-3"><MapPin className="h-4 w-4 shrink-0 text-slate-400" /> <span className="truncate">{e.venue}, {e.city || e.address}</span></div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                       <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{e.familyBranch} Branch</span>
+                       </div>
+                       <div className="text-indigo-600 font-bold text-sm flex items-center">
+                          View Details <ChevronRight className="h-4 w-4 ml-1" />
+                       </div>
+                    </div>
+                 </CardContent>
+               </Card>
+             );
+           })}
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2">
-        {['upcoming', 'past'].map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-2 rounded-full text-sm font-bold capitalize transition-all ${tab === t ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-white dark:bg-slate-900 text-slate-600 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}>
-            {t === 'upcoming' ? `🗓 Upcoming (${events.filter(e => e.status === 'upcoming').length})` : `⏳ Past Events`}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {filtered.map(ev => (
-          <div key={ev.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
-            <div className="h-44 relative overflow-hidden">
-              <img src={ev.cover} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute top-4 left-4">
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${TYPE_COLORS[ev.type]}`}>{ev.type}</span>
-              </div>
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl p-2.5 text-center min-w-[52px] shadow-md">
-                <div className="text-[10px] font-black text-rose-500 uppercase">{ev.date.split(' ')[0]}</div>
-                <div className="text-xl font-black text-slate-800 leading-none">{ev.date.split(' ')[1].replace(',', '')}</div>
-              </div>
-            </div>
-            <div className="p-5 flex-1 flex flex-col gap-3">
-              <h3 className="font-bold text-slate-900 dark:text-white text-[15px] leading-snug">{ev.title}</h3>
-              <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">{ev.description}</p>
-              <div className="space-y-1.5 text-xs font-medium text-slate-500">
-                <div className="flex items-center gap-2"><Clock size={12} className="text-slate-400" />{ev.date} at {ev.time}</div>
-                <div className="flex items-center gap-2"><MapPin size={12} className="text-slate-400" />{ev.location}</div>
-                <div className="flex items-center gap-2"><Users size={12} className="text-slate-400" />{ev.attendees} attending</div>
-              </div>
-              {ev.status === 'upcoming' && (
-                <button onClick={() => setRsvpd(prev => prev.includes(ev.id) ? prev.filter(x => x !== ev.id) : [...prev, ev.id])}
-                  className={`mt-auto w-full py-2.5 rounded-xl text-sm font-bold transition-all ${rsvpd.includes(ev.id) ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/30'}`}>
-                  {rsvpd.includes(ev.id) ? <span className="flex items-center justify-center gap-2"><Check size={15} /> RSVP'd</span> : 'RSVP Now'}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -28,6 +29,8 @@ export default function Calendar() {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDay(year, month);
 
+  const [showEventModal, setShowEventModal] = useState(false);
+
   const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
   const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); };
 
@@ -37,13 +40,13 @@ export default function Calendar() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 relative">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Calendar</h1>
           <p className="text-sm text-slate-500 mt-1">Track birthdays, anniversaries, and family events.</p>
         </div>
-        <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30">
+        <button onClick={() => setShowEventModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30">
           <Plus size={18} /> Add Event
         </button>
       </div>
@@ -122,6 +125,40 @@ export default function Calendar() {
           ))}
         </div>
       </div>
+
+      {showEventModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add Calendar Event</h2>
+              
+              <div className="space-y-4">
+                <div>
+                   <p className="text-xs font-bold text-slate-500 mb-1">Basic Information</p>
+                   <input type="text" placeholder="Event Title (Required) ✅" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium mb-3" />
+                   <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium">
+                      <option>Event Type ✅</option>
+                      <option>Birthday</option>
+                      <option>Meeting</option>
+                      <option>Gathering</option>
+                   </select>
+                </div>
+                
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                   <p className="text-xs font-bold text-slate-500 mb-2">2.2 Date & Time</p>
+                   <div className="flex gap-3">
+                      <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                      <input type="time" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex gap-3">
+                 <button onClick={() => { alert('Calendar Event Added Successfully!'); setShowEventModal(false); }} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-indigo-500/20">Save Event</button>
+                 <button onClick={() => setShowEventModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

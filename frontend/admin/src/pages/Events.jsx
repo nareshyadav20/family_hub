@@ -1,77 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Calendar as CalendarIcon, MapPin, Users, Plus, Clock, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Plus, Clock, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 export default function Events() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('upcoming');
+
+  const { data: events = [], isLoading } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/admin/events');
+      return res.data;
+    }
+  });
+
+  const now = new Date();
+  
+  const upcomingEvents = events.filter(e => new Date(e.eventDate) >= now && e.status !== 'Draft');
+  const pastEvents = events.filter(e => new Date(e.eventDate) < now && e.status !== 'Draft');
+  const draftEvents = events.filter(e => e.status === 'Draft');
+
+  const activeEvents = activeTab === 'upcoming' ? upcomingEvents : activeTab === 'past' ? pastEvents : draftEvents;
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-end">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
          <div>
-           <h1 className="text-3xl font-bold tracking-tight">Family Events</h1>
+           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Events</h1>
            <p className="text-muted-foreground text-sm mt-1">Plan, manage, and celebrate together.</p>
          </div>
-         <Button className="h-10 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 rounded-full px-6">
+         <Button onClick={() => navigate('/admin/dashboard/events/create')} className="h-10 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 rounded-full px-6 whitespace-nowrap">
            <Plus className="h-4 w-4 mr-2" /> Create Event
          </Button>
       </div>
       
       <div className="flex gap-4 border-b border-slate-200 dark:border-slate-800 pb-px">
-         <button className="pb-3 border-b-2 border-indigo-600 text-indigo-600 font-bold px-2">Upcoming</button>
-         <button className="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium px-2">Past Events</button>
-         <button className="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium px-2">Drafts</button>
+         <button onClick={() => setActiveTab('upcoming')} className={`pb-3 border-b-2 font-bold px-2 transition-colors ${activeTab === 'upcoming' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Upcoming ({upcomingEvents.length})</button>
+         <button onClick={() => setActiveTab('past')} className={`pb-3 border-b-2 font-medium px-2 transition-colors ${activeTab === 'past' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Past Events ({pastEvents.length})</button>
+         <button onClick={() => setActiveTab('draft')} className={`pb-3 border-b-2 font-medium px-2 transition-colors ${activeTab === 'draft' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Drafts ({draftEvents.length})</button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-         {[
-           { title: "Summer Family Reunion 2026", date: "Aug 15", fullDate: "August 15, 2026", time: "10:00 AM", location: "Central Park, NY", attendees: 45, type: "Reunion", bg: "from-blue-600 to-cyan-500", cover: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=500&h=300&fit=crop" },
-           { title: "Grandpa's 80th Birthday Bash", date: "Sep 02", fullDate: "September 2, 2026", time: "6:00 PM", location: "Family Estate, LA", attendees: 120, type: "Birthday", bg: "from-purple-600 to-pink-500", cover: "https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=500&h=300&fit=crop" },
-           { title: "10th Anniversary Dinner", date: "Oct 12", fullDate: "October 12, 2026", time: "7:00 PM", location: "The Ritz Carlton", attendees: 30, type: "Anniversary", bg: "from-amber-500 to-orange-500", cover: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=500&h=300&fit=crop" },
-         ].map((e, idx) => (
-           <Card key={idx} className="border-0 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
-             <div className="h-40 w-full relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
-                <img src={e.cover} alt={e.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out" />
-                <div className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-md dark:bg-slate-900/90 rounded-xl p-2 shadow-lg text-center min-w-[55px] border border-white/50">
-                  <div className="text-[10px] font-black text-rose-500 uppercase tracking-wider">{e.date.split(" ")[0]}</div>
-                  <div className="text-2xl font-black text-slate-800 dark:text-white leading-none mt-0.5">{e.date.split(" ")[1]}</div>
-                </div>
-                <div className="absolute top-4 right-4 z-20">
-                   <span className="px-3 py-1 bg-black/50 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20 shadow-sm">
-                     {e.type}
-                   </span>
-                </div>
-             </div>
+      {isLoading ? (
+         <div className="py-20 text-center font-bold text-slate-400">Loading Events...</div>
+      ) : activeEvents.length === 0 ? (
+         <div className="py-20 text-center text-slate-400 font-semibold bg-slate-50 dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+           No events found for this category.
+         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           {activeEvents.map((e, idx) => {
+             const dateObj = new Date(e.eventDate);
+             const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+             const day = dateObj.getDate();
              
-             <CardContent className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{e.title}</h3>
-                  
-                  <div className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <div className="flex items-center gap-3"><Clock className="h-4 w-4 text-slate-400" /> {e.fullDate} at {e.time}</div>
-                    <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-slate-400" /> {e.location}</div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                   <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {[1,2,3].map(i => (
-                           <div key={i} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white dark:border-slate-900 overflow-hidden">
-                             <img src={`https://i.pravatar.cc/100?img=${idx*3+i}`} alt="user" />
-                           </div>
-                        ))}
+             return (
+               <Card key={e.id} onClick={() => navigate(`/admin/dashboard/events/${e.id}`)} className="border-0 shadow-sm dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
+                 <div className="h-40 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
+                    {e.bannerImage ? (
+                       <img src={e.bannerImage} alt={e.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out" />
+                    ) : ( 
+                       <ImageIcon size={40} className="transform group-hover:scale-105 transition-transform duration-700 opacity-50" />
+                    )}
+                    
+                    <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md dark:bg-slate-900/95 rounded-xl p-2 shadow-lg text-center min-w-[55px] border border-white/50">
+                      <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{month}</div>
+                      <div className="text-2xl font-black text-slate-800 dark:text-white leading-none mt-0.5">{day}</div>
+                    </div>
+                    
+                    <div className="absolute top-4 right-4 z-20">
+                       <span className="px-3 py-1 bg-black/50 backdrop-blur-md rounded-full text-white text-xs font-bold border border-white/20 shadow-sm">
+                         {e.category}
+                       </span>
+                    </div>
+                 </div>
+                 
+                 <CardContent className="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{e.name}</h3>
+                      
+                      <div className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                        <div className="flex items-center gap-3"><Clock className="h-4 w-4 shrink-0 text-slate-400" /> {dateObj.toLocaleDateString()} at {e.startTime}</div>
+                        <div className="flex items-center gap-3"><MapPin className="h-4 w-4 shrink-0 text-slate-400" /> <span className="truncate">{e.venue}, {e.city || e.address}</span></div>
                       </div>
-                      <span className="text-xs font-semibold text-slate-500">+{e.attendees - 3} attending</span>
-                   </div>
-                   <Button variant="ghost" size="icon" className="group-hover:bg-indigo-50 text-indigo-600 rounded-full h-8 w-8">
-                      <ChevronRight className="h-4 w-4" />
-                   </Button>
-                </div>
-             </CardContent>
-           </Card>
-         ))}
-      </div>
+                    </div>
+                    
+                    <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                       <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{e.familyBranch} Branch</span>
+                       </div>
+                       <Button variant="ghost" size="icon" className="group-hover:bg-indigo-50 text-indigo-600 rounded-full h-8 w-8">
+                          <ChevronRight className="h-4 w-4" />
+                       </Button>
+                    </div>
+                 </CardContent>
+               </Card>
+             );
+           })}
+        </div>
+      )}
     </div>
   );
 }

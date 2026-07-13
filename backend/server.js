@@ -301,6 +301,142 @@ app.post('/api/v1/auth/invite/accept', async (req, res) => {
   }
 });
 
+// ==========================================
+// DOCUMENTS API (Shared)
+// ==========================================
+
+app.get('/api/v1/documents', async (req, res) => {
+  try {
+     const docs = await prisma.document.findMany({
+        include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
+        orderBy: { createdAt: 'desc' }
+     });
+     res.json(docs);
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/v1/documents', async (req, res) => {
+  try {
+     const { name, type, size, category, visibility, uploaderId } = req.body;
+     const doc = await prisma.document.create({
+        data: {
+           name, type, size, category,
+           url: `#${Date.now()}`,
+           visibility: visibility || 'PRIVATE',
+           uploaderId,
+           status: 'PENDING'
+        },
+        include: { uploader: { select: { firstName: true, lastName: true } } }
+     });
+     
+     const io = req.app.get('socketio');
+     io.emit('document.uploaded', { message: `New Document "${name}" uploaded and pending verification.` });
+     io.emit('notification.created', { message: `New Document "${name}" uploaded and pending verification.` });
+     
+     res.status(201).json(doc);
+  } catch(err) { 
+     console.error('Document Upload Error:', err);
+     res.status(500).json({ error: 'Failed to upload document.' }); 
+  }
+});
+
+app.put('/api/v1/documents/:id/status', async (req, res) => {
+  try {
+     const { status, visibility } = req.body;
+     const updateData = {};
+     if (status) updateData.status = status;
+     if (visibility) updateData.visibility = visibility;
+
+     const doc = await prisma.document.update({
+        where: { id: req.params.id },
+        data: updateData
+     });
+     
+     const io = req.app.get('socketio');
+     if (status === 'VERIFIED') {
+        io.emit('document.verified', { documentId: doc.id, message: `Your document ${doc.name} was verified!` });
+        io.emit('notification.created', { message: `Document ${doc.name} was successfully verified.` });
+     }
+     
+     res.json(doc);
+  } catch(err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ==========================================
+// EVENTS API (Admin)
+// ==========================================
+
+app.post('/api/v1/admin/events', async (req, res) => {
+  try {
+     const {
+        name, category, description, bannerImage, eventDate, startTime, endTime, venue,
+        address, city, state, country, googleMapsUrl, organizerId, familyBranch,
+        visibility, inviteType, invitedMembers, rsvpEnabled, maxGuests, rsvpDeadline,
+        liveStream, streamVisibility, liveChat, recordEvent, allowPhotos, allowComments,
+        reminders, status
+     } = req.body;
+
+     const eventId = 'EVT-' + Math.floor(10000 + Math.random() * 90000);
+     const safeEventDate = eventDate ? new Date(eventDate) : new Date();
+     
+     const event = await prisma.event.create({
+        data: {
+           eventId, 
+           name: name || 'Untitled Event', 
+           category: category || 'Other', 
+           description: description || '', 
+           bannerImage,
+           eventDate: safeEventDate,
+           startTime: startTime || '12:00', 
+           endTime: endTime || null, 
+           venue: venue || 'TBD', 
+           address: address || '', 
+           city: city || '', 
+           state: state || '', 
+           country: country || '', 
+           googleMapsUrl: googleMapsUrl || null,
+           organizerId: organizerId || 'Admin', 
+           familyBranch: familyBranch || 'General', 
+           visibility: visibility || 'Private', 
+           inviteType: inviteType || 'All Members', 
+           invitedMembers,
+           rsvpEnabled: !!rsvpEnabled, 
+           maxGuests: maxGuests ? parseInt(maxGuests) : null,
+           rsvpDeadline: rsvpDeadline ? new Date(rsvpDeadline) : null,
+           liveStream: !!liveStream, 
+           streamVisibility: streamVisibility || null, 
+           liveChat: !!liveChat, 
+           recordEvent: !!recordEvent, 
+           allowPhotos: !!allowPhotos, 
+           allowComments: !!allowComments,
+           reminders, 
+           status: status || 'Draft', 
+           createdBy: 'Admin'
+        }
+     });
+
+     if (status === 'Publish') {
+         const io = req.app.get('socketio');
+         io.emit('event.created', { eventId, message: `New Event Scheduled: ${name || 'Untitled Event'}` });
+         io.emit('notification.created', { message: `New ${category || 'Event'} created: ${name || 'Untitled Event'}!` });
+     }
+
+     res.status(201).json({ success: true, event });
+  } catch(err) {
+     console.error('Event Creation Error:', err);
+     res.status(500).json({ error: 'Failed to create event. Please ensure dates are valid.' });
+  }
+});
+
+app.get('/api/v1/admin/events', async (req, res) => {
+  try {
+    const events = await prisma.event.findMany({ orderBy: { eventDate: 'asc' } });
+    res.json(events);
+  } catch(err) {
+    res.status(500).json({ error: 'Failed' });
+  }
+});
+
 // Get Logged-in Profile Endpoint
 app.get('/api/v1/member/profile', async (req, res) => {
   const memberId = typeof req.user !== 'undefined' ? req.user.id : null;
@@ -308,6 +444,8 @@ app.get('/api/v1/member/profile', async (req, res) => {
      let user = null;
      if (memberId) {
         user = await prisma.user.findUnique({ where: { id: memberId }, include: { memberProfile: true } });
+
+// Triggered reboot
      } else {
         user = await prisma.user.findFirst({ include: { memberProfile: true } });
      }

@@ -55,6 +55,7 @@ model User {
   family          Family?  @relation(fields: [familyId], references: [id])
   memberProfile   MemberProfile?
   invitation      Invitation?
+  documents       Document[]
 
   @@map("users")
 }
@@ -100,4 +101,75 @@ model Invitation {
   otp       String?      
   expiresAt DateTime
   status    InviteStatus @default(PENDING)
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  eventId         String?  @unique
+  name            String
+  category        String
+  description     String
+  bannerImage     String?
+  eventDate       DateTime
+  startTime       String
+  endTime         String?
+  venue           String
+  address         String
+  city            String
+  state           String
+  country         String
+  googleMapsUrl   String?
+  organizerId     String
+  familyBranch    String
+  visibility      String   @default("Private")
+  inviteType      String   @default("All Members")
+  invitedMembers  Json?
+  rsvpEnabled     Boolean  @default(false)
+  maxGuests       Int?
+  rsvpDeadline    DateTime?
+  liveStream      Boolean  @default(false)
+  streamVisibility String?
+  liveChat        Boolean  @default(false)
+  recordEvent     Boolean  @default(false)
+  allowPhotos     Boolean  @default(true)
+  allowComments   Boolean  @default(true)
+  reminders       Json?    
+  status          String   @default("Draft")
+
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("events")
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  FAMILY
+  ADMIN_ONLY
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  size        String
+  category    String
+  url         String
+  status      DocumentStatus @default(PENDING)
+  visibility  DocumentVisibility @default(PRIVATE)
+  
+  uploaderId  String
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("documents")
 }

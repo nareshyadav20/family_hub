@@ -12,6 +12,7 @@ import FamilyTree from './pages/FamilyTree';
 import FamilyHistory from './pages/FamilyHistory';
 import JoinRequests from './pages/JoinRequests';
 import Gallery from './pages/Gallery';
+import CreateEvent from './pages/events/CreateEvent';
 import Announcements from './pages/Announcements';
 import Polls from './pages/Polls';
 import Notifications from './pages/Notifications';
@@ -134,6 +135,7 @@ function AppLayer() {
             <Route path="tree" element={<FamilyTree />} />
             <Route path="history" element={<FamilyHistory />} />
             <Route path="events" element={<Events />} />
+            <Route path="events/create" element={<CreateEvent />} />
             <Route path="calendar" element={<Calendar />} />
             <Route path="gallery" element={<Gallery />} />
             <Route path="finance" element={<Finance />} />

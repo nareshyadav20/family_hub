@@ -31,9 +31,13 @@ const upcomingEvents = [
 
 export default function Dashboard() {
   const [liked, setLiked] = useState(new Set());
+  const [showBanner, setShowBanner] = useState(true);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const activeUser = JSON.parse(localStorage.getItem('user')) || {};
+  const firstName = activeUser.firstName || 'Family Member';
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
@@ -43,7 +47,7 @@ export default function Dashboard() {
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-indigo-900/70 to-transparent" />
         <div className="absolute inset-0 p-8 flex flex-col justify-center">
           <p className="text-indigo-200 text-sm font-medium mb-1">{greeting}, 👋</p>
-          <h1 className="text-3xl font-black text-white mb-2">Welcome, Arjun!</h1>
+          <h1 className="text-3xl font-black text-white mb-2">Welcome, {firstName}!</h1>
           <p className="text-indigo-200 text-sm">You have 2 upcoming birthdays, 3 events, and 8 new messages.</p>
           <div className="flex gap-3 mt-5">
             <Link to="/events" className="flex items-center gap-2 bg-white text-indigo-700 text-sm font-bold px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all shadow-lg">
@@ -57,19 +61,21 @@ export default function Dashboard() {
       </div>
 
       {/* Completion Banner for Stage 2/3/4 */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 md:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-xl shadow-blue-600/20 gap-4">
-         <div>
-            <h2 className="text-white font-bold text-xl mb-1">Complete Your Profile</h2>
-            <p className="text-indigo-200 text-sm">25% Completed - Next: Education & Career</p>
-            <div className="w-full md:w-64 h-2 bg-indigo-900/40 rounded-full mt-3 overflow-hidden">
-               <div className="h-full bg-emerald-400 w-1/4 rounded-full"></div>
-            </div>
-         </div>
-         <div className="flex gap-4 shrink-0">
-            <button className="text-indigo-100 text-sm font-semibold hover:text-white transition-colors">Remind Me Later</button>
-            <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
-         </div>
-      </div>
+      {showBanner && (
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 md:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-xl shadow-blue-600/20 gap-4">
+           <div>
+              <h2 className="text-white font-bold text-xl mb-1">Complete Your Profile</h2>
+              <p className="text-indigo-200 text-sm">25% Completed - Next: Education & Career</p>
+              <div className="w-full md:w-64 h-2 bg-indigo-900/40 rounded-full mt-3 overflow-hidden">
+                 <div className="h-full bg-emerald-400 w-1/4 rounded-full"></div>
+              </div>
+           </div>
+           <div className="flex gap-4 shrink-0">
+              <button onClick={() => setShowBanner(false)} className="text-indigo-100 text-sm font-semibold hover:text-white transition-colors cursor-pointer">Remind Me Later</button>
+              <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
+           </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

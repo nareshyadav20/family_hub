@@ -22,6 +22,7 @@ export default function Gallery() {
   const [activeTag, setActiveTag] = useState('All');
   const [search, setSearch] = useState('');
   const [likedIds, setLikedIds] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   const filtered = photos.filter(p => 
     (activeTag === 'All' || p.tag === activeTag) && 
@@ -37,7 +38,7 @@ export default function Gallery() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Gallery</h1>
           <p className="text-slate-500 text-sm mt-1">{photos.length} memories shared by the family</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30">
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30 cursor-pointer">
           <Upload size={16} /> Upload Photos
         </button>
       </div>
@@ -100,6 +101,24 @@ export default function Gallery() {
       {filtered.length === 0 && (
         <div className="text-center py-20 text-slate-400">
           <p className="font-medium">No photos found</p>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Upload Photos</h2>
+              <label className="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative">
+                 <input type="file" multiple accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                 <Upload size={40} className="text-blue-500 mb-3" />
+                 <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop photos here</span>
+                 <span className="text-xs text-slate-400 mt-1">Supports JPG, PNG (Max 5MB each)</span>
+              </label>
+              <div className="mt-5 flex gap-3">
+                 <button onClick={() => { alert('Photos uploaded successfully!'); setShowModal(false); }} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">Upload Now</button>
+                 <button onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
         </div>
       )}
     </div>

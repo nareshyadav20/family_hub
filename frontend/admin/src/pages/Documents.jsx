@@ -1,110 +1,180 @@
 import React, { useState } from 'react';
-import { Folder, File, FileText, Image, Upload, Lock, Eye, Download, Trash2, Plus, Search } from 'lucide-react';
-
-const documents = [
-  { id: 1, name: 'Property Deed – Mumbai House', type: 'pdf', size: '2.4 MB', uploadedBy: 'Robert Smith', date: 'June 12, 2026', folder: 'Legal', icon: <FileText size={20} />, iconColor: 'text-red-500', locked: true },
-  { id: 2, name: 'Family Insurance Policy 2026', type: 'pdf', size: '1.8 MB', uploadedBy: 'Arjun Mehta', date: 'July 1, 2026', folder: 'Insurance', icon: <FileText size={20} />, iconColor: 'text-red-500', locked: true },
-  { id: 3, name: 'Annual Reunion Invitation.docx', type: 'doc', size: '340 KB', uploadedBy: 'Sarah Smith', date: 'July 5, 2026', folder: 'Events', icon: <File size={20} />, iconColor: 'text-blue-500', locked: false },
-  { id: 4, name: 'Family Group Photo – 2024', type: 'image', size: '5.1 MB', uploadedBy: 'Emily Smith', date: 'Jan 22, 2025', folder: 'Photos', icon: <Image size={20} />, iconColor: 'text-emerald-500', locked: false },
-  { id: 5, name: 'Will & Testament – Robert Smith', type: 'pdf', size: '892 KB', uploadedBy: 'Robert Smith', date: 'March 3, 2024', folder: 'Legal', icon: <FileText size={20} />, iconColor: 'text-red-500', locked: true },
-  { id: 6, name: 'Vaccination Records – All Members', type: 'pdf', size: '1.2 MB', uploadedBy: 'Arjun Mehta', date: 'May 14, 2026', folder: 'Health', icon: <FileText size={20} />, iconColor: 'text-red-500', locked: false },
-  { id: 7, name: 'Grandpa 80th Birthday Budget', type: 'sheet', size: '128 KB', uploadedBy: 'Emily Smith', date: 'July 3, 2026', folder: 'Events', icon: <File size={20} />, iconColor: 'text-green-500', locked: false },
-  { id: 8, name: 'Passport Copies – Family', type: 'pdf', size: '3.6 MB', uploadedBy: 'Robert Smith', date: 'Feb 18, 2025', folder: 'Legal', icon: <FileText size={20} />, iconColor: 'text-red-500', locked: true },
-];
+import { Search, Filter, ShieldCheck, XCircle, FileText, Download, CheckCircle2, MoreVertical, Eye, Lock } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 const folders = ['All', 'Legal', 'Insurance', 'Events', 'Photos', 'Health'];
+const statuses = ['All Statuses', 'PENDING', 'VERIFIED', 'REJECTED'];
 
 export default function Documents() {
+  const queryClient = useQueryClient();
   const [activeFolder, setActiveFolder] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [search, setSearch] = useState('');
 
-  const filtered = documents.filter(d =>
-    (activeFolder === 'All' || d.folder === activeFolder) &&
-    (search === '' || d.name.toLowerCase().includes(search.toLowerCase()))
-  );
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ['adminDocuments'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/documents', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status, visibility }) => {
+      const payload = { status };
+      if (visibility) payload.visibility = visibility;
+      const res = await axios.put(`http://localhost:5000/api/v1/documents/${id}/status`, payload, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries(['adminDocuments'])
+  });
+
+  const filtered = documents.filter(d => {
+    const f1 = activeFolder === 'All' || d.category === activeFolder;
+    const f2 = statusFilter === 'All Statuses' || d.status === statusFilter;
+    const f3 = d.name.toLowerCase().includes(search.toLowerCase()) || 
+               (d.uploader?.firstName && d.uploader.firstName.toLowerCase().includes(search.toLowerCase()));
+    return f1 && f2 && f3;
+  });
+
+  if (isLoading) return <div className="p-20 text-center text-slate-400 font-bold">Loading Documents Directory...</div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Documents</h1>
-          <p className="text-slate-500 text-sm mt-1">Secure storage for important family files.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Review Documents</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage, verify, and secure files uploaded by family members.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30">
-          <Upload size={16} /> Upload Document
-        </button>
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+           {statuses.map(s => (
+             <button 
+               key={s} 
+               onClick={() => setStatusFilter(s)}
+               className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${statusFilter === s ? 'bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+             >
+               {s === 'All Statuses' ? 'All' : s}
+             </button>
+           ))}
+        </div>
       </div>
 
-      {/* Folder Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        {folders.map(f => {
-          const count = f === 'All' ? documents.length : documents.filter(d => d.folder === f).length;
-          return (
-            <button key={f} onClick={() => setActiveFolder(f)}
-              className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all ${activeFolder === f ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-blue-300'}`}>
-              <Folder size={22} className={activeFolder === f ? 'text-white' : 'text-amber-400'} />
-              <span className="text-xs font-bold truncate w-full text-center">{f}</span>
-              <span className={`text-[10px] font-semibold ${activeFolder === f ? 'text-blue-200' : 'text-slate-400'}`}>{count} files</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Search */}
-      <div className="relative w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <input type="text" placeholder="Search documents..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
-      </div>
-
-      {/* File Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800">
-            <tr>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Folder</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Uploaded by</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Size</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(doc => (
-              <tr key={doc.id} className="border-b border-slate-50 dark:border-slate-800/60 last:border-0 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors group">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center ${doc.iconColor}`}>
-                      {doc.icon}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">{doc.name}</p>
-                      {doc.locked && <div className="flex items-center gap-1 text-amber-500 text-[10px] font-bold mt-0.5"><Lock size={10} /> Sensitive</div>}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{doc.folder}</span></td>
-                <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">{doc.uploadedBy}</td>
-                <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">{doc.size}</td>
-                <td className="px-6 py-4 text-slate-500 dark:text-slate-400 font-medium">{doc.date}</td>
-                <td className="px-6 py-4">
-                  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 transition-colors"><Eye size={15} /></button>
-                    <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-600 transition-colors"><Download size={15} /></button>
-                    <button className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={15} /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-400">
-            <Folder className="mx-auto mb-3 opacity-30" size={36} />
-            <p className="font-medium text-sm">No documents found</p>
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search by document name or uploader..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3 placeholder:text-slate-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
           </div>
-        )}
+          <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+            {folders.map(folder => (
+              <button 
+                key={folder}
+                onClick={() => setActiveFolder(folder)}
+                className={`px-4 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${activeFolder === folder ? 'bg-slate-800 text-white dark:bg-slate-700' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 dark:bg-slate-800/50 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}`}
+              >
+                {folder}
+              </button>
+            ))}
+            <button className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-100 flex items-center gap-2 text-sm font-semibold dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 transition-colors">
+              <Filter size={16} /> Filters
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800/80">
+                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Document Name</th>
+                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Uploader</th>
+                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Details</th>
+                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Status & Visibility</th>
+                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+              {filtered.map(doc => (
+                <tr key={doc.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                   <td className="px-4 py-4 min-w-[200px]">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+                            <FileText size={18} />
+                         </div>
+                         <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{doc.name}</p>
+                            <p className="text-xs text-slate-400 font-medium">Uploaded {new Date(doc.createdAt).toLocaleDateString()}</p>
+                         </div>
+                      </div>
+                   </td>
+                   <td className="px-4 py-4 min-w-[150px]">
+                      <div className="flex items-center gap-2">
+                         <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300">
+                           {doc.uploader?.firstName?.charAt(0) || 'U'}
+                         </div>
+                         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {doc.uploader?.firstName} {doc.uploader?.lastName}
+                         </span>
+                      </div>
+                   </td>
+                   <td className="px-4 py-4 min-w-[120px]">
+                      <div className="text-xs font-bold text-slate-500 whitespace-nowrap">{doc.category}</div>
+                      <div className="text-[10px] text-slate-400 font-medium">{doc.type} • {doc.size}</div>
+                   </td>
+                   <td className="px-4 py-4 min-w-[150px]">
+                      <div className="flex flex-col gap-1.5 items-start">
+                         {doc.status === 'PENDING' && <span className="inline-flex px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 text-[10px] items-center gap-1 font-bold border border-amber-200 dark:border-amber-500/20"><ShieldCheck size={10} /> Pending</span>}
+                         {doc.status === 'VERIFIED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[10px] items-center gap-1 font-bold border border-emerald-200 dark:border-emerald-500/20"><CheckCircle2 size={10} /> Verified</span>}
+                         {doc.status === 'REJECTED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-600 text-[10px] items-center gap-1 font-bold border border-rose-200 dark:border-rose-500/20"><XCircle size={10} /> Rejected</span>}
+                         
+                         <span className="inline-flex px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] items-center gap-1 font-bold">
+                           <Lock size={10} /> {doc.visibility}
+                         </span>
+                      </div>
+                   </td>
+                   <td className="px-4 py-4">
+                      <div className="flex items-center justify-end gap-2 pr-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                         {doc.status === 'PENDING' && (
+                           <>
+                             <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'VERIFIED' })} className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 flex items-center justify-center transition-colors shadow-sm" title="Verify">
+                               <CheckCircle2 size={14} />
+                             </button>
+                             <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'REJECTED' })} className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-500/20 flex items-center justify-center transition-colors shadow-sm" title="Reject">
+                               <XCircle size={14} />
+                             </button>
+                           </>
+                         )}
+                         <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 flex items-center justify-center transition-colors shadow-sm" title="Preview">
+                           <Eye size={14} />
+                         </button>
+                         <button className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-colors shadow-sm" title="Download">
+                           <Download size={14} />
+                         </button>
+                      </div>
+                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {filtered.length === 0 && (
+            <div className="text-center py-20 text-slate-400">
+              <FileText className="mx-auto mb-4 opacity-30" size={48} />
+              <p className="font-medium">No documents matching those filters</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

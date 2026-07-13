@@ -44,6 +44,7 @@ const mockPolls = [
 export default function Polls() {
   const [voted, setVoted] = useState({});
   const [selected, setSelected] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   const handleVote = (pollId) => {
     if (!selected[pollId]) return;
@@ -57,7 +58,7 @@ export default function Polls() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Polls</h1>
           <p className="text-slate-500 text-sm mt-1">Gather opinions and make decisions together.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30">
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30 cursor-pointer">
           <Plus size={16} /> Create Poll
         </button>
       </div>
@@ -132,6 +133,35 @@ export default function Polls() {
           );
         })}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Poll</h2>
+              <div className="space-y-4">
+                <input type="text" placeholder="What is your question?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium" />
+                
+                <div className="space-y-2">
+                   <p className="text-xs font-bold text-slate-500 ml-1">Options</p>
+                   <input type="text" placeholder="Option 1" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   <input type="text" placeholder="Option 2" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   <input type="text" placeholder="Option 3 (Optional)" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                </div>
+                
+                <div className="flex gap-4">
+                   <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-500 ml-1 mb-1">End Date</p>
+                      <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   </div>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                 <button onClick={() => { alert('Poll published successfully!'); setShowModal(false); }} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">Create Poll</button>
+                 <button onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }
