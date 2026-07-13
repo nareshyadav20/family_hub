@@ -56,6 +56,21 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Completion Banner for Stage 2/3/4 */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 md:px-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-xl shadow-blue-600/20 gap-4">
+         <div>
+            <h2 className="text-white font-bold text-xl mb-1">Complete Your Profile</h2>
+            <p className="text-indigo-200 text-sm">25% Completed - Next: Education & Career</p>
+            <div className="w-full md:w-64 h-2 bg-indigo-900/40 rounded-full mt-3 overflow-hidden">
+               <div className="h-full bg-emerald-400 w-1/4 rounded-full"></div>
+            </div>
+         </div>
+         <div className="flex gap-4 shrink-0">
+            <button className="text-indigo-100 text-sm font-semibold hover:text-white transition-colors">Remind Me Later</button>
+            <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
+         </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
@@ -114,6 +129,44 @@ export default function Dashboard() {
 
         {/* Sidebar widgets */}
         <div className="space-y-4">
+          
+          {/* Profile Completion Tracking Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+            <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center justify-between">
+               <span>Profile Completion</span>
+               <span className="text-emerald-500 font-black">25%</span>
+            </h3>
+            
+            <div className="flex gap-1 mb-4 h-1.5 w-full">
+               <div className="bg-emerald-500 h-full flex-1 rounded-l-full"></div>
+               <div className="bg-slate-100 dark:bg-slate-800 h-full flex-1"></div>
+               <div className="bg-slate-100 dark:bg-slate-800 h-full flex-1"></div>
+               <div className="bg-slate-100 dark:bg-slate-800 h-full flex-1 rounded-r-full"></div>
+            </div>
+
+            <div className="space-y-2 mb-5">
+               <div className="text-sm flex items-center justify-between font-semibold text-emerald-600">
+                  <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Basic Info</span>
+                  ✓
+               </div>
+               <div className="text-sm flex items-center justify-between text-slate-500">
+                  <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div> Education</span>
+                  Remaining
+               </div>
+               <div className="text-sm flex items-center justify-between text-slate-500">
+                  <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div> Documents</span>
+                  Remaining
+               </div>
+               <div className="text-sm flex items-center justify-between text-slate-500">
+                  <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div> Privacy</span>
+                  Remaining
+               </div>
+            </div>
+            
+            <Link to="/member/dashboard/profile-setup" className="w-full flex items-center justify-center gap-2 text-sm font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 py-2.5 rounded-xl transition-colors">
+              Continue Profile
+            </Link>
+          </div>
           {/* Birthdays */}
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-500/20">
             <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">

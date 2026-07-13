@@ -1,126 +1,145 @@
-import React, { useState } from 'react';
-import { User, Mail, Phone, MapPin, Edit2, Check, Camera, Calendar, Heart, Shield } from 'lucide-react';
-
-const getMockStats = () => [
-  { label: 'Events Attended', value: '14' }, 
-  { label: 'Photos Shared', value: '47' }, 
-  { label: 'Messages Sent', value: '283' }
-];
+import React from 'react';
+import { User, Mail, Phone, MapPin, Edit2, Camera, Calendar, Shield, BookOpen, Briefcase, Heart, Activity, FileText } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Arjun Mehta';
-  const roleName = user ? (user.role === 'ADMIN' ? 'Family Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member') : 'Family Admin';
-  const displayEmail = user?.email || 'arjun.mehta@email.com';
-  
-  const defaultProfile = {
-    name: fullName, 
-    role: roleName, 
-    relation: user?.memberProfile?.relationship || 'Member', 
-    email: displayEmail,
-    phone: user?.memberProfile?.phone || '+91 76543 21098', 
-    location: user?.memberProfile?.currentCity || 'Bangalore, India', 
-    dob: user?.memberProfile?.dateOfBirth ? new Date(user.memberProfile.dateOfBirth).toLocaleDateString() : 'August 10, 1998',
-    bio: user?.memberProfile?.biography || 'Passionate about keeping our family connected and creating memories together.',
-    avatar: 'https://i.pravatar.cc/150?img=33', 
-    joinedDate: 'January 2024', 
-    statusMsg: '🎉 Excited for the family reunion!',
-    stats: getMockStats(),
-  };
+  const navigate = useNavigate();
 
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(defaultProfile);
+  const { data, isLoading } = useQuery({
+    queryKey: ['memberProfile'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/member/profile', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
+  if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold">Loading Profile Data...</div>;
+
+  const { user, profile } = data || {};
+  const completion = profile?.profileCompletion || 25;
 
   return (
-    <div className="max-w-3xl space-y-6 animate-in fade-in duration-500 pb-10">
-      <div className="flex justify-between items-center">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 pb-10">
+      
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">My Profile</h1>
-        <button onClick={() => setEditing(!editing)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${editing ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 shadow-sm'}`}>
-          {editing ? <><Check size={15} /> Save Changes</> : <><Edit2 size={15} /> Edit Profile</>}
-        </button>
+        <div className="flex gap-3">
+           <button className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors bg-white dark:bg-slate-900 shadow-sm text-sm">Share Profile</button>
+           <button onClick={() => navigate('/member/dashboard/profile-setup')} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all">
+             <Edit2 size={16} /> Edit Profile Wizard
+           </button>
+        </div>
       </div>
 
-      {/* Profile Card */}
+      {completion < 100 && (
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between shadow-lg text-white">
+             <div>
+                <h3 className="font-bold text-lg mb-1">Incomplete Profile</h3>
+                <p className="text-emerald-100 text-sm">Your profile is currently {completion}% complete.</p>
+                <div className="w-full max-w-[200px] h-2 bg-black/20 rounded-full overflow-hidden mt-3">
+                   <div className="h-full bg-white rounded-full" style={{ width: `${completion}%` }}></div>
+                </div>
+             </div>
+             <button onClick={() => navigate('/member/dashboard/profile-setup')} className="mt-4 md:mt-0 bg-white text-emerald-600 px-6 py-2.5 rounded-xl font-bold text-sm shadow hover:shadow-lg transition-all">
+                Complete Now
+             </button>
+          </div>
+      )}
+
+      {/* Basic Profile Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
         {/* Cover */}
-        <div className="h-32 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 relative">
-          <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)' }}></div>
-        </div>
-        <div className="px-6 pb-6">
-          <div className="flex items-end gap-4 -mt-12 mb-5">
+        <div className="h-40 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 relative"></div>
+        <div className="px-8 pb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6 -mt-16 mb-6">
             <div className="relative">
-              <img src={form.avatar} alt={form.name} className="w-24 h-24 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-lg" />
-              {editing && (
-                <button className="absolute bottom-1 right-1 w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                  <Camera size={14} />
-                </button>
-              )}
+              <div className="w-32 h-32 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-lg bg-blue-900 flex items-center justify-center text-4xl text-white font-bold overflow-hidden">
+                 {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.firstName?.charAt(0)}
+              </div>
+              <button className="absolute bottom-2 right-2 w-8 h-8 md:w-10 md:h-10 bg-slate-900 dark:bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-md hover:bg-slate-800 transition-colors border-2 border-white dark:border-slate-950 block">
+                <Camera size={16} />
+              </button>
             </div>
             <div className="pb-2 flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{form.name}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 flex items-center gap-1">
-                  <Shield size={10} /> {form.role}
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white capitalize truncate">{user?.firstName} {user?.lastName}</h2>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 flex items-center gap-1 uppercase tracking-wider shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                   <Shield size={12} /> {user?.role}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${user?.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'}`}>
+                   {user?.status}
                 </span>
               </div>
-              <p className="text-sm font-medium text-slate-500 mt-1">{form.statusMsg}</p>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2">
+                 <Heart size={14} className="text-rose-500" /> {user?.relationship || 'Family Member'} • {user?.familyBranch || 'General Branch'}
+              </p>
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {form.stats.map((s, i) => (
-              <div key={i} className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-center">
-                <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
-                <p className="text-xs font-semibold text-slate-500 mt-1">{s.label}</p>
-              </div>
-            ))}
+          {/* About / Bio */}
+          {profile?.biography && (
+            <div className="mb-8 p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+               <h3 className="text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider flex items-center gap-2"><User size={14}/> About Me</h3>
+               <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">{profile.biography}</p>
+            </div>
+          )}
+
+          {/* Grids */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             
+             {/* Contact & Basics Section */}
+             <div className="space-y-6">
+                <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+                   <User className="text-blue-500" /> Contact & Basic Info
+                </h3>
+                <div className="space-y-4">
+                   <InfoRow icon={<Phone />} label="Mobile Phone" value={user?.phone || 'Not provided'} />
+                   <InfoRow icon={<Mail />} label="Email Address" value={user?.email || 'Not provided'} />
+                   <InfoRow icon={<MapPin />} label="Address" value={profile?.address || 'Not provided'} />
+                   <InfoRow icon={<Calendar />} label="Date of Birth" value={profile?.dob ? new Date(profile.dob).toLocaleDateString() : 'Not provided'} />
+                   <InfoRow icon={<Shield />} label="Member ID" value={user?.memberId || 'Pending'} copyable />
+                   <InfoRow icon={<Activity />} label="Blood Group" value={profile?.bloodGroup || 'Not provided'} />
+                </div>
+             </div>
+
+             {/* Education & Career Section */}
+             <div className="space-y-6">
+                <h3 className="font-bold text-lg border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+                   <Briefcase className="text-amber-500" /> Education & Career
+                </h3>
+                <div className="space-y-4">
+                   <InfoRow icon={<BookOpen />} label="Qualification" value={profile?.education || 'Not provided'} />
+                   <InfoRow icon={<Briefcase />} label="Occupation" value={profile?.occupation || 'Not provided'} />
+                   <InfoRow icon={<Briefcase />} label="Company" value={profile?.company || 'Not provided'} />
+                </div>
+             </div>
+             
           </div>
 
-          {/* Form Fields */}
-          <div className="space-y-4">
-            {[
-              { label: 'Full Name', key: 'name', icon: <User size={16} /> },
-              { label: 'Email Address', key: 'email', icon: <Mail size={16} /> },
-              { label: 'Phone Number', key: 'phone', icon: <Phone size={16} /> },
-              { label: 'Location', key: 'location', icon: <MapPin size={16} /> },
-              { label: 'Date of Birth', key: 'dob', icon: <Calendar size={16} /> },
-              { label: 'Relation', key: 'relation', icon: <Heart size={16} /> },
-            ].map(field => (
-              <div key={field.key} className="flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">
-                  {field.icon}
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{field.label}</p>
-                  {editing && field.key !== 'dob' && field.key !== 'relation' ? (
-                    <input value={form[field.key]} onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
-                  ) : (
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{form[field.key]}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div className="flex items-start gap-4">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0 mt-5">
-                <Edit2 size={16} />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Bio</p>
-                {editing ? (
-                  <textarea value={form.bio} onChange={e => setForm(prev => ({ ...prev, bio: e.target.value }))} rows={3}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30 resize-none" />
-                ) : (
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">{form.bio}</p>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
+
     </div>
   );
+}
+
+function InfoRow({ icon, label, value, copyable }) {
+  return (
+    <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+       <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400 flex items-center justify-center shrink-0">
+          {React.cloneElement(icon, { size: 18 })}
+       </div>
+       <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+          <div className="flex items-center gap-2">
+             <p className="font-semibold text-sm text-slate-900 dark:text-white truncate">{value}</p>
+             {copyable && <button className="text-blue-600 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">Copy</button>}
+          </div>
+       </div>
+    </div>
+  )
 }

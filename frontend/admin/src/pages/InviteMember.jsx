@@ -64,8 +64,8 @@ export default function InviteMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone || (!isDraft && (!formData.gender || !formData.relationship || !formData.familyBranch))) {
-      toast.error('Please fill all required basic fields');
+    if (!formData.fullName || !formData.phone) {
+      toast.error('Full Name and Mobile Number are minimally required.');
       return;
     }
     const nameParts = formData.fullName.trim().split(' ');

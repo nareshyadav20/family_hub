@@ -87,6 +87,9 @@ model MemberProfile {
   emergency       Json?
   documents       Json?
   privacySettings Json?
+
+  currentStage      Int @default(1)
+  profileCompletion Int @default(0)
 }
 
 model Invitation {

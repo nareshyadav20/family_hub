@@ -45,8 +45,8 @@ export default function AddMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.gender || !formData.relationship || !formData.familyBranch) {
-      toast.error('Please fill all required fields (First Name, Last Name, Gender, Relationship, Branch)');
+    if (!formData.firstName) {
+      toast.error('First Name is minimally required for creating members.');
       return;
     }
     mutation.mutate({ payload: { ...formData, isDraft } });

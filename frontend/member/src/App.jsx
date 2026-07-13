@@ -15,6 +15,7 @@ import Documents from './pages/Documents';
 import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
+import ProfileSetup from './pages/ProfileSetup';
 
 import {
   LayoutDashboard, Users, Users2, Image as ImageIcon, CalendarDays, Calendar,
@@ -116,6 +117,7 @@ function AppLayer() {
             <Route path="documents" element={<Documents />} />
             <Route path="ai" element={<AIAssistant />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="profile-setup" element={<ProfileSetup />} />
             <Route path="settings" element={<ComingSoon title="Settings" />} />
             <Route path="calendar" element={<ComingSoon title="Calendar" />} />
             <Route path="*" element={<ComingSoon title="Page Not Found" />} />

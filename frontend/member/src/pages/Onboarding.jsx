@@ -61,12 +61,18 @@ export default function Onboarding() {
 
   const handleComplete = async () => {
     setSubmitting(true);
-    // In a real app this would post the complete form data.
-    setTimeout(() => {
-       toast.success("Profile fully generated!");
-       setSubmitting(false);
+    try {
+       await axios.post('http://localhost:5000/api/v1/auth/invite/accept', {
+          token,
+          ...formData
+       });
+       toast.success("Profile successfully submitted & synchronized!");
        setStep(12);
-    }, 1500);
+    } catch (err) {
+       toast.error(err.response?.data?.error || "Error accepting invitation.");
+    } finally {
+       setSubmitting(false);
+    }
   }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-500 font-medium animate-pulse">Verifying secure link...</div>;
@@ -138,10 +144,14 @@ export default function Onboarding() {
              </div>
            )}
 
-           {/* Step 4: Basic Profile */}
+           {/* Step 4: Basic Profile (Stage 1 - 25%) */}
            {step === 4 && (
              <div className="space-y-6">
-                <h2 className="text-2xl font-bold"><User className="inline text-blue-500 mr-2"/> Basic Profile</h2>
+                <h2 className="text-2xl font-bold"><User className="inline text-blue-500 mr-2"/> Finalize Basic Setup</h2>
+                <div className="bg-slate-50 p-6 rounded-xl space-y-3 mb-6">
+                  <p className="font-semibold text-slate-800 text-lg border-b pb-2">Complete Stage 1 (25%)</p>
+                  <p className="text-slate-600 text-sm">Providing this basic information activates your profile and grants you immediate Dashboard access!</p>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold mb-1">Date of Birth</label>
@@ -149,52 +159,15 @@ export default function Onboarding() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold mb-1">Blood Group</label>
-                    <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                    <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 rounded-xl px-4 py-3">
                       <option>Select</option><option>A+</option><option>O+</option><option>B+</option><option>AB+</option>
                     </select>
                   </div>
                 </div>
                 <div className="flex justify-between pt-4">
                    <button onClick={prev} className="px-6 py-3 font-semibold text-slate-500 hover:text-slate-700">Back</button>
-                   <button onClick={next} className="px-8 py-3 rounded-xl font-bold bg-slate-900 text-white">Next</button>
-                </div>
-             </div>
-           )}
-
-           {/* Steps 5-10 Compressed for rendering limits, showing structural navigation and form fields concept */}
-           {step >= 5 && step <= 10 && (
-              <div className="space-y-6 min-h-[300px]">
-                 <h2 className="text-2xl font-bold text-slate-900">
-                    {step === 5 && 'Contact Information'}
-                    {step === 6 && 'Education & Career'}
-                    {step === 7 && 'Personal Information'}
-                    {step === 8 && 'Emergency Contact'}
-                    {step === 9 && 'Documents (Optional)'}
-                    {step === 10 && 'Privacy Settings'}
-                 </h2>
-                 <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 text-center">
-                    Render respective fields for Step {step} here.
-                 </div>
-                 
-                 <div className="flex justify-between pt-8 mt-auto border-t border-slate-100 dark:border-slate-800">
-                   <button onClick={prev} className="px-6 py-3 font-semibold text-slate-500 hover:text-slate-700">Back</button>
-                   <button onClick={next} className="px-8 py-3 rounded-xl font-bold bg-slate-900 text-white shadow-lg">Next Section</button>
-                </div>
-              </div>
-           )}
-
-           {/* Step 11: Review & Submit */}
-           {step === 11 && (
-             <div className="space-y-6">
-                <h2 className="text-2xl font-bold">Review & Submit</h2>
-                <div className="bg-slate-50 p-6 rounded-xl space-y-3">
-                  <p className="font-semibold text-slate-800 text-lg border-b pb-2">Final Check</p>
-                  <p className="text-slate-600 text-sm">Please ensure all your information is correct before submitting. This will update your branch in the Family Tree and notify the Admin.</p>
-                </div>
-                <div className="flex justify-between pt-4">
-                   <button onClick={prev} className="px-6 py-3 font-semibold text-slate-500 hover:text-slate-700">Go Back</button>
                    <button onClick={handleComplete} disabled={submitting} className="px-8 py-3 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/30">
-                     {submitting ? 'Submitting...' : 'Complete Profile'}
+                     {submitting ? 'Submitting...' : 'Complete Stage 1 & Sign In'}
                    </button>
                 </div>
              </div>
@@ -206,8 +179,8 @@ export default function Onboarding() {
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Check size={40} strokeWidth={3} />
                 </div>
-                <h1 className="text-3xl font-bold text-slate-900">You're All Set!</h1>
-                <p className="text-slate-500 text-lg">Your profile has been completed successfully and awaiting any pending Admin approvals if applicable.</p>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Profile Activated!</h1>
+                <p className="text-slate-500 text-lg">Stage 1 is complete! You now have active access to the FamilyHub Dashboard.</p>
                 
                 <button onClick={() => navigate('/member/dashboard')} className="mt-8 px-8 py-4 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-500/40 w-full sm:w-auto mx-auto block transition-all">
                   Proceed to Dashboard

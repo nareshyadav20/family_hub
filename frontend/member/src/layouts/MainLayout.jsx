@@ -1,10 +1,54 @@
-import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Bell, Search, Moon, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Search, Moon, Sun, Users, LogOut, Settings as SettingsIcon, UserCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+import { io } from 'socket.io-client';
 
 export default function MainLayout({ navItems, bottomNav }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifs, setShowNotifs] = useState(false);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('notification.created', (notif) => {
+       setNotifications(prev => [notif, ...prev]);
+    });
+    return () => socket.disconnect();
+  }, []);
+
+  const { data: memberData } = useQuery({
+    queryKey: ['memberProfile'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/member/profile', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+
+  const handleLogout = () => {
+     localStorage.clear();
+     sessionStorage.clear();
+     navigate('/member/login');
+  };
 
   return (
     <div className="flex h-screen w-full bg-[#F4F7FB] dark:bg-slate-900 overflow-hidden font-sans text-slate-800 dark:text-slate-200">
@@ -82,16 +126,66 @@ export default function MainLayout({ navItems, bottomNav }) {
           </div>
           
           {/* Header Right Actions */}
-          <div className="flex items-center gap-4">
-             <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-               <Moon size={20} />
+          <div className="flex items-center gap-5">
+             <button onClick={toggleTheme} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
              </button>
-             <button className="relative text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-               <Bell size={20} />
-             </button>
+             <div className="relative">
+                <button onClick={() => setShowNotifs(!showNotifs)} className="relative text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors pt-1">
+                  <Bell size={20} />
+                  {notifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[10px] font-bold text-white rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950">
+                       {notifications.length}
+                    </span>
+                  )}
+                </button>
+                {showNotifs && (
+                   <div className="absolute top-10 right-0 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
+                      <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+                         <span className="font-bold text-sm">Notifications</span>
+                         <button onClick={() => setNotifications([])} className="text-xs text-blue-600 font-semibold cursor-pointer">Mark all read</button>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                         {notifications.length > 0 ? notifications.map((n, i) => (
+                           <div key={i} className="px-4 py-3 text-sm border-b border-slate-50 dark:border-slate-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                             {n.message}
+                           </div>
+                         )) : <div className="px-4 py-8 text-center text-sm text-slate-500">No new notifications</div>}
+                      </div>
+                      <Link to="/member/dashboard/notifications" onClick={() => setShowNotifs(false)} className="block w-full text-center text-xs font-bold bg-slate-50 dark:bg-slate-800/50 py-3 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                         View All
+                      </Link>
+                   </div>
+                )}
+             </div>
              
-             <div className="w-8 h-8 rounded-full bg-[#129AAB] text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">
-                ME
+             <div className="relative">
+                <button onClick={() => setShowAvatarMenu(!showAvatarMenu)} className="w-9 h-9 rounded-full bg-[#129AAB] text-white flex items-center justify-center font-bold text-sm uppercase shadow-sm cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-[#129AAB] transition-all overflow-hidden relative">
+                   {memberData?.user?.avatar ? (
+                      <img src={memberData.user.avatar} className="w-full h-full object-cover" alt="Profile" />
+                   ) : (
+                      memberData?.user?.firstName ? memberData.user.firstName.charAt(0) : "ME"
+                   )}
+                </button>
+                {showAvatarMenu && (
+                   <div className="absolute top-12 right-0 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col pt-2">
+                       <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col">
+                           <span className="font-bold text-slate-900 dark:text-white truncate">
+                              {memberData?.user ? `${memberData.user.firstName} ${memberData.user.lastName}` : "Loading..."}
+                           </span>
+                           <span className="text-xs text-slate-500 truncate">{memberData?.user?.email || "No Email Associated"}</span>
+                       </div>
+                       <Link to="/member/dashboard/profile" onClick={() => setShowAvatarMenu(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-sm font-medium transition-colors">
+                          <UserCircle size={18} className="text-slate-400" /> My Profile
+                       </Link>
+                       <Link to="/member/dashboard/settings" onClick={() => setShowAvatarMenu(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-sm font-medium transition-colors">
+                          <SettingsIcon size={18} className="text-slate-400" /> Settings
+                       </Link>
+                       <button onClick={handleLogout} className="flex items-center w-full gap-3 px-5 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 text-sm font-bold border-t border-slate-100 dark:border-slate-800 transition-colors">
+                          <LogOut size={18} /> Logout
+                       </button>
+                   </div>
+                )}
              </div>
           </div>
         </header>
