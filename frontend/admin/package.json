@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@tanstack/react-query": "^5.101.2",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -26,6 +27,7 @@
     "react-router-dom": "^6.25.1",
     "reactflow": "^11.11.4",
     "recharts": "^2.12.7",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^2.4.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"

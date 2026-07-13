@@ -1,40 +1,56 @@
 import React, { useState } from 'react';
 import { Users, MapPin, Phone, Mail, Heart, MessageCircle, Crown, Shield, User } from 'lucide-react';
 
-const familyMembers = [
-  { id: 1, name: 'Robert Smith', relation: 'Grandfather', role: 'Super Admin', phone: '+91 98765 43210', email: 'robert.smith@email.com', location: 'Mumbai, India', avatar: 'https://i.pravatar.cc/150?img=70', online: false, bio: 'Patriarch of the Smith family. Retired professor, avid reader.', dob: 'March 12, 1946' },
-  { id: 2, name: 'Martha Smith', relation: 'Grandmother', role: 'Member', phone: '+91 98765 43211', email: 'martha.smith@email.com', location: 'Mumbai, India', avatar: 'https://i.pravatar.cc/150?img=45', online: true, bio: 'Loves cooking traditional recipes and gardening.', dob: 'June 5, 1950' },
-  { id: 3, name: 'James Smith', relation: 'Father', role: 'Member', phone: '+91 87654 32109', email: 'james.smith@email.com', location: 'Delhi, India', avatar: 'https://i.pravatar.cc/150?img=68', online: false, bio: 'Software engineer at TechCorp. Loves cricket and hiking.', dob: 'Nov 22, 1972' },
-  { id: 4, name: 'Sarah Smith', relation: 'Mother', role: 'Member', phone: '+91 87654 32108', email: 'sarah.smith@email.com', location: 'Delhi, India', avatar: 'https://i.pravatar.cc/150?img=47', online: true, bio: 'Artist and yoga instructor. Loves painting.', dob: 'Feb 14, 1975' },
-  { id: 5, name: 'Arjun Mehta', relation: 'Myself (Son)', role: 'Family Admin', phone: '+91 76543 21098', email: 'arjun.mehta@email.com', location: 'Bangalore, India', avatar: 'https://i.pravatar.cc/150?img=33', online: true, bio: 'Product Manager. Passionate about family togetherness.', dob: 'Aug 10, 1998' },
-  { id: 6, name: 'Emily Smith', relation: 'Sister', role: 'Member', phone: '+91 76543 21097', email: 'emily.smith@email.com', location: 'Pune, India', avatar: 'https://i.pravatar.cc/150?img=25', online: true, bio: 'Medical student at AIIMS. Dancer and music lover.', dob: 'Jan 30, 2001' },
-  { id: 7, name: 'William Smith', relation: 'Uncle', role: 'Member', phone: '+91 65432 10987', email: 'william.smith@email.com', location: 'Chennai, India', avatar: 'https://i.pravatar.cc/150?img=52', online: false, bio: 'Businessman. Loves travelling and photography.', dob: 'Sep 8, 1968' },
-  { id: 8, name: 'Priya Mehta', relation: 'Cousin', role: 'Member', phone: '+91 54321 09876', email: 'priya.mehta@email.com', location: 'Hyderabad, India', avatar: 'https://i.pravatar.cc/150?img=44', online: false, bio: 'Graphic designer. Creative and adventurous.', dob: 'Dec 19, 2000' },
-];
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 const ROLE_BADGE = {
-  'Super Admin': { label: 'Super Admin', class: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400', icon: <Crown size={11} /> },
-  'Family Admin': { label: 'Admin', class: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400', icon: <Shield size={11} /> },
-  'Member': { label: 'Member', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400', icon: <User size={11} /> },
+  'SUPER_ADMIN': { label: 'Super Admin', class: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400', icon: <Crown size={11} /> },
+  'ADMIN': { label: 'Admin', class: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400', icon: <Shield size={11} /> },
+  'MEMBER': { label: 'Member', class: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400', icon: <User size={11} /> },
 };
 
 export default function Family() {
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState('');
 
-  const filtered = familyMembers.filter(m =>
+  const { data: rawMembers = [], isLoading } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/admin/members', {
+         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
+  const liveMembers = rawMembers.map(m => ({
+    id: m.id,
+    name: `${m.firstName} ${m.lastName}`.trim(),
+    relation: m.relationship || 'Member',
+    role: m.role || 'MEMBER',
+    phone: m.phone || m.memberProfile?.phone || 'No Phone',
+    email: m.email || 'No email',
+    location: m.memberProfile?.address || 'Unknown',
+    avatar: m.avatar || '',
+    online: m.status === 'ACTIVE' || false,
+    bio: m.memberProfile?.biography || 'No biography available.',
+    dob: m.memberProfile?.dob ? new Date(m.memberProfile.dob).toLocaleDateString() : 'N/A'
+  }));
+
+  const filtered = liveMembers.filter(m =>
     m.name.toLowerCase().includes(search.toLowerCase()) ||
     m.relation.toLowerCase().includes(search.toLowerCase())
   );
 
-  const member = selected ? familyMembers.find(m => m.id === selected) : null;
+  const member = selected ? liveMembers.find(m => m.id === selected) : null;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Members</h1>
-          <p className="text-slate-500 text-sm mt-1">{familyMembers.length} members in the Smith family</p>
+          <p className="text-slate-500 text-sm mt-1">{liveMembers.length} members in the family</p>
         </div>
       </div>
 

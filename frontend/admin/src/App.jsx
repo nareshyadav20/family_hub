@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Members from './pages/Members';
+import AddMember from './pages/AddMember';
+import InviteMember from './pages/InviteMember';
 import Events from './pages/Events';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -99,43 +101,74 @@ function PublicRoute({ children }) {
   return children;
 }
 
-function App() {
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { io } from 'socket.io-client';
+import { useEffect } from 'react';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+function AppLayer() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="/admin/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/admin/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/admin/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
-        <Route path="/admin/dashboard" element={<ProtectedAdminRoute><MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} /></ProtectedAdminRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="assistant" element={<AIAssistant />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="members" element={<Members />} />
-          <Route path="requests" element={<JoinRequests />} />
-          <Route path="tree" element={<FamilyTree />} />
-          <Route path="history" element={<FamilyHistory />} />
-          <Route path="events" element={<Events />} />
-          <Route path="calendar" element={<Calendar />} />
-          <Route path="gallery" element={<Gallery />} />
-          <Route path="finance" element={<Finance />} />
-          <Route path="assets" element={<Assets />} />
-          <Route path="vault" element={<DigitalVault />} />
-          <Route path="documents" element={<Documents />} />
-          <Route path="announcements" element={<Announcements />} />
-          <Route path="polls" element={<Polls />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="/admin/dashboard" element={<ProtectedAdminRoute><MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} /></ProtectedAdminRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="assistant" element={<AIAssistant />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="members" element={<Members />} />
+            <Route path="members/add" element={<AddMember />} />
+            <Route path="members/invite" element={<InviteMember />} />
+            <Route path="requests" element={<JoinRequests />} />
+            <Route path="tree" element={<FamilyTree />} />
+            <Route path="history" element={<FamilyHistory />} />
+            <Route path="events" element={<Events />} />
+            <Route path="calendar" element={<Calendar />} />
+            <Route path="gallery" element={<Gallery />} />
+            <Route path="finance" element={<Finance />} />
+            <Route path="assets" element={<Assets />} />
+            <Route path="vault" element={<DigitalVault />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="announcements" element={<Announcements />} />
+            <Route path="polls" element={<Polls />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<Profile />} />
 
-          <Route path="albums" element={<ComingSoon title="Albums" />} />
-          <Route path="reports" element={<ComingSoon title="Reports" />} />
-          <Route path="*" element={<ComingSoon title="Page Not Found" />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route path="albums" element={<ComingSoon title="Albums" />} />
+            <Route path="reports" element={<ComingSoon title="Reports" />} />
+            <Route path="*" element={<ComingSoon title="Page Not Found" />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+  );
+}
+
+function App() {
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    socket.on('member.invited', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    socket.on('member.updated', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    return () => socket.disconnect();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+       <AppLayer />
+    </QueryClientProvider>
   );
 }
 

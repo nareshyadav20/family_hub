@@ -63,8 +63,15 @@ export default function MainLayout({ portalName = "Admin", navItems, bottomNav }
                     <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-white dark:border-slate-900 rounded-full"></span>
                  </div>
                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[14px] font-bold text-slate-900 dark:text-white truncate leading-tight">Arjun Mehta</h4>
-                    <p className="text-[12px] text-slate-500 truncate mt-0.5">Family Admin</p>
+                    <h4 className="text-[14px] font-bold text-slate-900 dark:text-white truncate leading-tight">
+                      {localStorage.getItem('user') ? `${JSON.parse(localStorage.getItem('user'))?.firstName || ''} ${JSON.parse(localStorage.getItem('user'))?.lastName || ''}`.trim() : 'Admin User'}
+                    </h4>
+                    <p className="text-[12px] text-slate-500 truncate mt-0.5">
+                      {localStorage.getItem('user') ? 
+                        (JSON.parse(localStorage.getItem('user'))?.role === 'ADMIN' ? 'Family Admin' : 
+                         JSON.parse(localStorage.getItem('user'))?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member') 
+                        : 'Admin'}
+                    </p>
                  </div>
                  <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>

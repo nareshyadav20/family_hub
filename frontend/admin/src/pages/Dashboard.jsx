@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, UserPlus, CalendarDays, Gift, CheckCircle, Image as ImageIcon, 
-  Bell, TrendingUp, Activity, Plus 
+  Bell, TrendingUp, Activity, Plus, Link, Check
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -17,6 +18,15 @@ const data = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const copyInviteLink = () => {
+    navigator.clipboard.writeText("http://localhost:5174/invite");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex justify-between items-end mb-8">
@@ -28,7 +38,10 @@ export default function Dashboard() {
           <button className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl font-medium transition-all shadow-sm">
              <CalendarDays size={18} /> Schedule Event
           </button>
-          <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30">
+          <button onClick={() => navigate('/admin/dashboard/members/invite')} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/30">
+             <Link size={18} /> Invite Link
+          </button>
+          <button onClick={() => navigate('/admin/dashboard/members/add')} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30">
              <Plus size={18} /> Add Member
           </button>
         </div>

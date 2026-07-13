@@ -4,30 +4,38 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-const initialNodes = [
-  { id: '1', position: { x: 400, y: 50 }, data: { label: 'Robert Smith (Grandpa)' }, type: 'input' },
-  { id: '2', position: { x: 550, y: 50 }, data: { label: 'Martha Smith (Grandma)' }, type: 'input' },
-  { id: '3', position: { x: 250, y: 200 }, data: { label: 'James Smith (Father)' } },
-  { id: '4', position: { x: 450, y: 200 }, data: { label: 'Sarah Smith (Mother)' } },
-  { id: '5', position: { x: 700, y: 200 }, data: { label: 'William Smith (Uncle)' } },
-  { id: '6', position: { x: 150, y: 350 }, data: { label: 'Arjun Mehta (Son)' }, type: 'output' },
-  { id: '7', position: { x: 350, y: 350 }, data: { label: 'Emily Smith (Daughter)' }, type: 'output' },
-];
-
-const initialEdges = [
-  { id: 'e1-3', source: '1', target: '3', animated: true },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
-  { id: 'e1-5', source: '1', target: '5' },
-  { id: 'e2-5', source: '2', target: '5' },
-  { id: 'e3-6', source: '3', target: '6', animated: true },
-  { id: 'e4-6', source: '4', target: '6', animated: true },
-  { id: 'e3-7', source: '3', target: '7' },
-  { id: 'e4-7', source: '4', target: '7' },
-];
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 export default function FamilyTree() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { data: members = [] } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const res = await axios.get('http://localhost:5000/api/v1/admin/members', {
+         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
+  const dynamicNodes = members.map((m, i) => ({
+    id: String(m.id),
+    position: { x: (i % 4) * 250 + 100, y: Math.floor(i / 4) * 180 + 100 },
+    data: { label: `${m.firstName} ${m.lastName}\n(${m.relationship || 'Member'})` },
+    type: m.status === 'INVITATION_SENT' ? 'default' : 'output'
+  }));
+
+  // We can dynamically render edges if fatherId/motherId existed properly. 
+  // For basic sync requirement, we just map out nodes dynamically to show instant add feature.
+  const dynamicEdges = [];
+
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  React.useEffect(() => {
+    setNodes(dynamicNodes);
+    setEdges(dynamicEdges);
+  }, [members]);
 
   return (
     <div className="h-full w-full flex flex-col space-y-4 animate-in fade-in duration-500">

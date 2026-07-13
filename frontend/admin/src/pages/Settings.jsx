@@ -10,6 +10,12 @@ const settingsSections = [
 ];
 
 export default function Settings() {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Admin User';
+  const roleName = user ? (user.role === 'ADMIN' ? 'Family Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member') : 'Family Admin';
+  const displayEmail = user?.email || 'admin@familyhub.com';
+
   const [activeSection, setActiveSection] = useState('general');
   const [theme, setTheme] = useState('light');
   const [notifications, setNotifications] = useState({
@@ -155,13 +161,13 @@ export default function Settings() {
               <div className="flex items-center gap-6 p-5 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl">
                 <img src="https://i.pravatar.cc/100?u=a04258" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '3px solid #4F46E5' }} alt="Profile" />
                 <div className="flex-1">
-                  <div className="font-black text-xl text-slate-900 dark:text-white">Arjun Mehta</div>
-                  <div className="text-sm text-slate-500 mt-1">Family Admin • arjun@smith.com</div>
+                  <div className="font-black text-xl text-slate-900 dark:text-white">{fullName}</div>
+                  <div className="text-sm text-slate-500 mt-1">{roleName} • {displayEmail}</div>
                 </div>
                 <button className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-sm">Change Photo</button>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                {[['Full Name', 'Arjun Mehta'], ['Email', 'arjun@smith.com'], ['Phone', '+1 555 007 1234'], ['Role', 'Family Admin'], ['Location', 'San Francisco, CA'], ['Joined', 'March 2022']].map(([label, val]) => (
+                {[['Full Name', fullName], ['Email', displayEmail], ['Phone', user?.memberProfile?.phone || '+91 9876543210'], ['Role', roleName], ['Location', 'Not Set'], ['Joined', 'Recently']].map(([label, val]) => (
                   <div key={label}>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
                     <input defaultValue={val} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />

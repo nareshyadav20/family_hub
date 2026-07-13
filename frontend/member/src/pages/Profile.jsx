@@ -1,17 +1,36 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, MapPin, Edit2, Check, Camera, Calendar, Heart, Shield } from 'lucide-react';
 
-const profileData = {
-  name: 'Arjun Mehta', role: 'Family Admin', relation: 'Son', email: 'arjun.mehta@email.com',
-  phone: '+91 76543 21098', location: 'Bangalore, India', dob: 'August 10, 1998',
-  bio: 'Product Manager by day, family man always. Passionate about keeping our family connected and creating memories together.',
-  avatar: 'https://i.pravatar.cc/150?img=33', joinedDate: 'January 2024', statusMsg: '🎉 Excited for the family reunion!',
-  stats: [{ label: 'Events Attended', value: '14' }, { label: 'Photos Shared', value: '47' }, { label: 'Messages Sent', value: '283' }],
-};
+const getMockStats = () => [
+  { label: 'Events Attended', value: '14' }, 
+  { label: 'Photos Shared', value: '47' }, 
+  { label: 'Messages Sent', value: '283' }
+];
 
 export default function Profile() {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Arjun Mehta';
+  const roleName = user ? (user.role === 'ADMIN' ? 'Family Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member') : 'Family Admin';
+  const displayEmail = user?.email || 'arjun.mehta@email.com';
+  
+  const defaultProfile = {
+    name: fullName, 
+    role: roleName, 
+    relation: user?.memberProfile?.relationship || 'Member', 
+    email: displayEmail,
+    phone: user?.memberProfile?.phone || '+91 76543 21098', 
+    location: user?.memberProfile?.currentCity || 'Bangalore, India', 
+    dob: user?.memberProfile?.dateOfBirth ? new Date(user.memberProfile.dateOfBirth).toLocaleDateString() : 'August 10, 1998',
+    bio: user?.memberProfile?.biography || 'Passionate about keeping our family connected and creating memories together.',
+    avatar: 'https://i.pravatar.cc/150?img=33', 
+    joinedDate: 'January 2024', 
+    statusMsg: '🎉 Excited for the family reunion!',
+    stats: getMockStats(),
+  };
+
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(profileData);
+  const [form, setForm] = useState(defaultProfile);
 
   return (
     <div className="max-w-3xl space-y-6 animate-in fade-in duration-500 pb-10">
@@ -52,7 +71,7 @@ export default function Profile() {
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            {profileData.stats.map((s, i) => (
+            {form.stats.map((s, i) => (
               <div key={i} className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-center">
                 <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
                 <p className="text-xs font-semibold text-slate-500 mt-1">{s.label}</p>

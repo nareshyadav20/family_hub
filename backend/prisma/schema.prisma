@@ -14,21 +14,47 @@ enum Role {
   MEMBER
 }
 
-model User {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  role      Role     @default(MEMBER)
-  familyId  String?
-  phone     String?
-  avatar    String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum MemberStatus {
+  PENDING_INVITE
+  INVITATION_SENT
+  OTP_VERIFIED
+  PROFILE_INCOMPLETE
+  ACTIVE
+}
 
-  family Family? @relation(fields: [familyId], references: [id])
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+model User {
+  id              String   @id @default(cuid())
+  memberId        String?  @unique
+  firstName       String
+  lastName        String
+  email           String?  @unique
+  phone           String?  @unique
+  password        String?  
+  role            Role     @default(MEMBER)
+  familyId        String?
+  gender          String?
+  relationship    String?
+  familyBranch    String?
+  fatherId        String?
+  motherId        String?
+  spouseId        String?
+  notes           String?
+  status          MemberStatus @default(ACTIVE)
+  
+  avatar          String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  family          Family?  @relation(fields: [familyId], references: [id])
+  memberProfile   MemberProfile?
+  invitation      Invitation?
 
   @@map("users")
 }
@@ -43,4 +69,32 @@ model Family {
   members User[]
 
   @@map("families")
+}
+
+model MemberProfile {
+  id              String @id @default(cuid())
+  userId          String @unique
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  dob             DateTime?
+  bloodGroup      String?
+  address         String?
+  education       String?
+  occupation      String?
+  company         String?
+  biography       String?
+  socialLinks     Json?
+  emergency       Json?
+  documents       Json?
+  privacySettings Json?
+}
+
+model Invitation {
+  id        String       @id @default(cuid())
+  userId    String       @unique
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String       @unique
+  otp       String?      
+  expiresAt DateTime
+  status    InviteStatus @default(PENDING)
 }

@@ -14,6 +14,7 @@ import Announcements from './pages/Announcements';
 import Documents from './pages/Documents';
 import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
+import Onboarding from './pages/Onboarding';
 
 import {
   LayoutDashboard, Users, Users2, Image as ImageIcon, CalendarDays, Calendar,
@@ -81,32 +82,62 @@ function PublicRoute({ children }) {
   return children;
 }
 
-function App() {
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { io } from 'socket.io-client';
+import { useEffect } from 'react';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+function AppLayer() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Routes>
-        <Route path="/" element={<Navigate to="/member/dashboard" replace />} />
-        <Route path="/member" element={<Navigate to="/member/dashboard" replace />} />
-        <Route path="/member/login" element={<PublicRoute><Login /></PublicRoute>} />
-        <Route path="/member/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-        <Route path="/member/dashboard" element={<ProtectedMemberRoute><MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} /></ProtectedMemberRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="family" element={<Family />} />
-          <Route path="gallery" element={<Gallery />} />
-          <Route path="events" element={<Events />} />
-          <Route path="tree" element={<FamilyTree />} />
-          <Route path="messages" element={<Messages />} />
-          <Route path="announcements" element={<Announcements />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="documents" element={<Documents />} />
-          <Route path="ai" element={<AIAssistant />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="calendar" element={<ComingSoon title="Family Calendar" />} />
-          <Route path="settings" element={<ComingSoon title="Settings" />} />
-          <Route path="*" element={<ComingSoon title="Page Not Found" />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/member/dashboard" replace />} />
+          <Route path="/member" element={<Navigate to="/member/dashboard" replace />} />
+          <Route path="/member/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/member/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path="/member/invite" element={<PublicRoute><Onboarding /></PublicRoute>} />
+          <Route path="/member/dashboard" element={<ProtectedMemberRoute><MainLayout navItems={navSidebarItems} bottomNav={bottomNavItems} /></ProtectedMemberRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="family" element={<Family />} />
+            <Route path="gallery" element={<Gallery />} />
+            <Route path="events" element={<Events />} />
+            <Route path="tree" element={<FamilyTree />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="announcements" element={<Announcements />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="ai" element={<AIAssistant />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<ComingSoon title="Settings" />} />
+            <Route path="calendar" element={<ComingSoon title="Calendar" />} />
+            <Route path="*" element={<ComingSoon title="Page Not Found" />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+  );
+}
+
+function App() {
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    socket.on('member.invited', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    socket.on('member.updated', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
+    return () => socket.disconnect();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+       <AppLayer />
+    </QueryClientProvider>
   );
 }
 
