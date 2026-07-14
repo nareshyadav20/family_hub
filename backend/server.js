@@ -423,13 +423,14 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
 
     io.emit('notification.created', { message: `${firstName} has been invited to join the family.` });
 
+    const appUrl = process.env.APP_URL || 'http://localhost:5173';
     res.status(201).json({
        success: true,
        emailSent: true,
        status: 'INVITATION_SENT',
        message: 'Invitation sent successfully',
        user: result,
-       inviteLink: `http://localhost:5174/invite?token=${generatedToken}`
+       inviteLink: `${appUrl}/invite?token=${generatedToken}`
     });
   } catch (error) {
     console.error('Invite error:', error);

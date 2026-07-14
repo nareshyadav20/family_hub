@@ -19,7 +19,7 @@ const timeAgo = (dateStr) => {
   return `${Math.floor(h/24)}d ago`;
 };
 
-const API_URL = import.meta.env.VITE_API_URL || `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function Dashboard() {
   const navigate = useNavigate();

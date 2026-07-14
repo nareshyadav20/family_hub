@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
+let rawEnv = import.meta.env.VITE_API_URL;
+if (rawEnv) {
+  if (rawEnv.endsWith('/')) rawEnv = rawEnv.slice(0, -1);
+  if (rawEnv.endsWith('/api')) rawEnv += '/v1';
+  else if (!rawEnv.endsWith('/v1')) rawEnv += '/api/v1';
+}
+const baseURL = rawEnv || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
 
 const api = axios.create({
   baseURL: baseURL,
