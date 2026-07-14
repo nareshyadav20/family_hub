@@ -12,6 +12,7 @@ export default function AddMember() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    email: '',
     gender: '',
     dob: '',
     relationship: '',
@@ -31,6 +32,9 @@ export default function AddMember() {
   const mutation = useMutation({
     mutationFn: async ({ payload }) => {
       const res = await axios.post('http://localhost:5000/api/v1/admin/members/add', payload);
+      if (res.data.success === false) {
+        throw new Error(res.data.error || 'Server rejected payload');
+      }
       return res.data;
     },
     onSuccess: (_, variables) => {
@@ -39,14 +43,19 @@ export default function AddMember() {
       navigate('/admin/dashboard/members');
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Failed to add member');
+      toast.error(error.response?.data?.error || error.message || 'Failed to add member');
     }
   });
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName) {
-      toast.error('First Name is minimally required for creating members.');
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role) {
+      toast.error('Please fill all required fields, including Email.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address.');
       return;
     }
     mutation.mutate({ payload: { ...formData, isDraft } });
@@ -79,6 +88,10 @@ export default function AddMember() {
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Last Name *</label>
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Doe" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">Email Address *</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="email@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gender *</label>

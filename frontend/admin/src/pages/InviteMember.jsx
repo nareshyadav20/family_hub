@@ -40,6 +40,12 @@ export default function InviteMember() {
   const mutation = useMutation({
     mutationFn: async (payload) => {
       const res = await axios.post('http://localhost:5000/api/v1/admin/members/invite', payload);
+      if (res.data.success === false) {
+        if (res.data.status === 'EMAIL_FAILED') {
+           throw new Error(`Invitation could not be sent. ${res.data.error}`);
+        }
+        throw new Error(res.data.error || 'Server rejected payload');
+      }
       return res.data;
     },
     onSuccess: (data, variables) => {
@@ -58,14 +64,19 @@ export default function InviteMember() {
       }
     },
     onError: (error) => {
-      toast.error(error.response?.data?.error || 'Failed to generate invite');
+      toast.error(error.response?.data?.error || error.message || 'Failed to generate invite');
     }
   });
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) {
-      toast.error('Full Name and Mobile Number are minimally required.');
+    if (!formData.fullName || !formData.phone || !formData.email) {
+      toast.error('Full Name, Mobile Number, and Email Address are required.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address.');
       return;
     }
     const nameParts = formData.fullName.trim().split(' ');
@@ -124,7 +135,7 @@ export default function InviteMember() {
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="+91 9876543210" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">Email Address <span className="text-slate-400 font-normal">Optional</span></label>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address *</label>
                   <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="email@example.com" />
                 </div>
                 <div>

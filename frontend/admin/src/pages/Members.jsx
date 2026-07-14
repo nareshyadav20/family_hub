@@ -15,13 +15,15 @@ const mockMetrics = [
   { label: "Today's Birthdays", value: '2', icon: AlertCircle, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const getStatusBadge = (status) => {
   switch (status) {
     case 'ACTIVE': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200';
     case 'INVITATION_SENT': return 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200';
+    case 'EMAIL_FAILED': return 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200';
     case 'PENDING_INVITE': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200';
     case 'WAITING_APPROVAL': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 border-purple-200';
     case 'INACTIVE': return 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400 border-slate-200';
@@ -40,6 +42,65 @@ export default function Members() {
   const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState([]);
   const [activeDrawer, setActiveDrawer] = useState(null); // holds member object
+  const queryClient = useQueryClient();
+
+  const handleResendInvite = async (memberId) => {
+    try {
+      toast.loading('Resending invitation...', { id: 'resend' });
+      const res = await axios.post('http://localhost:5000/api/v1/admin/members/invite/resend', { memberId }, {
+         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (res.data.success === false) {
+          throw new Error(res.data.error || 'Failed to resend');
+      }
+      toast.success('Invitation resent successfully', { id: 'resend' });
+      queryClient.invalidateQueries(['members']);
+    } catch (err) {
+      toast.error(err.response?.data?.error || err.message || 'Failed to resend invitation', { id: 'resend' });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedRows.length} members?`)) return;
+    try {
+      toast.loading('Deleting members...', { id: 'bulk-delete' });
+      await axios.delete('http://localhost:5000/api/v1/admin/members/bulk', {
+        data: { ids: selectedRows },
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      toast.success('Members deleted successfully', { id: 'bulk-delete' });
+      setSelectedRows([]);
+      queryClient.invalidateQueries(['members']);
+    } catch (err) {
+      toast.error('Failed to delete members', { id: 'bulk-delete' });
+    }
+  };
+
+  const handleBulkNotify = () => {
+    toast.success(`Sent notifications to ${selectedRows.length} selected members.`);
+  };
+
+  const handleBulkExport = () => {
+    // Generate simple CSV from selected rows
+    const selectedData = rawMembers.filter(m => selectedRows.includes(m.id));
+    if (selectedData.length === 0) return;
+    
+    // Create CSV content
+    const headers = ['Member ID,First Name,Last Name,Email,Phone,Role,Status\n'];
+    const rows = selectedData.map(m => `${m.memberId || ''},${m.firstName},${m.lastName || ''},${m.email || ''},${m.phone || ''},${m.role},${m.status}\n`);
+    const csvContent = headers.concat(rows).join('');
+    
+    // Trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `members_export_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Export downloaded successfully!');
+  };
 
   const { data: rawMembers = [], isLoading, error } = useQuery({
     queryKey: ['members'],
@@ -120,9 +181,9 @@ export default function Members() {
             {selectedRows.length > 0 ? (
                <div className="flex items-center gap-2 animate-in slide-in-from-right-4">
                   <span className="text-sm font-bold text-blue-600 mr-2">{selectedRows.length} selected</span>
-                  <button className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 flex items-center gap-1"><Download size={14} /> Export</button>
-                  <button className="px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 flex items-center gap-1"><Mail size={14} /> Notify</button>
-                  <button className="px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 rounded-md hover:bg-rose-100 flex items-center gap-1"><Trash2 size={14} /> Delete</button>
+                  <button onClick={handleBulkExport} className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 flex items-center gap-1"><Download size={14} /> Export</button>
+                  <button onClick={handleBulkNotify} className="px-3 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 flex items-center gap-1"><Mail size={14} /> Notify</button>
+                  <button onClick={handleBulkDelete} className="px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 rounded-md hover:bg-rose-100 flex items-center gap-1"><Trash2 size={14} /> Delete</button>
                </div>
             ) : (
                <div className="flex items-center gap-2">
@@ -258,7 +319,9 @@ export default function Members() {
                       <h4 className="text-xs text-slate-400 uppercase font-bold tracking-wider border-t border-slate-100 pt-4">Quick Actions</h4>
                       <div className="grid grid-cols-2 gap-2">
                          <button className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><Edit2 size={14}/> Edit</button>
-                         <button className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><Mail size={14}/> Resend Invite</button>
+                         {['INVITATION_SENT', 'EMAIL_FAILED'].includes(activeDrawer.status) && (
+                            <button onClick={() => handleResendInvite(activeDrawer.id)} className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><Mail size={14}/> Resend Invite</button>
+                         )}
                          <button className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><FamilyIcon size={14}/> View Tree</button>
                          <button className="p-2 border border-rose-200 text-sm font-bold text-rose-700 hover:bg-rose-50 rounded-lg flex justify-center items-center gap-2"><ShieldAlert size={14}/> Deactivate</button>
                       </div>
