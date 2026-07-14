@@ -15,11 +15,13 @@ import Documents from './pages/Documents';
 import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
+import Settings from './pages/Settings';
 import ProfileSetup from './pages/ProfileSetup';
+import CalendarPage from './pages/Calendar';
 
 import {
   LayoutDashboard, Users, Users2, Image as ImageIcon, CalendarDays, Calendar,
-  MessageSquare, Megaphone, Bell, Folder, Sparkles, UserCircle, Settings, LogOut
+  MessageSquare, Megaphone, Bell, Folder, Sparkles, UserCircle, Settings as SettingsIcon, LogOut
 } from 'lucide-react';
 
 const navSidebarItems = [
@@ -38,7 +40,7 @@ const navSidebarItems = [
 
 const bottomNavItems = [
   { title: 'Profile', href: '/member/dashboard/profile', icon: <UserCircle size={18} /> },
-  { title: 'Settings', href: '/member/dashboard/settings', icon: <Settings size={18} /> },
+  { title: 'Settings', href: '/member/dashboard/settings', icon: <SettingsIcon size={18} /> },
   { title: 'Sign Out', href: '/member/login', icon: <LogOut size={18} /> },
 ];
 
@@ -118,8 +120,8 @@ function AppLayer() {
             <Route path="ai" element={<AIAssistant />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile-setup" element={<ProfileSetup />} />
-            <Route path="settings" element={<ComingSoon title="Settings" />} />
-            <Route path="calendar" element={<ComingSoon title="Calendar" />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="calendar" element={<CalendarPage />} />
             <Route path="*" element={<ComingSoon title="Page Not Found" />} />
           </Route>
         </Routes>

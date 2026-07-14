@@ -6,14 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const mockMetrics = [
-  { label: 'Total Members', value: '142', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { label: 'Active Members', value: '118', icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { label: 'Pending Invites', value: '12', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-  { label: 'Profile Incomplete', value: '8', icon: FileText, color: 'text-rose-600', bg: 'bg-rose-50' },
-  { label: 'Family Branches', value: '4', icon: FamilyIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { label: "Today's Birthdays", value: '2', icon: AlertCircle, color: 'text-purple-600', bg: 'bg-purple-50' },
-];
+// Metrics are computed dynamically based on live API data
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -127,6 +120,16 @@ export default function Members() {
     lastActive: m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : 'Never',
     avatar: m.avatar || ''
   }));
+  
+  const today = new Date();
+  const liveMetrics = [
+    { label: 'Total Members', value: rawMembers.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Active Members', value: rawMembers.filter(m => m.status === 'ACTIVE').length, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Pending Invites', value: rawMembers.filter(m => ['PENDING_INVITE', 'INVITATION_SENT'].includes(m.status)).length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Profile Incomplete', value: rawMembers.filter(m => m.status === 'ACTIVE' && (m.memberProfile?.profileCompletion || 0) < 100).length, icon: FileText, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Family Branches', value: new Set(rawMembers.map(m => m.familyBranch).filter(Boolean)).size, icon: FamilyIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: "Today's Birthdays", value: rawMembers.filter(m => m.memberProfile?.dob && new Date(m.memberProfile.dob).getDate() === today.getDate() && new Date(m.memberProfile.dob).getMonth() === today.getMonth()).length, icon: AlertCircle, color: 'text-purple-600', bg: 'bg-purple-50' }
+  ];
 
   const handleRowClick = (m) => setActiveDrawer(m);
 
@@ -151,7 +154,7 @@ export default function Members() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {mockMetrics.map((m, i) => (
+        {liveMetrics.map((m, i) => (
            <div key={i} className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center">
               <div className={`w-10 h-10 rounded-full ${m.bg} ${m.color} flex items-center justify-center mb-2`}>
                  <m.icon size={20} strokeWidth={2.5} />

@@ -1,68 +1,218 @@
-import React, { useState } from 'react';
-import { Megaphone, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Megaphone, Globe, ChevronDown, ChevronUp, BarChart2, Check } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { io } from 'socket.io-client';
+import toast from 'react-hot-toast';
 
-const announcements = [
-  { id: 1, title: 'Annual Family Reunion – August 2026', author: 'Arjun Mehta (Admin)', avatar: 'https://i.pravatar.cc/150?img=33', date: 'July 8, 2026', content: 'We are thrilled to announce our Annual Family Reunion on August 15, 2026 at Central Park, New York! Theme: "Roots & Branches." Please RSVP by August 1st. Transportation from major airports will be arranged. Looking forward to seeing everyone!', reactions: 34, comments: 12, tag: 'Important', tagColor: 'bg-red-100 text-red-700', pinned: true },
-  { id: 2, title: "Grandpa Robert's 80th Birthday Celebration!", author: 'Sarah Smith (Admin)', avatar: 'https://i.pravatar.cc/150?img=47', date: 'July 5, 2026', content: 'Our beloved Grandpa Robert is celebrating his 80th birthday on September 2nd at the Family Estate in Los Angeles. Dinner, music, and a special video tribute are in store. Please keep it a surprise!', reactions: 67, comments: 29, tag: 'Celebration', tagColor: 'bg-purple-100 text-purple-700', pinned: true },
-  { id: 3, title: 'New Document Vault Now Live', author: 'Arjun Mehta (Admin)', avatar: 'https://i.pravatar.cc/150?img=33', date: 'July 1, 2026', content: 'We\'ve launched the secure Family Document Vault! Upload and access important documents like property papers, insurance, and certificates. All files are encrypted and only accessible to verified family members.', reactions: 21, comments: 4, tag: 'Update', tagColor: 'bg-blue-100 text-blue-700', pinned: false },
-  { id: 4, title: 'Monthly Family Poll – Vote Now!', author: 'Arjun Mehta (Admin)', avatar: 'https://i.pravatar.cc/150?img=33', date: 'June 28, 2026', content: 'Cast your vote for our December vacation destination! The options are Goa, Maldives, Switzerland, and Dubai. Please respond by June 30th. Your voice matters!', reactions: 15, comments: 7, tag: 'Action Required', tagColor: 'bg-amber-100 text-amber-700', pinned: false },
-  { id: 5, title: 'Welcome New Family Members!', author: 'Sarah Smith (Admin)', avatar: 'https://i.pravatar.cc/150?img=47', date: 'June 20, 2026', content: 'We welcome three new members to the FamilyHub portal: Priya Mehta (daughter-in-law), Kiran Sharma (nephew), and Ananya Patel (cousin). Say hello and help them feel at home!', reactions: 43, comments: 16, tag: 'Welcome', tagColor: 'bg-emerald-100 text-emerald-700', pinned: false },
-];
-
-const EMOJI_REACTIONS = ['❤️', '😍', '🎉', '👏', '😮'];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
 export default function Announcements() {
+  const queryClient = useQueryClient();
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId') || '1';
   const [expanded, setExpanded] = useState(null);
-  const [reacted, setReacted] = useState({});
+  const [selectedOpt, setSelectedOpt] = useState({});
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    const refresh = () => {
+       queryClient.invalidateQueries(['announcements_polls']);
+    };
+    socket.on('announcement.created', refresh);
+    socket.on('poll.created', refresh);
+    socket.on('poll.updated', refresh);
+    return () => socket.disconnect();
+  }, [queryClient]);
+
+  const { data: feed = [], isLoading } = useQuery({
+     queryKey: ['announcements_polls'],
+     queryFn: async () => {
+        const [annRes, pollRes] = await Promise.all([
+           axios.get(`${API_URL}/member/announcements`, { headers: { Authorization: `Bearer ${token}` } }),
+           axios.get(`${API_URL}/member/polls`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        
+        const anns = annRes.data.map(a => ({ ...a, kind: 'announcement' }));
+        const polls = pollRes.data.map(p => ({ ...p, kind: 'poll' }));
+        
+        // Merge and sort
+        const merged = [...anns, ...polls].sort((a, b) => {
+           // Pinned announcements always first
+           if (a.kind === 'announcement' && a.pinned && (!b.pinned)) return -1;
+           if (b.kind === 'announcement' && b.pinned && (!a.pinned)) return 1;
+           return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        
+        return merged;
+     },
+     refetchInterval: 30000
+  });
+
+  const voteMutation = useMutation({
+     mutationFn: async ({pollId, optionId}) => {
+        const res = await axios.post(`${API_URL}/member/polls/${pollId}/vote`, { optionId }, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        return res.data;
+     },
+     onSuccess: () => {
+        toast.success("Vote recorded!");
+        queryClient.invalidateQueries(['announcements_polls']);
+     }
+  });
+
+  const handleVote = (pollId) => {
+    if (!selectedOpt[pollId]) return;
+    voteMutation.mutate({ pollId, optionId: selectedOpt[pollId] });
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Announcements</h1>
-        <p className="text-slate-500 text-sm mt-1">Family updates and important notices from admins.</p>
+      <div className="flex justify-between items-center bg-blue-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Family Bulletins</h1>
+          <p className="text-blue-100 text-sm max-w-md font-medium leading-relaxed">Stay updated with the latest family news, important announcements, and ongoing polls from the administrators.</p>
+        </div>
+        <div className="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-6">
+           <Megaphone size={160} />
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {announcements.map(ann => (
-          <div key={ann.id} className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${ann.pinned ? 'border-blue-200 dark:border-blue-800/60' : 'border-slate-100 dark:border-slate-800'}`}>
-            {ann.pinned && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/40 px-5 py-2 flex items-center gap-2">
-                <Megaphone size={13} className="text-blue-600" />
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Pinned</span>
-              </div>
-            )}
-            <div className="p-5">
-              <div className="flex items-start gap-4 mb-4">
-                <img src={ann.avatar} className="w-10 h-10 rounded-xl object-cover shadow-sm shrink-0" alt="" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center flex-wrap gap-2 mb-1">
-                    <h3 className="font-bold text-slate-900 dark:text-white text-[15px]">{ann.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${ann.tagColor}`}>{ann.tag}</span>
+      <div className="space-y-5 flex flex-col items-center">
+        {isLoading && <div className="p-8 text-center text-slate-500 font-medium w-full">Loading bulletins...</div>}
+        {!isLoading && feed.length === 0 && <div className="p-8 text-center text-slate-500 font-medium bg-white rounded-2xl border w-full">No announcements found. You're all caught up!</div>}
+        
+        {feed.map(item => {
+          if (item.kind === 'announcement') {
+             return (
+               <div key={`ann_${item.id}`} className={`bg-white dark:bg-slate-900 w-full rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${item.pinned ? 'border-blue-200 dark:border-blue-800/60' : 'border-slate-100 dark:border-slate-800'}`}>
+                 {item.pinned && (
+                   <div className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50 px-5 py-2 flex items-center gap-2">
+                     <Megaphone size={14} className="text-blue-600 dark:text-blue-400" />
+                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Pinned Announcement</span>
+                   </div>
+                 )}
+                 <div className="p-6">
+                   <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-start gap-4 flex-1 min-w-0">
+                       <img src={item.author?.avatar || `https://ui-avatars.com/api/?name=${item.author?.firstName}+${item.author?.lastName}`} className="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0" alt="" />
+                       <div className="min-w-0 flex-1">
+                         <div className="flex items-center gap-2 flex-wrap mb-1">
+                           <h3 className="font-bold text-slate-900 dark:text-white text-lg">{item.title}</h3>
+                         </div>
+                         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                           <span className="text-slate-700 font-bold">{item.author?.firstName} {item.author?.lastName}</span>
+                           <span>·</span>
+                           <span>{new Date(item.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric'})}</span>
+                           <span>·</span>
+                           <div className="flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded text-[10px] uppercase font-bold"><Globe size={10} /> {item.targetType}</div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   <div className={`mt-5 text-[15px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed whitespace-pre-wrap ${expanded === item.id ? '' : 'line-clamp-3'}`}>
+                     {item.message}
+                   </div>
+                   
+                   {item.message && item.message.length > 200 && (
+                      <button onClick={() => setExpanded(expanded === item.id ? null : item.id)} className="mt-2 flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg">
+                        {expanded === item.id ? <><ChevronUp size={14} /> Show less</> : <><ChevronDown size={14} /> Read full story</>}
+                      </button>
+                   )}
+                 </div>
+               </div>
+             );
+          }
+
+          if (item.kind === 'poll') {
+             const votesMap = item.votes || {};
+             const totalVotes = Object.keys(votesMap).length;
+             const hasVotedLocal = !!votesMap[userId] || localStorage.getItem(`voted_${item.id}`);
+             const active = new Date(item.endDate) > new Date();
+             const pStatus = active ? 'active' : 'closed';
+             
+             const optionCounts = {};
+             item.options.forEach(opt => optionCounts[opt.id] = 0);
+             Object.values(votesMap).forEach(oid => {
+                if (optionCounts[oid] !== undefined) optionCounts[oid]++;
+             });
+             
+             const maxVotes = Math.max(...Object.values(optionCounts), 0);
+
+             return (
+                <div key={`poll_${item.id}`} className="bg-white dark:bg-slate-900 rounded-2xl w-full border border-slate-100 dark:border-slate-800 shadow-sm p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between gap-3 mb-5">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${pStatus === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                          {pStatus === 'active' ? '🟢 Active Poll' : '⚫ Closed Poll'}
+                        </span>
+                        <span className="text-xs text-slate-400">Ends {new Date(item.endDate).toLocaleDateString()}</span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-snug">{item.question}</h3>
+                      <p className="text-xs text-slate-400 mt-1">by {item.author?.firstName || 'Admin'} · {totalVotes} votes</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                       <BarChart2 size={24} className="text-blue-600" />
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 font-medium">{ann.author} · {ann.date}</p>
-                </div>
-              </div>
 
-              <p className={`text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed ${expanded === ann.id ? '' : 'line-clamp-2'}`}>{ann.content}</p>
-              <button onClick={() => setExpanded(expanded === ann.id ? null : ann.id)} className="mt-1.5 flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700">
-                {expanded === ann.id ? <><ChevronUp size={14} /> Show less</> : <><ChevronDown size={14} /> Read more</>}
-              </button>
+                  <div className="space-y-3">
+                    {item.options.map((opt) => {
+                      const vCount = optionCounts[opt.id] || 0;
+                      const pct = totalVotes === 0 ? 0 : Math.round((vCount / totalVotes) * 100);
+                      const isWinner = vCount === maxVotes && maxVotes > 0 && (hasVotedLocal || pStatus === 'closed');
+                      const isSelected = selectedOpt[item.id] === opt.id;
+                      const isMyVote = votesMap[userId] === opt.id || localStorage.getItem(`voted_${item.id}_opt`) === String(opt.id);
 
-              {/* Reactions */}
-              <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800 flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-1 flex-wrap">
-                  {EMOJI_REACTIONS.map(emoji => (
-                    <button key={emoji} onClick={() => setReacted(prev => ({ ...prev, [ann.id + emoji]: !prev[ann.id + emoji] }))}
-                      className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all ${reacted[ann.id + emoji] ? 'bg-blue-50 border-blue-300 dark:bg-blue-500/20 dark:border-blue-700' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100'}`}>
-                      {emoji}
+                      return (
+                        <div key={opt.id}
+                          onClick={() => !hasVotedLocal && pStatus === 'active' && setSelectedOpt(prev => ({ ...prev, [item.id]: opt.id }))}
+                          className={`relative rounded-xl overflow-hidden border transition-all cursor-pointer ${isSelected && !hasVotedLocal ? 'border-blue-400 shadow-md shadow-blue-500/10' : 'border-slate-200'}`}
+                        >
+                          <div className={`absolute inset-y-0 left-0 rounded-xl transition-all duration-500 ${isWinner ? 'bg-blue-100 dark:bg-blue-500/10' : 'bg-slate-50 dark:bg-slate-800/60'}`}
+                            style={{ width: (hasVotedLocal || pStatus === 'closed') ? `${pct}%` : '0%' }}
+                          />
+                          <div className="relative flex items-center justify-between px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors ${isMyVote ? 'bg-blue-600 border-blue-600' : isSelected ? 'border-blue-400' : 'border-slate-300 dark:border-slate-600'}`}>
+                                {isMyVote && <Check size={11} className="text-white" />}
+                              </div>
+                              <span className={`text-[15px] font-semibold ${isWinner && (hasVotedLocal || pStatus === 'closed') ? 'text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>{opt.text}</span>
+                            </div>
+                            {(hasVotedLocal || pStatus === 'closed') && (
+                              <div className="flex items-center gap-3 text-sm font-bold text-slate-500 dark:text-slate-400">
+                                <span>{vCount} votes</span>
+                                <span className={`${isWinner ? 'text-blue-600' : ''} w-10 text-right`}>{pct}%</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {pStatus === 'active' && !hasVotedLocal && (
+                    <button onClick={() => {
+                       handleVote(item.id);
+                       localStorage.setItem(`voted_${item.id}`, 'true');
+                       localStorage.setItem(`voted_${item.id}_opt`, selectedOpt[item.id]);
+                    }} disabled={selectedOpt[item.id] === undefined || voteMutation.isPending}
+                      className={`w-full mt-5 py-3 rounded-xl text-sm font-bold transition-all ${selectedOpt[item.id] !== undefined ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}>
+                      {voteMutation.isPending ? 'Recording...' : 'Cast Vote'}
                     </button>
-                  ))}
+                  )}
+                  {hasVotedLocal && (
+                    <div className="mt-5 py-3 bg-emerald-50 rounded-xl flex justify-center border border-emerald-100">
+                       <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2"><Check size={16}/> You have cast your vote</p>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs font-semibold text-slate-400">{ann.reactions} reactions · {ann.comments} comments</span>
-              </div>
-            </div>
-          </div>
-        ))}
+             );
+          }
+         })}
       </div>
     </div>
   );

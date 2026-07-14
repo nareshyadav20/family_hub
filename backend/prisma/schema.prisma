@@ -17,6 +17,7 @@ enum Role {
 enum MemberStatus {
   PENDING_INVITE
   INVITATION_SENT
+  EMAIL_FAILED
   OTP_VERIFIED
   PROFILE_INCOMPLETE
   ACTIVE
@@ -52,10 +53,17 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  brevoErrorCode    String?
+  brevoErrorMessage String?
+  lastEmailAttempt  DateTime?
+
   family          Family?  @relation(fields: [familyId], references: [id])
   memberProfile   MemberProfile?
+  memberSettings  MemberSettings?
   invitation      Invitation?
   documents       Document[]
+  announcements   Announcement[]
+  polls           Poll[] @relation("UserPolls")
 
   @@map("users")
 }
@@ -172,4 +180,82 @@ model Document {
   updatedAt   DateTime @updatedAt
 
   @@map("documents")
+}
+
+model MemberSettings {
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  profile_photo              String?
+  display_name               String?
+  username                   String?  @unique
+  email                      String?
+  mobile                     String?
+  
+  theme                      String   @default("System")
+  language                   String   @default("English")
+  timezone                   String   @default("UTC")
+  
+  show_mobile                Boolean  @default(false)
+  show_email                 Boolean  @default(false)
+  show_dob                   Boolean  @default(false)
+  show_address               Boolean  @default(false)
+  show_public_profile        Boolean  @default(true)
+  allow_direct_messages      Boolean  @default(true)
+  
+  email_notifications        Boolean  @default(true)
+  whatsapp_notifications     Boolean  @default(true)
+  push_notifications         Boolean  @default(true)
+  birthday_notifications     Boolean  @default(true)
+  event_notifications        Boolean  @default(true)
+  announcement_notifications Boolean  @default(true)
+  
+  two_factor_enabled         Boolean  @default(false)
+  updated_at                 DateTime @updatedAt
+
+  @@map("member_settings")
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  targetType  String   @default("All Members")
+  pinned      Boolean  @default(false)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("announcements")
+}
+
+model Poll {
+  id          String   @id @default(cuid())
+  question    String
+  options     Json     // store array of strings or objects [{id, text}]
+  votes       Json     // store key/value map { "userId": optionId }
+  endDate     DateTime
+  authorId    String
+  author      User     @relation("UserPolls", fields: [authorId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("polls")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        String   @default("system") // e.g., 'event', 'member', 'alert'
+  targetType  String   @default("All") // 'All', 'Admin', or specific userId
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("notifications")
 }

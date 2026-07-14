@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, Moon, Sun, Settings as SettingsIcon, UserCircle, LogOut } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 
 export default function MainLayout({ navItems, bottomNav }) {
@@ -12,7 +12,6 @@ export default function MainLayout({ navItems, bottomNav }) {
 
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [showNotifs, setShowNotifs] = useState(false);
 
   useEffect(() => {
@@ -24,13 +23,25 @@ export default function MainLayout({ navItems, bottomNav }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  const queryClient = useQueryClient();
   useEffect(() => {
     const socket = io('http://localhost:5000');
     socket.on('notification.created', (notif) => {
-       setNotifications(prev => [notif, ...prev]);
+       queryClient.invalidateQueries(['header_notifications']);
     });
     return () => socket.disconnect();
-  }, []);
+  }, [queryClient]);
+
+  const { data: notifications = [] } = useQuery({
+     queryKey: ['header_notifications'],
+     queryFn: async () => {
+        const res = await axios.get('http://localhost:5000/api/v1/notifications', {
+           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        return res.data;
+     },
+     refetchInterval: 30000
+  });
 
   const { data: memberData } = useQuery({
     queryKey: ['adminProfile'],
@@ -140,13 +151,9 @@ export default function MainLayout({ navItems, bottomNav }) {
              <div className="relative">
                 <button onClick={() => setShowNotifs(!showNotifs)} className="relative text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors outline-none pt-1 cursor-pointer">
                   <Bell size={20} strokeWidth={2.5} />
-                  {notifications.length > 0 ? (
+                  {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#EF4444] text-[10px] font-bold text-white rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 shadow-sm">
-                       {notifications.length}
-                    </span>
-                  ) : (
-                    <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#EF4444] text-[10px] font-bold text-white rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 shadow-sm">
-                       8
+                       {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length}
                     </span>
                   )}
                 </button>
@@ -154,17 +161,18 @@ export default function MainLayout({ navItems, bottomNav }) {
                    <div className="absolute top-10 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden outline-none">
                       <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
                          <span className="font-bold text-sm">Notifications</span>
-                         <button onClick={() => setNotifications([])} className="text-xs text-blue-600 font-semibold cursor-pointer">Mark read</button>
+                         <Link to="/admin/dashboard/notifications" onClick={() => setShowNotifs(false)} className="text-xs text-blue-600 font-semibold cursor-pointer">View</Link>
                       </div>
                       <div className="max-h-64 overflow-y-auto">
-                         {notifications.length > 0 ? notifications.map((n, i) => (
-                           <div key={i} className="px-4 py-3 text-sm border-b border-slate-50 dark:border-slate-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
-                             {n.message}
-                           </div>
-                         )) : (
-                            <div className="px-4 py-3 text-xs border-b border-slate-50 dark:border-slate-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer text-slate-600 font-medium">
-                               <p className="font-bold text-slate-900 dark:text-white mb-0.5">Pending Approvals</p>
-                               You have 3 new member join requests pending.
+                         {notifications.slice(0, 5).map((n, i) => (
+                           <Link to="/admin/dashboard/notifications" onClick={() => setShowNotifs(false)} key={i} className="block px-4 py-3 text-sm border-b border-slate-50 dark:border-slate-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer">
+                             <p className="font-bold text-slate-900 dark:text-white mb-0.5">{n.title}</p>
+                             <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{n.message}</p>
+                           </Link>
+                         ))}
+                         {notifications.length === 0 && (
+                            <div className="px-4 py-6 text-center text-xs text-slate-500">
+                               No new notifications
                             </div>
                          )}
                       </div>

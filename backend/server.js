@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
+const { sendInvitationEmail } = require('./services/emailService');
+const crypto = require('crypto');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -23,6 +25,20 @@ app.set('socketio', io); // Keep accessible globally
 
 app.use(cors());
 app.use(express.json());
+
+const memberSettingsRouter = require('./routes/memberSettings');
+const dashboardRouter = require('./routes/dashboard');
+const announcementsRouter = require('./routes/announcements');
+const pollsRouter = require('./routes/polls');
+const notificationsRouter = require('./routes/notifications');
+
+app.use('/api', memberSettingsRouter);
+app.use('/api/v1/admin/dashboard', dashboardRouter);
+app.use('/api/v1/admin/announcements', announcementsRouter);
+app.use('/api/v1/member/announcements', announcementsRouter);
+app.use('/api/v1/admin/polls', pollsRouter);
+app.use('/api/v1/member/polls', pollsRouter);
+app.use('/api/v1/notifications', notificationsRouter);
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
@@ -136,26 +152,71 @@ app.get('/api/v1/admin/members', async (req, res) => {
      res.status(500).json({ error: 'Failed to fetch members' });
   }
 });
+
+// Bulk Delete Members Endpoint (Admin)
+app.delete('/api/v1/admin/members/bulk', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No member IDs provided' });
+    }
+    
+    // Delete associated relations first if onDelete Cascade isn't setup perfectly or relying on Prisma logic
+    await prisma.user.deleteMany({
+      where: { id: { in: ids } }
+    });
+
+    res.json({ success: true, message: `Deleted ${ids.length} members` });
+  } catch (err) {
+    console.error('Bulk delete error:', err);
+    res.status(500).json({ error: 'Server error during deletion' });
+  }
+});
 // Manual Add Member Endpoint (No Invite)
 app.post('/api/v1/admin/members/add', async (req, res) => {
-  const { firstName, lastName, gender, relationship, familyBranch, role, status, isDraft } = req.body;
+  const { firstName, lastName, email, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId } = req.body;
   if (!firstName?.trim()) {
     console.log("WARN: Add Validation skipped. Payload:", req.body);
   }
+  
+  if (!email) {
+    return res.status(200).json({ success: false, error: 'Email is required' });
+  }
+
   try {
+     const existing = await prisma.user.findFirst({
+        where: { email }
+     });
+     if (existing) {
+        return res.status(200).json({ success: false, error: 'Email already exists' });
+     }
+
      const memberId = 'MEM-' + Math.floor(1000 + Math.random() * 9000);
-     const user = await prisma.user.create({
-        data: {
-          memberId, firstName, lastName: lastName?.trim() || '', gender, relationship, familyBranch, role: role || 'MEMBER',
-          status: isDraft ? 'PENDING_INVITE' : status
-        }
+     const user = await prisma.$transaction(async (tx) => {
+        const u = await tx.user.create({
+           data: {
+             memberId, firstName, lastName: lastName?.trim() || '', email, gender, relationship, familyBranch, role: role || 'MEMBER',
+             fatherId: fatherId || null, motherId: motherId || null, spouseId: spouseId || null,
+             status: isDraft ? 'PENDING_INVITE' : status
+           }
+        });
+        
+        await tx.memberProfile.create({
+           data: {
+              userId: u.id,
+              currentStage: 1,
+              profileCompletion: 0
+           }
+        });
+        
+        return u;
      });
      const io = req.app.get('socketio');
      io.emit('member.created', { memberId: user.id });
      res.status(201).json({ message: 'Member added successfully', user });
   } catch (err) {
      console.error(err);
-     res.status(500).json({ error: 'Server error' });
+     res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 
@@ -172,7 +233,7 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
       where: { OR: [{ phone }, { email: email || 'NONE' }] }
     });
     if (existing) {
-       return res.status(400).json({ error: 'This Phone Number or Email is already registered to a Family Member!' });
+       return res.status(200).json({ success: false, error: 'This Phone Number or Email is already registered to a Family Member!' });
     }
 
     const memberId = 'FH-' + Math.floor(1000 + Math.random() * 9000);
@@ -205,41 +266,151 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
     io.emit('member.invited', { memberId: result.id, isDraft });
     
     // Notification & Real-Time Events Engine
-    if (!isDraft) {
-       const inviteUrl = `http://localhost:5174/invite?token=${generatedToken}`;
-       
-       // 1. Email Service (Nodemailer)
-       if (email) {
-          const transporter = nodemailer.createTransport({ host: 'smtp.ethereal.email', port: 587, auth: { user: 'user', pass: 'pass' } });
-          const mailOptions = {
-             from: '"FamilyHub OS" <invites@familyhub.com>',
-             to: email,
-             subject: 'You have been invited to join the Family Tree!',
-             html: `<p>Hello ${firstName},</p>
-                    <p>You have been invited to join as a <strong>${relationship}</strong> to the family.</p>
-                    <p>Click <a href="${inviteUrl}">here</a> to join or use URL: ${inviteUrl}</p>`
-          };
-          // transporter.sendMail(mailOptions).catch(console.error); // Enabled for Ethereal / Sendgrid in Prod
-          console.log(`[EMAIL DISPATCH] Sent Invite to ${email}`);
-       }
-
-       // 2. Meta WhatsApp Cloud API (Stub)
-       if (phone) {
-          console.log(`[WHATSAPP DISPATCH] Sending WhatsApp Template to ${phone} with OTP / Link...`);
-       }
-
-       // 3. Socket broadcast Notification to logged-in users 
-       io.emit('notification.created', { message: `${firstName} has been invited to join the family.` });
+    if (isDraft) {
+      return res.status(201).json({
+        message: 'Member saved as draft',
+        user: result
+      });
     }
 
+    let emailStatus = 'INVITATION_SENT';
+    let emailResult = { success: true };
+    
+    // 1. Email Service (Brevo)
+    if (email) {
+       emailResult = await sendInvitationEmail(
+           { email, firstName: firstName, lastName: lastName?.trim() || '' },
+           'Admin', // the inviter
+           'FamilyHub' // the family
+       );
+       if (!emailResult.success) {
+           emailStatus = 'EMAIL_FAILED';
+       }
+    }
+
+    if (emailStatus === 'EMAIL_FAILED') {
+        await prisma.user.update({
+            where: { id: result.id },
+            data: { 
+              status: 'EMAIL_FAILED',
+              brevoErrorCode: emailResult.errorCode || 'UNKNOWN_ERROR',
+              brevoErrorMessage: emailResult.error || 'Unknown email failure',
+              lastEmailAttempt: new Date()
+            }
+        });
+        
+        return res.status(200).json({
+           success: false,
+           emailSent: false,
+           status: 'EMAIL_FAILED',
+           error: emailResult.error || 'Brevo Configuration Missing or Sender Error'
+        });
+    }
+
+    // Success Status
+    await prisma.user.update({
+        where: { id: result.id },
+        data: { 
+          lastEmailAttempt: new Date(),
+          brevoErrorCode: null,
+          brevoErrorMessage: null
+        }
+    });
+
+    if (phone) {
+       console.log(`[WHATSAPP DISPATCH] Sending WhatsApp Template to ${phone} with OTP / Link...`);
+    }
+
+    io.emit('notification.created', { message: `${firstName} has been invited to join the family.` });
+
     res.status(201).json({
-      message: isDraft ? 'Member saved as draft' : 'Invitation sent successfully',
-      user: result,
-      inviteLink: !isDraft ? `http://localhost:5174/invite?token=${generatedToken}` : null
+       success: true,
+       emailSent: true,
+       status: 'INVITATION_SENT',
+       message: 'Invitation sent successfully',
+       user: result,
+       inviteLink: `http://localhost:5174/invite?token=${generatedToken}`
     });
   } catch (error) {
     console.error('Invite error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+});
+
+// Resend Invitation Endpoint
+app.post('/api/v1/admin/members/invite/resend', async (req, res) => {
+  const { memberId } = req.body;
+  if (!memberId) return res.status(400).json({ error: 'Member ID is required' });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: memberId },
+      include: { invitation: true }
+    });
+
+    if (!user) return res.status(404).json({ error: 'Member not found' });
+    if (user.status !== 'INVITATION_SENT' && user.status !== 'EMAIL_FAILED') {
+      return res.status(400).json({ error: 'Cannot resend invitation for this status' });
+    }
+
+    let token = user.invitation?.token;
+    if (!token) {
+        token = crypto.randomBytes(32).toString('hex');
+        await prisma.invitation.create({
+            data: {
+                userId: user.id,
+                token,
+                otp: Math.floor(100000 + Math.random() * 900000).toString(),
+                expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000)
+            }
+        });
+    }
+
+    let emailStatus = 'INVITATION_SENT';
+    let emailResult = { success: true };
+    if (user.email) {
+       emailResult = await sendInvitationEmail(
+           { email: user.email, firstName: user.firstName, lastName: user.lastName },
+           'Admin',
+           'FamilyHub'
+       );
+       if (!emailResult.success) {
+           emailStatus = 'EMAIL_FAILED';
+       }
+    }
+
+    if (emailStatus === 'EMAIL_FAILED') {
+        const failedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: { 
+              status: 'EMAIL_FAILED',
+              brevoErrorCode: emailResult.errorCode || 'UNKNOWN_ERROR',
+              brevoErrorMessage: emailResult.error || 'Unknown email issue',
+              lastEmailAttempt: new Date()
+            }
+        });
+        const io = req.app.get('socketio');
+        io.emit('member.updated', { memberId: user.id });
+        return res.status(200).json({ success: false, emailSent: false, status: 'EMAIL_FAILED', error: emailResult.error || 'Unknown email issue', user: failedUser });
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          status: 'INVITATION_SENT',
+          brevoErrorCode: null,
+          brevoErrorMessage: null,
+          lastEmailAttempt: new Date()
+        }
+    });
+
+    const io = req.app.get('socketio');
+    io.emit('member.updated', { memberId: user.id });
+
+    res.json({ success: true, emailSent: true, status: 'INVITATION_SENT', message: 'Invitation resent successfully', user: updatedUser });
+  } catch (err) {
+    console.error('Resend error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -501,6 +672,39 @@ app.put('/api/v1/member/profile', async (req, res) => {
   } catch(err) {
      console.error("Profile Save Error: ", err);
      res.status(500).json({ error: 'Server error updating profile' });
+  }
+});
+
+app.get('/api/test/brevo', async (req, res) => {
+  try {
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (!brevoApiKey || typeof brevoApiKey !== 'string' || brevoApiKey.length < 20) {
+      return res.status(401).json({ success: false, message: 'Invalid Brevo API key.' });
+    }
+
+    const response = await fetch('https://api.brevo.com/v3/account', {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'api-key': brevoApiKey
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      let parsedError = {};
+      try { parsedError = JSON.parse(errorData); } catch (e) {}
+      return res.status(response.status).json({
+        success: false,
+        error: parsedError.message || errorData,
+        errorCode: parsedError.code || 'UNKNOWN'
+      });
+    }
+
+    const data = await response.json();
+    res.json({ success: true, account: data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

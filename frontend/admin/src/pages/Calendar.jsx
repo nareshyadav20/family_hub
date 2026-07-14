@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-const events = [
-  { date: '2026-07-14', title: "Grandpa's Birthday", type: 'birthday', color: '#F59E0B' },
-  { date: '2026-07-15', title: 'Board Meeting', type: 'meeting', color: '#4F46E5' },
-  { date: '2026-07-20', title: 'Business Strategy', type: 'meeting', color: '#4F46E5' },
-  { date: '2026-07-28', title: "Emily's Birthday", type: 'birthday', color: '#F59E0B' },
-  { date: '2026-08-02', title: "Grandma's Birthday", type: 'birthday', color: '#F59E0B' },
-  { date: '2026-08-15', title: 'Summer Reunion', type: 'event', color: '#14B8A6' },
-];
+const getCategoryColor = (cat) => {
+   if (!cat) return '#14B8A6'; 
+   const l = cat.toLowerCase();
+   if (l.includes('birthday')) return '#F59E0B';
+   if (l.includes('meeting') || l.includes('board')) return '#4F46E5';
+   return '#14B8A6';
+};
 
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
@@ -22,21 +24,76 @@ function getFirstDay(year, month) {
 }
 
 export default function Calendar() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const token = localStorage.getItem('token');
+  
   const today = new Date();
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(6); // July 2026
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDay(year, month);
 
   const [showEventModal, setShowEventModal] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+     name: '',
+     category: 'Birthday',
+     eventDate: '',
+     startTime: ''
+  });
 
   const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
   const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); };
 
+  const { data: serverEvents = [], isLoading } = useQuery({
+     queryKey: ['events'],
+     queryFn: async () => {
+        const res = await axios.get('http://localhost:5000/api/v1/admin/events', {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        return res.data;
+     }
+  });
+  
+  // Transform DB events to internal UI format
+  const events = serverEvents.map(e => ({
+     date: new Date(e.eventDate).toISOString().split('T')[0],
+     title: e.name,
+     type: e.category?.toLowerCase() || 'event',
+     color: getCategoryColor(e.category)
+  }));
+
   const getEventsForDay = (day) => {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     return events.filter(e => e.date === dateStr);
+  };
+
+  const createEventMutation = useMutation({
+     mutationFn: async (payload) => {
+       const res = await axios.post('http://localhost:5000/api/v1/admin/events', payload, {
+          headers: { Authorization: `Bearer ${token}` }
+       });
+       return res.data;
+     },
+     onSuccess: () => {
+        toast.success("Event added successfully");
+        setShowEventModal(false);
+        setNewEvent({ name: '', category: 'Birthday', eventDate: '', startTime: ''});
+        queryClient.invalidateQueries(['events']);
+     },
+     onError: () => toast.error("Failed to add event")
+  });
+
+  const handleCreateEvent = (e) => {
+     e.preventDefault();
+     if (!newEvent.name || !newEvent.eventDate) return toast.error("Title and Date are required");
+     
+     createEventMutation.mutate({
+        ...newEvent,
+        status: 'Publish', 
+        visibility: 'Family'
+     });
   };
 
   return (
@@ -116,48 +173,52 @@ export default function Calendar() {
               <div style={{ width: 4, height: 40, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
               <div>
                 <div className="font-bold text-sm text-slate-900 dark:text-white">{ev.title}</div>
-                <div className="text-xs text-slate-500">{new Date(ev.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                <div className="text-xs text-slate-500">{new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
               </div>
               <div className="ml-auto">
                 <span style={{ background: `${ev.color}15`, color: ev.color }} className="text-xs font-bold px-3 py-1 rounded-full capitalize">{ev.type}</span>
               </div>
             </div>
           ))}
+          {events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length === 0 && (
+             <div className="text-sm text-slate-500 font-medium py-4 text-center">No events scheduled.</div>
+          )}
         </div>
       </div>
 
       {showEventModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <form onSubmit={handleCreateEvent} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add Calendar Event</h2>
               
               <div className="space-y-4">
                 <div>
                    <p className="text-xs font-bold text-slate-500 mb-1">Basic Information</p>
-                   <input type="text" placeholder="Event Title (Required) ✅" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium mb-3" />
-                   <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium">
-                      <option>Event Type ✅</option>
-                      <option>Birthday</option>
-                      <option>Meeting</option>
-                      <option>Gathering</option>
+                   <input required type="text" value={newEvent.name} onChange={e => setNewEvent({...newEvent, name: e.target.value})} placeholder="Event Title (Required) ✅" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium mb-3" />
+                   <select value={newEvent.category} onChange={e => setNewEvent({...newEvent, category: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium">
+                      <option value="Birthday">Birthday</option>
+                      <option value="Meeting">Meeting</option>
+                      <option value="Gathering">Gathering</option>
                    </select>
                 </div>
                 
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                   <p className="text-xs font-bold text-slate-500 mb-2">2.2 Date & Time</p>
+                   <p className="text-xs font-bold text-slate-500 mb-2">Date & Time</p>
                    <div className="flex gap-3">
-                      <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
-                      <input type="time" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                      <input required type="date" value={newEvent.eventDate} onChange={e => setNewEvent({...newEvent, eventDate: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                      <input required type="time" value={newEvent.startTime} onChange={e => setNewEvent({...newEvent, startTime: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
                    </div>
                 </div>
               </div>
               
               <div className="mt-6 flex gap-3">
-                 <button onClick={() => { alert('Calendar Event Added Successfully!'); setShowEventModal(false); }} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-indigo-500/20">Save Event</button>
-                 <button onClick={() => setShowEventModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button type="submit" disabled={createEventMutation.isPending} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-indigo-500/20">
+                    {createEventMutation.isPending ? 'Saving...' : 'Save Event'}
+                 </button>
+                 <button type="button" onClick={() => setShowEventModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
-        </div>
+        </form>
       )}
     </div>
   );
