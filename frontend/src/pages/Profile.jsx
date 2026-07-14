@@ -7,7 +7,7 @@ export default function Profile() {
   const { data: memberData, isLoading } = useQuery({
     queryKey: ['adminProfilePage'],
     queryFn: async () => {
-      const res = await axios.get('http://localhost:5000/api/v1/member/profile', {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

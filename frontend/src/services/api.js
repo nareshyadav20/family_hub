@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -223,7 +223,8 @@ function AppLayer() {
 
 function App() {
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socketURL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api/v1', '') : (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com');
+    const socket = io(socketURL);
     socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
     socket.on('member.invited', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
     socket.on('member.updated', () => queryClient.invalidateQueries({ queryKey: ['members'] }));

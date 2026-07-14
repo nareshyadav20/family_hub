@@ -49,7 +49,7 @@ export default function Calendar() {
   const { data: serverEvents = [], isLoading } = useQuery({
      queryKey: ['events'],
      queryFn: async () => {
-        const res = await axios.get('http://localhost:5000/api/v1/admin/events', {
+        const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
            headers: { Authorization: `Bearer ${token}` }
         });
         return res.data;
@@ -71,7 +71,7 @@ export default function Calendar() {
 
   const createEventMutation = useMutation({
      mutationFn: async (payload) => {
-       const res = await axios.post('http://localhost:5000/api/v1/admin/events', payload, {
+       const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, payload, {
           headers: { Authorization: `Bearer ${token}` }
        });
        return res.data;

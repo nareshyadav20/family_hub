@@ -40,7 +40,7 @@ export default function Members() {
   const handleResendInvite = async (memberId) => {
     try {
       toast.loading('Resending invitation...', { id: 'resend' });
-      const res = await axios.post('http://localhost:5000/api/v1/admin/members/invite/resend', { memberId }, {
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/invite/resend`, { memberId }, {
          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.data.success === false) {
@@ -57,7 +57,7 @@ export default function Members() {
     if (!window.confirm(`Are you sure you want to delete ${selectedRows.length} members?`)) return;
     try {
       toast.loading('Deleting members...', { id: 'bulk-delete' });
-      await axios.delete('http://localhost:5000/api/v1/admin/members/bulk', {
+      await axios.delete(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/bulk`, {
         data: { ids: selectedRows },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -98,7 +98,7 @@ export default function Members() {
   const { data: rawMembers = [], isLoading, error } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
-      const res = await axios.get('http://localhost:5000/api/v1/admin/members', {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

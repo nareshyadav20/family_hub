@@ -39,7 +39,7 @@ export default function InviteMember() {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      const res = await axios.post('http://localhost:5000/api/v1/admin/members/invite', payload);
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/invite`, payload);
       if (res.data.success === false) {
         if (res.data.status === 'EMAIL_FAILED') {
            throw new Error(`Invitation could not be sent. ${res.data.error}`);

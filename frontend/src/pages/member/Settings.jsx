@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const socket = io('http://localhost:5000');
+const API_URL = import.meta.env.VITE_API_URL || `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api`;
+const socket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('account');

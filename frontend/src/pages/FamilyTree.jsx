@@ -11,7 +11,7 @@ export default function FamilyTree() {
   const { data: members = [] } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
-      const res = await axios.get('http://localhost:5000/api/v1/admin/members', {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

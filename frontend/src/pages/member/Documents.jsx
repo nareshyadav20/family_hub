@@ -17,7 +17,7 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['memberDocuments'],
     queryFn: async () => {
-      const res = await axios.get('http://localhost:5000/api/v1/documents', {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       // Filter out Private/Admin documents not owned by this user
@@ -30,7 +30,7 @@ export default function Documents() {
 
   const uploadDoc = useMutation({
     mutationFn: async () => {
-      const res = await axios.post('http://localhost:5000/api/v1/documents', {
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
          name: uploadData.name,
          category: uploadData.category,
          visibility: uploadData.visibility,

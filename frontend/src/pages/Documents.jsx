@@ -15,7 +15,7 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['adminDocuments'],
     queryFn: async () => {
-      const res = await axios.get('http://localhost:5000/api/v1/documents', {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
@@ -26,7 +26,7 @@ export default function Documents() {
     mutationFn: async ({ id, status, visibility }) => {
       const payload = { status };
       if (visibility) payload.visibility = visibility;
-      const res = await axios.put(`http://localhost:5000/api/v1/documents/${id}/status`, payload, {
+      const res = await axios.put(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents/${id}/status`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
