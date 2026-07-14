@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Search, Moon, Sun, Users, LogOut, Settings as SettingsIcon, UserCircle } from 'lucide-react';
+import { Bell, Search, Moon, Sun, Users, LogOut, Settings as SettingsIcon, UserCircle, Menu, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,8 @@ export default function MainLayout({ navItems, bottomNav }) {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -64,11 +66,19 @@ export default function MainLayout({ navItems, bottomNav }) {
   return (
     <div className="flex h-screen w-full bg-[#F4F7FB] dark:bg-slate-900 overflow-hidden font-sans text-slate-800 dark:text-slate-200">
       
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 bg-white dark:bg-slate-950 flex flex-col z-20 border-r border-slate-100 dark:border-slate-800">
+      <aside className={cn(
+        "fixed lg:static inset-y-0 left-0 w-64 bg-white dark:bg-slate-950 flex flex-col z-50 border-r border-slate-100 dark:border-slate-800 transition-transform duration-300 font-sans",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
         
         {/* Logo Section */}
-        <div className="h-[76px] flex items-center px-6 shrink-0 mt-2">
+        <div className="h-[76px] flex items-center justify-between px-6 shrink-0 mt-2 border-b border-transparent">
            <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-blue-500 rounded-xl flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20 text-white">
                  <Users size={20} />
@@ -78,6 +88,9 @@ export default function MainLayout({ navItems, bottomNav }) {
                 <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">MEMBER PORTAL</span>
               </div>
            </div>
+           <button className="lg:hidden text-slate-500 p-1" onClick={() => setIsMobileMenuOpen(false)}>
+             <X size={20} />
+          </button>
         </div>
 
         {/* Navigation Section */}
@@ -89,6 +102,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                 <Link 
                   key={idx} 
                   to={item.href} 
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-medium transition-all duration-200",
                     isActive 
@@ -124,21 +138,34 @@ export default function MainLayout({ navItems, bottomNav }) {
       <main className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header */}
-        <header className="h-[76px] bg-white dark:bg-slate-950 flex items-center justify-between px-8 shrink-0 z-10 border-b border-transparent shadow-[0_2px_10px_rgba(0,0,0,0.015)]">
+        <header className="h-[76px] bg-white dark:bg-slate-950 flex items-center justify-between px-4 md:px-8 shrink-0 z-10 border-b border-transparent shadow-[0_2px_10px_rgba(0,0,0,0.015)] gap-3">
           
-          <div className="flex items-center gap-4 flex-1">
-             <div className="relative w-full max-w-sm hidden md:block">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-               <input 
-                 placeholder="Search family..." 
-                 className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700"
-               />
-             </div>
+          <div className="flex items-center gap-3 flex-1">
+             <button className="lg:hidden text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-lg" onClick={() => setIsMobileMenuOpen(true)}>
+               <Menu size={22} />
+             </button>
+             
+             {isSearchOpen ? (
+                <div className="relative w-full max-w-[300px] animate-in fade-in slide-in-from-right-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input autoFocus onBlur={() => setIsSearchOpen(false)} placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
+                </div>
+             ) : (
+                <div className="relative w-full max-w-sm hidden md:block">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                   <input placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
+                </div>
+             )}
           </div>
           
           {/* Header Right Actions */}
-          <div className="flex items-center gap-5">
-             <button onClick={toggleTheme} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <div className="flex items-center gap-3 md:gap-5 shrink-0">
+             {!isSearchOpen && (
+                <button onMouseDown={(e) => { e.preventDefault(); setIsSearchOpen(true); }} className="md:hidden text-slate-500 hover:text-slate-800 p-2">
+                  <Search size={20} />
+                </button>
+             )}
+             <button onClick={toggleTheme} className="hidden sm:block text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2">
                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
              </button>
              <div className="relative">
@@ -208,8 +235,8 @@ export default function MainLayout({ navItems, bottomNav }) {
         </header>
 
         {/* Page Scrollable Content */}
-        <div className="flex-1 overflow-y-auto w-full pt-8 pb-20 px-6 md:px-10">
-           <div className="max-w-[1200px] h-full mx-auto">
+        <div className="flex-1 overflow-y-auto w-full pt-6 pb-20 px-4 md:px-10">
+           <div className="max-w-[1200px] h-full mx-auto w-full">
               <Outlet />
            </div>
         </div>

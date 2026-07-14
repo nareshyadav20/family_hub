@@ -79,7 +79,7 @@ export default function Dashboard() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Family Members', value: '247', icon: Users, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' },
           { label: 'My Photos', value: '384', icon: Image, color: 'text-violet-600 bg-violet-50 dark:bg-violet-500/10' },

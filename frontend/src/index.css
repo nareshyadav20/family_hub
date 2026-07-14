@@ -62,3 +62,64 @@
 .glassmorphism {
   @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 shadow-soft;
 }
+
+@media (max-width: 767px) {
+  .responsive-table blockquote, 
+  .responsive-table table, 
+  .responsive-table thead, 
+  .responsive-table tbody, 
+  .responsive-table th, 
+  .responsive-table td, 
+  .responsive-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  /* Hide table headers on mobile */
+  .responsive-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .responsive-table tr {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    background-color: var(--card);
+    padding: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .responsive-table td {
+    /* Behave like a "row" */
+    border: none;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    padding-left: 45% !important;
+    text-align: right;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .responsive-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .responsive-table td:before {
+    /* Now like a table header */
+    position: absolute;
+    left: 1rem;
+    width: 40%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    content: attr(data-label);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+}

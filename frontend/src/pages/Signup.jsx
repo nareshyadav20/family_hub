@@ -153,13 +153,13 @@ export default function Signup() {
   );
 
   const renderForm = (roleDef) => (
-    <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-stretch pt-4 animate-in slide-in-from-bottom-8 duration-500 h-full">
-      <div className="flex-1 bg-white p-10 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-full">
+    <div className="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-4 md:gap-8 items-stretch pt-4 animate-in slide-in-from-bottom-8 duration-500 h-full">
+      <div className="flex-1 bg-white p-6 md:p-10 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-full">
         <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">Register as {roleDef.title}</h1>
         <p className="text-slate-500 mb-8">{roleDef.subtitle}</p>
 
         <form onSubmit={(e) => handleSignup(e, roleDef.id)} className="space-y-5 flex-1 flex flex-col">
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
              <div className="space-y-1.5">
                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Full Name <span className="text-red-500">*</span></label>
                <input type="text" name="fullName" placeholder="Enter full name" value={formData.fullName} onChange={handleInputChange} className="w-full px-4 py-3 rounded-xl bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 border border-slate-200 focus:border-blue-500 transition-all font-medium text-slate-900 text-sm" required />
@@ -170,7 +170,7 @@ export default function Signup() {
              </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
              <div className="space-y-1.5 relative">
                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Mobile Number <span className="text-red-500">*</span></label>
                <div className="flex">
@@ -190,7 +190,7 @@ export default function Signup() {
              )}
           </div>
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
              <div className="space-y-1.5 relative">
                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Create Password <span className="text-red-500">*</span></label>
                <div className="relative">
@@ -223,7 +223,7 @@ export default function Signup() {
         </form>
       </div>
 
-      <div className={`w-80 p-8 rounded-[2rem] flex flex-col justify-start border border-white relative overflow-hidden ${roleDef.panelBg} shrink-0`}>
+      <div className={`w-full md:w-80 p-8 rounded-[2rem] flex flex-col justify-start border border-white relative overflow-hidden ${roleDef.panelBg} shrink-0`}>
          <div className="flex items-center gap-3 mb-8 relative z-10">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm ${roleDef.iconBg}`}>
                {roleDef.icon}

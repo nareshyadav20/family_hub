@@ -201,16 +201,16 @@ export default function Members() {
 
       {/* Main Enterprise Data Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden overflow-x-auto">
-         <table className="w-full text-sm text-left whitespace-nowrap">
+         <table className="w-full text-sm text-left whitespace-nowrap responsive-table">
             <thead className="text-xs text-slate-500 font-bold uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                <tr>
-                  <th className="px-4 py-4 w-12 text-center">
+                  <th className="px-4 py-4 w-12 text-center hidden md:table-cell">
                     <input type="checkbox" onChange={(e) => setSelectedRows(e.target.checked ? liveMembers.map(m=>m.id) : [])} checked={selectedRows.length > 0 && selectedRows.length === liveMembers.length} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                   </th>
                   <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Member</th>
-                  <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Contact</th>
+                  <th className="px-4 py-4 cursor-pointer hover:text-slate-800 hidden md:table-cell">Contact</th>
                   <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Relationship</th>
-                  <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Branch</th>
+                  <th className="px-4 py-4 cursor-pointer hover:text-slate-800 text-right md:text-left">Branch</th>
                   <th className="px-4 py-4 cursor-pointer text-center hover:text-slate-800">Gen</th>
                   <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Role</th>
                   <th className="px-4 py-4 cursor-pointer hover:text-slate-800">Status</th>
@@ -223,60 +223,62 @@ export default function Members() {
                {isLoading ? (
                   <tr><td colSpan="11" className="text-center py-8 text-slate-500 font-bold">Loading Directory...</td></tr>
                ) : liveMembers.map((m) => (
-                 <tr key={m.id} className="hover:bg-blue-50/40 dark:hover:bg-slate-800/40 transition-colors group">
-                    <td className="px-4 py-4 text-center">
+                 <tr key={m.id} className="hover:bg-blue-50/40 dark:hover:bg-slate-800/40 transition-colors group relative">
+                    <td className="px-4 py-4 text-center hidden md:table-cell w-12">
                        <input type="checkbox" checked={selectedRows.includes(m.id)} onChange={() => setSelectedRows(prev => prev.includes(m.id) ? prev.filter(id => id !== m.id) : [...prev, m.id])} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                     </td>
-                    <td className="px-4 py-4 cursor-pointer" onClick={() => handleRowClick(m)}>
-                       <div className="flex items-center gap-3">
+                    <td data-label="Member" className="px-4 py-4 cursor-pointer md:w-auto" onClick={() => handleRowClick(m)}>
+                       <div className="flex items-center gap-3 justify-end md:justify-start">
                           <div className="w-10 h-10 rounded-full bg-indigo-100 border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center text-indigo-700 font-bold">
                              {m.avatar ? <img src={m.avatar} alt="Profile" className="w-full h-full object-cover" /> : m.name.charAt(0)}
                           </div>
-                          <div>
+                          <div className="text-right md:text-left">
                              <div className="font-bold text-slate-900 dark:text-white text-sm">{m.name}</div>
                              <div className="text-[11px] font-mono text-slate-500 mt-0.5">{m.memId}</div>
                           </div>
                        </div>
                     </td>
-                    <td className="px-4 py-4">
-                       <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><MessageCircle size={12}/>{m.phone}</div>
-                       <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">{m.email ? <><Mail size={12}/> {m.email}</> : <span className="text-slate-400 italic">No email</span>}</div>
+                    <td data-label="Contact" className="px-4 py-4 w-full md:w-auto">
+                       <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 justify-end md:justify-start"><MessageCircle size={12}/>{m.phone}</div>
+                       <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 justify-end md:justify-start">{m.email ? <><Mail size={12}/> {m.email}</> : <span className="text-slate-400 italic">No email</span>}</div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td data-label="Relationship" className="px-4 py-4 w-full md:w-auto">
                        <span className="font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-xs">{m.relation}</span>
                     </td>
-                    <td className="px-4 py-4 text-slate-600 text-sm font-medium">{m.branch}</td>
-                    <td className="px-4 py-4 text-center text-slate-500 font-mono font-bold text-xs bg-slate-50/50">{m.gen}</td>
-                    <td className="px-4 py-4">
+                    <td data-label="Branch" className="px-4 py-4 w-full md:w-auto text-slate-600 text-sm font-medium">{m.branch}</td>
+                    <td data-label="Generation" className="px-4 py-4 w-full md:w-auto md:text-center text-slate-500 font-mono font-bold text-xs"><span className="bg-slate-50/50 px-2 rounded">{m.gen}</span></td>
+                    <td data-label="Role" className="px-4 py-4 w-full md:w-auto">
                        <span className={`text-xs ${getRoleBadge(m.role)}`}>{m.role.replace('_', ' ')}</span>
                     </td>
-                    <td className="px-4 py-4">
-                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusBadge(m.status)}`}>
+                    <td data-label="Status" className="px-4 py-4 w-full md:w-auto">
+                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold border inline-block ${getStatusBadge(m.status)}`}>
                          {m.status === 'Active' ? '🟢 ' : m.status === 'Invitation Sent' ? '🟡 ' : ''}{m.status}
                        </span>
                     </td>
-                    <td className="px-4 py-4 w-40">
-                       <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center gap-2">
-                             <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <td data-label="Profile" className="px-4 py-4 w-full md:w-40">
+                       <div className="flex flex-col gap-1.5 items-end md:items-start w-full relative">
+                          <div className="flex items-center gap-2 w-full md:w-auto">
+                             <div className="w-full md:w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex-1 md:flex-none">
                                 <div className={`h-full rounded-full ${m.progress === 100 ? 'bg-emerald-500' : m.progress >= 50 ? 'bg-blue-500' : 'bg-amber-500'}`} style={{ width: `${m.progress}%` }}></div>
                              </div>
-                             <span className={`text-[11px] font-bold w-9 ${m.progress === 100 ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'}`}>{m.progress}%</span>
+                             <span className={`text-[11px] font-bold w-9 text-right md:text-left ${m.progress === 100 ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'}`}>{m.progress}%</span>
                           </div>
                           <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">{m.currentStep}</span>
                        </div>
                     </td>
-                    <td className="px-4 py-4 text-xs text-slate-500 font-medium">{m.lastActive}</td>
-                    <td className="px-4 py-4 text-center">
-                       <button className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors mr-1" title="View Profile" onClick={() => handleRowClick(m)}>
-                          <Search size={16} />
-                       </button>
-                       <button className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors mr-1" title="Edit">
-                          <Edit2 size={16} />
-                       </button>
-                       <button className="p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" title="More actions">
-                          <MoreHorizontal size={16} />
-                       </button>
+                    <td data-label="Last Active" className="px-4 py-4 w-full md:w-auto text-xs text-slate-500 font-medium">{m.lastActive}</td>
+                    <td data-label="Actions" className="px-4 py-4 w-full md:w-auto md:text-center mt-2 md:mt-0">
+                       <div className="flex justify-end md:justify-center">
+                          <button className="p-2 md:p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors mr-1" title="View Profile" onClick={() => handleRowClick(m)}>
+                             <Search size={16} />
+                          </button>
+                          <button className="p-2 md:p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors mr-1" title="Edit">
+                             <Edit2 size={16} />
+                          </button>
+                          <button className="p-2 md:p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" title="More actions">
+                             <MoreHorizontal size={16} />
+                          </button>
+                       </div>
                     </td>
                  </tr>
                ))}
