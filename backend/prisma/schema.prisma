@@ -50,6 +50,9 @@ model User {
   
   avatar          String?
   isActive        Boolean  @default(true)
+  profileCompletion Int @default(25)
+  currentProfileStep String @default("Basic Information")
+  isProfileCompleted Boolean @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -64,6 +67,9 @@ model User {
   documents       Document[]
   announcements   Announcement[]
   polls           Poll[] @relation("UserPolls")
+  
+  groupMembers    GroupMember[]
+  groupMessages   GroupMessage[]
 
   @@map("users")
 }
@@ -258,4 +264,66 @@ model Notification {
   createdAt   DateTime @default(now())
   
   @@map("notifications")
+}
+
+model Group {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  category        String   @default("Immediate Family")
+  coverImage      String?
+  icon            String?
+  privacy         String   @default("Private")
+  status          String   @default("Active")
+  
+  allowInvites    Boolean  @default(true)
+  allowPosts      Boolean  @default(true)
+  allowFiles      Boolean  @default(true)
+  allowPhotos     Boolean  @default(true)
+  allowVideos     Boolean  @default(true)
+  allowPolls      Boolean  @default(true)
+  welcomeMessage  String?
+  
+  ownerId         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  members         GroupMember[]
+  messages        GroupMessage[]
+  
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   @default("Member") // 'Admin' or 'Member'
+  status    String   @default("Active") // 'Active', 'Muted'
+  isMuted   Boolean  @default(false)
+  
+  joinedAt  DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  type      String   @default("Text") // Text, Image, Video, File
+  content   String
+  fileUrl   String?
+  fileName  String?
+  
+  createdAt DateTime @default(now())
+
+  @@map("group_messages")
 }

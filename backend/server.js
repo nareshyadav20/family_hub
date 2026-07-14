@@ -31,6 +31,7 @@ const dashboardRouter = require('./routes/dashboard');
 const announcementsRouter = require('./routes/announcements');
 const pollsRouter = require('./routes/polls');
 const notificationsRouter = require('./routes/notifications');
+const groupsRouter = require('./routes/groups');
 
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
@@ -39,6 +40,7 @@ app.use('/api/v1/member/announcements', announcementsRouter);
 app.use('/api/v1/admin/polls', pollsRouter);
 app.use('/api/v1/member/polls', pollsRouter);
 app.use('/api/v1/notifications', notificationsRouter);
+app.use('/api/v1/groups', groupsRouter);
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
@@ -47,10 +49,10 @@ io.on('connection', (socket) => {
 
 // Signup Endpoint
 app.post('/api/v1/auth/signup', async (req, res) => {
-  const { firstName, lastName, email, password, role } = req.body;
+  const { firstName, lastName, email, password, phone, role } = req.body;
   
-  if (!email || !password || !firstName || !lastName) {
-    return res.status(400).json({ error: 'All fields are required.' });
+  if (!email || !password || !firstName) {
+    return res.status(400).json({ error: 'Email, First Name, and Password are required.' });
   }
 
   try {
@@ -65,10 +67,12 @@ app.post('/api/v1/auth/signup', async (req, res) => {
     const user = await prisma.user.create({
       data: {
         firstName,
-        lastName,
+        lastName: lastName || '',
         email,
+        phone: phone || null,
         password: hashedPassword,
         role: userRole,
+        status: 'ACTIVE'
       },
     });
 
@@ -77,15 +81,28 @@ app.post('/api/v1/auth/signup', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
+    const refreshToken = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.status(201).json({
+      success: true,
       token,
+      refreshToken,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        memberId: user.memberId || 'FH-0000',
+        familyId: user.familyId || 'FAM-0000',
+        name: `${user.firstName} ${user.lastName}`.trim(),
         email: user.email,
+        mobile: user.phone || user.mobile,
         role: user.role,
+        status: user.status || 'ACTIVE',
+        profileCompletion: user.profileCompletion || 25,
+        currentProfileStep: user.currentProfileStep || 'Basic Information',
+        isProfileCompleted: user.isProfileCompleted || false
       }
     });
 
@@ -120,14 +137,28 @@ app.post('/api/v1/auth/login', async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
+    const refreshToken = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     res.json({
+      success: true,
       token,
+      refreshToken,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        memberId: user.memberId || 'FH-0000',
+        familyId: user.familyId || 'FAM-0000',
+        name: `${user.firstName} ${user.lastName}`.trim(),
         email: user.email,
+        mobile: user.phone || user.mobile,
         role: user.role,
+        status: user.status || 'ACTIVE',
+        profileCompletion: user.profileCompletion || 25,
+        currentProfileStep: user.currentProfileStep || 'Basic Information',
+        isProfileCompleted: user.isProfileCompleted || false
       }
     });
 
@@ -136,7 +167,7 @@ app.post('/api/v1/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// Fetch All Members Endpoint (Admin)
+// Fetch All Members Endpoint (Admin Legacy)
 app.get('/api/v1/admin/members', async (req, res) => {
   try {
      const members = await prisma.user.findMany({
@@ -150,6 +181,75 @@ app.get('/api/v1/admin/members', async (req, res) => {
   } catch (err) {
      console.error('Fetch members error:', err);
      res.status(500).json({ error: 'Failed to fetch members' });
+  }
+});
+
+// Shared Unified API
+// GET /api/v1/members
+app.get('/api/v1/members', async (req, res) => {
+  try {
+     const token = req.headers.authorization?.split(' ')[1];
+     let role = 'MEMBER';
+     if (token) {
+        try {
+           const decoded = jwt.verify(token, process.env.JWT_SECRET);
+           role = decoded.role || 'MEMBER';
+        } catch(e) {}
+     }
+
+     let users = [];
+
+     if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+         users = await prisma.user.findMany({
+            include: { invitation: true, memberProfile: true },
+            orderBy: { createdAt: 'desc' }
+         });
+     } else {
+         users = await prisma.user.findMany({
+            where: { status: 'ACTIVE' },
+            select: { id: true, memberId: true, firstName: true, lastName: true, email: true, phone: true, role: true, joinedDate: true, avatar: true },
+            orderBy: { firstName: 'asc' }
+         });
+     }
+     res.json(users);
+  } catch (error) {
+     res.status(500).json({ error: 'Failed to fetch members' });
+  }
+});
+
+// Shared Unified API for Profile
+// GET /api/v1/profile
+app.get('/api/v1/profile', async (req, res) => {
+  try {
+     const token = req.headers.authorization?.split(' ')[1];
+     if (!token) return res.status(401).json({ error: 'Unauthorized' });
+     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+     const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        include: { memberProfile: true }
+     });
+     if (!user) return res.status(404).json({ error: 'User not found' });
+     
+     res.json({
+        id: user.id,
+        memberId: user.memberId || 'FH-0000',
+        familyId: user.familyId || 'FAM-0000',
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        mobile: user.phone || user.mobile,
+        role: user.role,
+        status: user.status || 'ACTIVE',
+        profileCompletion: user.profileCompletion || 25,
+        currentProfileStep: user.currentProfileStep || 'Basic Information',
+        isProfileCompleted: user.isProfileCompleted || false,
+        avatar: user.avatar,
+        profile: user.memberProfile
+     });
+  } catch (error) {
+     res.status(500).json({ error: 'Profile fetch failed' });
   }
 });
 
