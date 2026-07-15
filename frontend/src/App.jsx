@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+import api from './services/api';
+import { globalLogout } from './utils/auth';
 
 /* --- ADMIN IMPORTS --- */
 import AdminMainLayout from './layouts/MainLayout';
@@ -112,57 +115,45 @@ function ComingSoon({ title }) {
   );
 }
 
-function RedirectExternal({ to }) {
-  React.useEffect(() => {
-    window.location.replace(to);
-  }, [to]);
-  return null;
-}
 
-function LogoutAndRedirect() {
-  React.useEffect(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.replace('http://localhost:5174/login?join=true');
-  }, []);
-  return null;
-}
 
 function ProtectedAdminRoute({ children }) {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
+  const params = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('token') || params.get('token');
+  const userStr = localStorage.getItem('user') || params.get('user');
   let isValid = false;
   let role = null;
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
-      role = user?.role;
+      role = user?.role?.toUpperCase();
       if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
         isValid = true;
       }
     } catch (e) {}
   }
-  if (role === 'MEMBER' && !isValid) return <RedirectExternal to="http://localhost:5173/member/dashboard" />;
-  if (!isValid) return <RedirectExternal to="http://localhost:5174/login?join=true" />;
+  if (role === 'MEMBER' && !isValid) return <Navigate to="/member/dashboard" replace />;
+  if (!isValid) return <Navigate to="/login" replace />;
   return children;
 }
 
 function ProtectedMemberRoute({ children }) {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
+  const params = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('token') || params.get('token');
+  const userStr = localStorage.getItem('user') || params.get('user');
   let isValid = false;
   let role = null;
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
-      role = user?.role;
+      role = user?.role?.toUpperCase();
       if (role === 'MEMBER') {
         isValid = true;
       }
     } catch (e) {}
   }
-  if (!isValid && (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')) return <RedirectExternal to="http://localhost:5173/admin/dashboard" />;
-  if (!isValid) return <RedirectExternal to="http://localhost:5174/login?join=true" />;
+  if (!isValid && (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')) return <Navigate to="/admin/dashboard" replace />;
+  if (!isValid) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -174,19 +165,17 @@ function PublicRoute({ children }) {
 
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
-import { useEffect } from 'react';
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
+window.__queryClient = queryClient;
 
 function AppLayer() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          <Route path="/" element={<RedirectExternal to="http://localhost:5174/login?join=true" />} />
-          <Route path="/login" element={<LogoutAndRedirect />} />
-          <Route path="/signup" element={<RedirectExternal to="http://localhost:5174/login?join=true" />} />
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/member" element={<Navigate to="/member/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/member/login" element={<Navigate to="/login" replace />} />
 
@@ -244,23 +233,52 @@ function AppLayer() {
 }
 
 function App() {
+  // Execute synchronous extraction to prevent child components from firing Bearer Null 401 traps
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const userStr = params.get('user');
+  if (token && userStr) {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', userStr);
+  }
+
   useEffect(() => {
-    // Intercept auth tokens passed from the website portal
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    const userStr = params.get('user');
+    // Interceptor to handle session expiration (401 Unauthorized) globally
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          globalLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+    const interceptor2 = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          globalLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
     if (token && userStr) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', userStr);
       window.history.replaceState(null, '', window.location.pathname);
     }
 
     const socketURL = (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com');
     const socket = io(socketURL);
+    window.__activeSocket = socket;
     socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
     socket.on('member.invited', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
     socket.on('member.updated', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
-    return () => socket.disconnect();
+    return () => {
+        socket.disconnect();
+        window.__activeSocket = null;
+        axios.interceptors.response.eject(interceptor);
+        api.interceptors.response.eject(interceptor2);
+    };
   }, []);
 
   return (

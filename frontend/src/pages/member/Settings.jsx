@@ -9,6 +9,7 @@ import {
   Mail, Save, Key, AlertCircle, LogOut, CheckCircle2, Moon, Sun, Monitor, X
 } from 'lucide-react';
 import { io } from 'socket.io-client';
+import { globalLogout } from '../../utils/auth';
 
 const API_URL =  `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api`;
 const socket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
@@ -435,7 +436,7 @@ export default function Settings() {
                   <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-slate-900">Active Devices</h3>
-                      <button className="text-sm font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">
+                      <button onClick={() => globalLogout()} className="text-sm font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">
                         Logout All Devices
                       </button>
                     </div>

@@ -30,7 +30,7 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'http://localhost:5174/login?join=true';
+    window.location.href = 'http://localhost:5173/login';
   };
 
   const getDashboardUrl = () => {
@@ -127,9 +127,9 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <Link to="/login?join=true" className="btn btn-primary" style={{ padding: '10px 20px' }}>
+            <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ padding: '10px 20px', textDecoration: 'none' }}>
               <UserPlus size={16} /> Join Family
-            </Link>
+            </a>
           )}
           <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'none', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4 }} className="mobile-menu-btn">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -151,7 +151,7 @@ export default function Navbar() {
             </Link>
           ))}
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <Link to="/login?join=true" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px' }}>Join Family</Link>
+            <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px', textDecoration: 'none' }}>Join Family</a>
           </div>
         </div>
       )}

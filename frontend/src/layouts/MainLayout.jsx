@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn';
 import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import { globalLogout } from '../utils/auth';
 
 export default function MainLayout({ navItems, bottomNav }) {
   const location = useLocation();
@@ -58,9 +59,7 @@ export default function MainLayout({ navItems, bottomNav }) {
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const handleLogout = () => {
-     localStorage.clear();
-     sessionStorage.clear();
-     navigate('/login');
+     globalLogout();
   };
 
   const handleGlobalSearch = (e) => {

@@ -28,7 +28,7 @@ export default function Dashboard() {
   const token = localStorage.getItem('token');
 
   const copyInviteLink = () => {
-    navigator.clipboard.writeText("http://localhost:5174/invite");
+    navigator.clipboard.writeText("http://localhost:5173/login?mode=signup");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

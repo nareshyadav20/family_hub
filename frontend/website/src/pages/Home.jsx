@@ -68,9 +68,9 @@ export default function Home() {
                 Preserve memories, celebrate milestones, and keep every generation connected through one beautiful, secure platform.
               </p>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 48 }}>
-                <Link to="/login?join=true" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px' }}>
+                <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px', textDecoration: 'none' }}>
                   Join Your Family <ArrowRight size={18} />
-                </Link>
+                </a>
                 <a href="#features" className="btn btn-outline" style={{ fontSize: 16, padding: '14px 32px' }}>
                   <Play size={16} /> See How It Works
                 </a>
@@ -200,7 +200,7 @@ export default function Home() {
               </p>
               <div style={{ display: 'flex', gap: 16 }}>
                 <Link to="/gallery" className="btn btn-primary">Explore Gallery <ArrowRight size={16} /></Link>
-                <Link to="/login" className="btn btn-ghost">Upload Photos</Link>
+                <a href="http://localhost:5173/login" className="btn btn-ghost" style={{ textDecoration: 'none' }}>Upload Photos</a>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -299,9 +299,9 @@ export default function Home() {
             Join thousands of families already preserving their legacy on FamilyHub OS.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/login?join=true" className="btn btn-white" style={{ fontSize: 16, padding: '16px 36px' }}>
+            <a href="http://localhost:5173/login?mode=signup" className="btn btn-white" style={{ fontSize: 16, padding: '16px 36px', textDecoration: 'none' }}>
               Get Started Free <ArrowRight size={18} />
-            </Link>
+            </a>
             <Link to="/about" className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', fontSize: 16, padding: '16px 36px' }}>
               Learn More
             </Link>

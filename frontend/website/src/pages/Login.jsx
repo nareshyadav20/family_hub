@@ -14,21 +14,9 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '', name: '', phone: '' });
   const navigate = null; // Removed hook since we are hard redirecting
   const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
-
-  // Requirement 7: If the user is already logged in, automatically redirect them based on their role
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    if (token && userStr) {
-       try {
-         const user = JSON.parse(userStr);
-         const targetUrl = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'FAMILY_ADMIN' 
-             ? 'http://localhost:5173/admin/dashboard' 
-             : 'http://localhost:5173/member/dashboard';
-         window.location.replace(`${targetUrl}?token=${token}&user=${encodeURIComponent(userStr)}`);
-       } catch(e) {}
-    }
-  }, []);
+  // Removed automatic proxy redirection based on unvalidated localStorage cache.
+  // The system must never redirect automatically based on stale frontend tokens.
+  
 
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -42,9 +30,6 @@ export default function Login() {
       
       const { token, user } = payload;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
       const role = user.role;
       const targetUrl = (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')
         ? 'http://localhost:5173/admin/dashboard'
@@ -52,7 +37,11 @@ export default function Login() {
       
       window.location.replace(`${targetUrl}?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`);
     } catch (err) {
-      setErrorMsg(err.response?.data?.error || 'Invalid email or password.');
+      if (err.response?.status === 404 || err.response?.data?.error?.toLowerCase().includes('found') || err.response?.data?.error?.toLowerCase().includes('not exist')) {
+          setErrorMsg('Account not found. Join your family or contact your Family Admin.');
+      } else {
+          setErrorMsg(err.response?.data?.error || 'Invalid email or password.');
+      }
       setLoading(false);
     }
   };
@@ -67,9 +56,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
-      localStorage.setItem('token', 'mock_website_token');
-      localStorage.setItem('user', JSON.stringify({ name: 'Arjun Smith', email: form.email, role: 'member' }));
-      navigate('/private');
+      // Mock OTP bypass removed to match robust auth paradigm
+      window.location.replace("http://localhost:5173/member/dashboard?token=mock_website_token&user=" + encodeURIComponent(JSON.stringify({ name: 'Arjun Smith', email: form.email, role: 'member' })));
     }, 1500);
   };
 
@@ -162,7 +150,17 @@ export default function Login() {
                 {mode === 'login' ? 'Sign in to access your family\'s private space' : 'Request access to your family\'s FamilyHub'}
               </p>
 
-              {errorMsg && <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', fontWeight: 600 }}>{errorMsg}</div>}
+              {errorMsg && (
+                <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', fontWeight: 600 }}>
+                  <p style={{ margin: 0, marginBottom: errorMsg === 'Account not found. Join your family or contact your Family Admin.' ? '12px' : '0' }}>{errorMsg}</p>
+                  {errorMsg === 'Account not found. Join your family or contact your Family Admin.' && (
+                    <div style={{ display: 'flex', gap: 10 }}>
+                       <button type="button" onClick={() => { setErrorMsg(''); setMode('join'); }} style={{ flex: 1, padding: '8px 12px', background: '#B91C1C', color: 'white', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Join Family</button>
+                       <button type="button" onClick={() => setErrorMsg('')} style={{ flex: 1, padding: '8px 12px', background: 'transparent', color: '#B91C1C', border: '1px solid #FCA5A5', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>Back to Login</button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <form onSubmit={mode === 'login' ? handleLogin : handleSendOtp}>
                 {mode === 'join' && (

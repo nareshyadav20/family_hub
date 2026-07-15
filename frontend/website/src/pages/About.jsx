@@ -109,7 +109,7 @@ export default function About() {
         <div className="container">
           <h2 style={{ fontSize: 44, fontWeight: 900, color: 'white', marginBottom: 20 }}>Be Part of Our Story</h2>
           <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.7)', maxWidth: 480, margin: '0 auto 40px', lineHeight: 1.8 }}>Join the family, add your chapter, and help write the next generation of our legacy.</p>
-          <Link to="/login?join=true" className="btn btn-primary" style={{ fontSize: 16, padding: '16px 36px' }}>Join the Family <ArrowRight size={18} /></Link>
+          <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ fontSize: 16, padding: '16px 36px', textDecoration: 'none' }}>Join the Family <ArrowRight size={18} /></a>
         </div>
       </section>
     </div>

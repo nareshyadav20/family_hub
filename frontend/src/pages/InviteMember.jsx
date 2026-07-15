@@ -57,7 +57,7 @@ export default function InviteMember() {
         toast.success('Invitation successfully processed');
         setInviteResult({
           memberId: data.user?.memberId || 'MEM-000245',
-          link: data.inviteLink || `http://localhost:5174/invite?token=mock_123`,
+          link: data.inviteLink || `http://localhost:5173/login?mode=signup&invite=${Date.now()}`,
           status: 'Pending Acceptance'
         });
         setShowSuccessDialog(true);

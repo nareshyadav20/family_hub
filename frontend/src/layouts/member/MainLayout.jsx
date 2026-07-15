@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn';
 import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import { globalLogout } from '../../utils/auth';
 
 export default function MainLayout({ navItems, bottomNav }) {
   const location = useLocation();
@@ -58,9 +59,7 @@ export default function MainLayout({ navItems, bottomNav }) {
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const handleLogout = () => {
-     localStorage.clear();
-     sessionStorage.clear();
-     navigate('/login');
+     globalLogout();
   };
 
   const handleGlobalSearch = (e) => {
@@ -129,7 +128,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                <Link 
                  key={idx} 
                  to={item.href} 
-                 onClick={(e) => { if (item.title === 'Sign Out') { e.preventDefault(); localStorage.clear(); sessionStorage.clear(); window.location.href = '/member/login'; } }}
+                 onClick={(e) => { if (item.title === 'Sign Out') { e.preventDefault(); globalLogout(); } }}
                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[14px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                >
                  {React.cloneElement(item.icon, { className: "opacity-60" })}
