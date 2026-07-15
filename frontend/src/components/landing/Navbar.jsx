@@ -12,9 +12,6 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,20 +20,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-  };
-
-  const getDashboardUrl = () => {
-    if (!user) return '/login';
-    const role = user.role || 'MEMBER';
-    return (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') 
-       ? '/admin/dashboard' 
-       : '/member/dashboard';
-  };
 
   return (
     <nav style={{
@@ -84,50 +67,12 @@ export default function Navbar() {
 
         {/* CTA */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {user ? (
-            <div style={{ position: 'relative' }}>
-              <button onClick={() => setShowUserMenu(!showUserMenu)} style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 16px', borderRadius: 50, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-                color: 'white', fontWeight: 600, fontSize: 14,
-              }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <User size={14} />
-                </div>
-                {user.name || 'Member'}
-                <ChevronDown size={14} />
-              </button>
-              {showUserMenu && (
-                <div style={{
-                  position: 'absolute', right: 0, top: '110%', minWidth: 200,
-                  background: 'white', borderRadius: 16, border: '1px solid #E5E7EB',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.12)', padding: 8, zIndex: 100,
-                }}>
-                  <Link to={getDashboardUrl()} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
-                    onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                    <Home size={16} color="#4F46E5" /> My Dashboard
-                  </Link>
-                  <Link to={`${getDashboardUrl()}/gallery`} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
-                    onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                    <Image size={16} color="#4F46E5" /> Private Gallery
-                  </Link>
-                  <div style={{ height: 1, background: '#E5E7EB', margin: '8px 0' }} />
-                  <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 500, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
-                    onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                    <LogOut size={16} /> Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link to="/login?mode=signup" className="btn btn-primary" style={{ padding: '10px 20px', textDecoration: 'none' }}>
-              <UserPlus size={16} /> Join Family
-            </Link>
-          )}
+          <Link to="/login" className="btn btn-ghost" style={{ padding: '10px 20px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <LogIn size={16} /> Sign In
+          </Link>
+          <Link to="/login?mode=signup" className="btn btn-primary" style={{ padding: '10px 20px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <UserPlus size={16} /> Join Family
+          </Link>
           <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'none', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4 }} className="mobile-menu-btn">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -148,6 +93,7 @@ export default function Navbar() {
             </a>
           ))}
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <Link to="/login" className="btn btn-ghost" style={{ flex: 1, justifyContent: 'center', padding: '12px', textDecoration: 'none' }}>Sign In</Link>
             <Link to="/login?mode=signup" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px', textDecoration: 'none' }}>Join Family</Link>
           </div>
         </div>
