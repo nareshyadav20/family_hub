@@ -35,6 +35,7 @@ const notificationsRouter = require('./routes/notifications');
 const groupsRouter = require('./routes/groups');
 const messagesRouter = require('./routes/messages');
 const galleryRouter = require('./routes/gallery');
+const familyHistoryRouter = require('./routes/familyHistory');
 
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
@@ -47,6 +48,7 @@ app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/groups', groupsRouter);
 app.use('/api/v1/messages', messagesRouter);
 app.use('/api/v1/gallery', galleryRouter);
+app.use('/api/v1/family-history', familyHistoryRouter);
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);

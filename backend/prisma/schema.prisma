@@ -72,6 +72,7 @@ model User {
   groupMessages   GroupMessage[]
   sentMessages    Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+  familyHistories FamilyHistory[]
 
   @@map("users")
 }
@@ -342,4 +343,26 @@ model Message {
   createdAt   DateTime @default(now())
 
   @@map("messages")
+}
+
+model FamilyHistory {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?  @db.Text
+  category      String
+  eventDate     DateTime
+  location      String?
+  visibility    String   @default("Family Only")
+  status        String   @default("Published")
+  thumbnailUrl  String?
+  
+  addedById     String
+  addedBy       User     @relation(fields: [addedById], references: [id])
+  
+  relatedMembers Json?    
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("family_history")
 }
