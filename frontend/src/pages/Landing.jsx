@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Image, Calendar, BookOpen, Star, Play, ChevronDown, Heart, Globe, Shield } from 'lucide-react';
 import axios from 'axios';
+import Navbar from '../components/landing/Navbar';
+import Footer from '../components/landing/Footer';
+import '../landing.css';
 const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 const features = [
@@ -46,6 +49,7 @@ export default function Home() {
 
   return (
     <div style={{ paddingTop: 72 }}>
+      <Navbar />
       {/* === HERO === */}
       <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 40%, #ECFDF5 100%)' }}>
         {/* Decorative blobs */}
@@ -68,9 +72,9 @@ export default function Home() {
                 Preserve memories, celebrate milestones, and keep every generation connected through one beautiful, secure platform.
               </p>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 48 }}>
-                <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px', textDecoration: 'none' }}>
+                <Link to="/login?mode=signup" className="btn btn-primary" style={{ fontSize: 16, padding: '14px 32px', textDecoration: 'none' }}>
                   Join Your Family <ArrowRight size={18} />
-                </a>
+                </Link>
                 <a href="#features" className="btn btn-outline" style={{ fontSize: 16, padding: '14px 32px' }}>
                   <Play size={16} /> See How It Works
                 </a>
@@ -199,8 +203,8 @@ export default function Home() {
                 From first birthdays to golden anniversaries, every family photo tells a story worth preserving for generations to come.
               </p>
               <div style={{ display: 'flex', gap: 16 }}>
-                <Link to="/gallery" className="btn btn-primary">Explore Gallery <ArrowRight size={16} /></Link>
-                <a href="http://localhost:5173/login" className="btn btn-ghost" style={{ textDecoration: 'none' }}>Upload Photos</a>
+                <Link to="/login" className="btn btn-primary">Explore Gallery <ArrowRight size={16} /></Link>
+                <Link to="/login" className="btn btn-ghost" style={{ textDecoration: 'none' }}>Upload Photos</Link>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -232,7 +236,7 @@ export default function Home() {
               <div className="badge" style={{ background: 'rgba(79,70,229,0.3)', color: '#A5B4FC', marginBottom: 16 }}>Upcoming Events</div>
               <h2 style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: 1.2 }}>Never Miss a<br />Family Milestone</h2>
             </div>
-            <Link to="/events" style={{ color: '#A5B4FC', fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+            <Link to="/login" style={{ color: '#A5B4FC', fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
               View All Events <ArrowRight size={16} />
             </Link>
           </div>
@@ -263,7 +267,7 @@ export default function Home() {
       </section>
 
       {/* === TESTIMONIALS === */}
-      <section style={{ padding: '80px 0', background: 'white' }}>
+      <section id="testimonials" style={{ padding: '80px 0', background: 'white' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
             <div className="badge badge-primary" style={{ marginBottom: 16, display: 'inline-flex', margin: '0 auto 16px' }}>Family Stories</div>
@@ -299,16 +303,17 @@ export default function Home() {
             Join thousands of families already preserving their legacy on FamilyHub OS.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="http://localhost:5173/login?mode=signup" className="btn btn-white" style={{ fontSize: 16, padding: '16px 36px', textDecoration: 'none' }}>
+            <Link to="/login?mode=signup" className="btn btn-white" style={{ fontSize: 16, padding: '16px 36px', textDecoration: 'none' }}>
               Get Started Free <ArrowRight size={18} />
-            </a>
-            <Link to="/about" className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', fontSize: 16, padding: '16px 36px' }}>
-              Learn More
             </Link>
+            <a href="#features" className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', fontSize: 16, padding: '16px 36px' }}>
+              Learn More
+            </a>
           </div>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 24 }}>Free forever for families • No credit card required</p>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

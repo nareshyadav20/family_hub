@@ -51,7 +51,7 @@ import MemberFamilyGroups from './pages/member/FamilyGroups';
 
 /* --- SHARED IMPORTS --- */
 import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Landing from './pages/Landing';
 
 import {
   LayoutDashboard, Users, UserPlus, GitFork, CalendarDays, Calendar as CalIcon,
@@ -173,7 +173,7 @@ function AppLayer() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />

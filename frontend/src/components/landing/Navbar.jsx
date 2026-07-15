@@ -4,12 +4,9 @@ import { Menu, X, Home, Info, GitFork, Image, Calendar, BookOpen, Phone, LogIn, 
 
 const navLinks = [
   { label: 'Home', href: '/', icon: Home },
-  { label: 'About', href: '/about', icon: Info },
-  { label: 'Family Tree', href: '/tree', icon: GitFork },
-  { label: 'Gallery', href: '/gallery', icon: Image },
-  { label: 'Events', href: '/events', icon: Calendar },
-  { label: 'Stories', href: '/stories', icon: BookOpen },
-  { label: 'Contact', href: '/contact', icon: Phone },
+  { label: 'Features', href: '#features', icon: Info },
+  { label: 'Testimonials', href: '#testimonials', icon: BookOpen },
+  { label: 'Contact', href: '#contact', icon: Phone },
 ];
 
 export default function Navbar() {
@@ -30,15 +27,15 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = 'http://localhost:5173/login';
+    window.location.href = '/login';
   };
 
   const getDashboardUrl = () => {
     if (!user) return '/login';
     const role = user.role || 'MEMBER';
     return (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') 
-       ? 'http://localhost:5173/admin/dashboard' 
-       : 'http://localhost:5173/member/dashboard';
+       ? '/admin/dashboard' 
+       : '/member/dashboard';
   };
 
   return (
@@ -73,7 +70,7 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
           {navLinks.map(link => (
-            <Link key={link.href} to={link.href} style={{
+            <a key={link.href} href={link.href} style={{
               padding: '8px 14px', borderRadius: 10, fontSize: 14, fontWeight: 500,
               color: location.pathname === link.href ? '#4F46E5' : '#374151',
               background: location.pathname === link.href ? 'rgba(79,70,229,0.08)' : 'transparent',
@@ -81,7 +78,7 @@ export default function Navbar() {
               textDecoration: 'none',
             }}>
               {link.label}
-            </Link>
+            </a>
           ))}
         </div>
 
@@ -107,16 +104,16 @@ export default function Navbar() {
                   background: 'white', borderRadius: 16, border: '1px solid #E5E7EB',
                   boxShadow: '0 20px 60px rgba(0,0,0,0.12)', padding: 8, zIndex: 100,
                 }}>
-                  <a href={getDashboardUrl()} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
+                  <Link to={getDashboardUrl()} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     <Home size={16} color="#4F46E5" /> My Dashboard
-                  </a>
-                  <a href={`${getDashboardUrl()}/gallery`} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
+                  </Link>
+                  <Link to={`${getDashboardUrl()}/gallery`} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     <Image size={16} color="#4F46E5" /> Private Gallery
-                  </a>
+                  </Link>
                   <div style={{ height: 1, background: '#E5E7EB', margin: '8px 0' }} />
                   <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 500, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
@@ -127,9 +124,9 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ padding: '10px 20px', textDecoration: 'none' }}>
+            <Link to="/login?mode=signup" className="btn btn-primary" style={{ padding: '10px 20px', textDecoration: 'none' }}>
               <UserPlus size={16} /> Join Family
-            </a>
+            </Link>
           )}
           <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'none', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4 }} className="mobile-menu-btn">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -141,17 +138,17 @@ export default function Navbar() {
       {isOpen && (
         <div style={{ background: 'white', borderTop: '1px solid #E5E7EB', padding: 16 }}>
           {navLinks.map(link => (
-            <Link key={link.href} to={link.href} onClick={() => setIsOpen(false)} style={{
+            <a key={link.href} href={link.href} onClick={() => setIsOpen(false)} style={{
               display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12,
               color: location.pathname === link.href ? '#4F46E5' : '#374151',
               fontWeight: 500, fontSize: 15, textDecoration: 'none', marginBottom: 4,
               background: location.pathname === link.href ? 'rgba(79,70,229,0.08)' : 'transparent',
             }}>
               <link.icon size={18} /> {link.label}
-            </Link>
+            </a>
           ))}
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <a href="http://localhost:5173/login?mode=signup" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px', textDecoration: 'none' }}>Join Family</a>
+            <Link to="/login?mode=signup" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px', textDecoration: 'none' }}>Join Family</Link>
           </div>
         </div>
       )}

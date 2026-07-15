@@ -59,8 +59,13 @@ export default function Login() {
     setErrorMsg('');
     setLoading(true);
     try {
+      const nameParts = adminForm.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
       await axios.post(`${API_URL}/auth/signup`, {
-        name: adminForm.name,
+        firstName,
+        lastName,
         email: adminForm.email,
         password: adminForm.password,
         phone: adminForm.phone,
@@ -83,8 +88,13 @@ export default function Login() {
     setErrorMsg('');
     setLoading(true);
     try {
+      const nameParts = memberForm.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
       await axios.post(`${API_URL}/auth/signup`, {
-        name: memberForm.name,
+        firstName,
+        lastName,
         email: memberForm.email,
         password: memberForm.password,
         phone: memberForm.phone,
@@ -110,11 +120,23 @@ export default function Login() {
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-[#38BDF8]/20 blur-3xl mix-blend-overlay"></div>
       
       <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-16">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-xl">
-             <span className="text-2xl font-black text-white px-1">FH</span>
+        <div className="flex items-center gap-4 mb-16 relative z-20">
+          <button 
+             onClick={() => {
+               if (view === 'register_admin' || view === 'register_member') setView('signup');
+               else navigate('/');
+             }} 
+             className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-all border border-white/20 shadow-lg cursor-pointer transform active:scale-95" 
+             title={view === 'register_admin' || view === 'register_member' ? "Back to Options" : "Back to Home"}
+          >
+            <ArrowLeft size={20} strokeWidth={2.5} />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-xl">
+               <span className="text-2xl font-black text-white px-1">FH</span>
+            </div>
+            <span className="text-[22px] font-black tracking-tight">FamilyHub OS</span>
           </div>
-          <span className="text-[22px] font-black tracking-tight">FamilyHub OS</span>
         </div>
         
         <h1 className="text-[42px] font-black leading-[1.1] mb-6 tracking-tight">
@@ -158,11 +180,17 @@ export default function Login() {
           {/* Main Container */}
           <div className="bg-white dark:bg-slate-900 rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none border border-slate-100 dark:border-slate-800 p-7 lg:p-10 pt-10 lg:pt-12 relative w-full">
             
-            {(view === 'register_admin' || view === 'register_member') && (
-              <button onClick={() => setView('signup')} className="absolute top-6 left-6 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center">
-                <ArrowLeft size={18} />
-              </button>
-            )}
+            {/* Mobile Dynamic Back Arrow */}
+            <button 
+              onClick={() => {
+                if (view === 'register_admin' || view === 'register_member') setView('signup');
+                else navigate('/');
+              }} 
+              className="lg:hidden absolute top-6 left-6 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800/80 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md z-10"
+              title={view === 'register_admin' || view === 'register_member' ? "Back to Options" : "Back to Home"}
+            >
+              <ArrowLeft size={18} />
+            </button>
 
             <div className="text-center mb-8">
                {(view === 'login' || view === 'signup') && (

@@ -38,32 +38,24 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 style={{ color: 'white', fontFamily: 'Poppins,sans-serif', fontWeight: 700, marginBottom: 20, fontSize: 16 }}>Explore</h4>
-            {[['Home', '/'], ['About Us', '/about'], ['Family Tree', '/tree'], ['Gallery', '/gallery'], ['Events', '/events'], ['Stories', '/stories']].map(([label, href]) => (
-              <Link key={href} to={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
+            {[['Home', '/'], ['Features', '#features'], ['Testimonials', '#testimonials'], ['Contact', '#contact']].map(([label, href]) => (
+              <a key={href} href={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#4F46E5'}
                 onMouseLeave={e => e.currentTarget.style.color = '#64748B'}>
                 → {label}
-              </Link>
+              </a>
             ))}
           </div>
 
           {/* Members */}
           <div>
             <h4 style={{ color: 'white', fontFamily: 'Poppins,sans-serif', fontWeight: 700, marginBottom: 20, fontSize: 16 }}>Members</h4>
-            {[['Join Family', 'http://localhost:5173/login?mode=signup'], ['Private Gallery', '/private/gallery'], ['Family Events', '/private/events'], ['Documents', '/private/documents'], ['Announcements', '/private/announcements']].map(([label, href]) => (
-              href.startsWith('http') ? (
-                <a key={label} href={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#4F46E5'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#64748B'}>
-                  → {label}
-                </a>
-              ) : (
-                <Link key={label} to={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#4F46E5'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#64748B'}>
-                  → {label}
-                </Link>
-              )
+            {[['Join Family', '/login?mode=signup'], ['Private Gallery', '/private/gallery'], ['Family Events', '/private/events'], ['Documents', '/private/documents'], ['Announcements', '/private/announcements']].map(([label, href]) => (
+              <Link key={label} to={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#4F46E5'}
+                onMouseLeave={e => e.currentTarget.style.color = '#64748B'}>
+                → {label}
+              </Link>
             ))}
           </div>
 

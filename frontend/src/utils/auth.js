@@ -21,5 +21,5 @@ export const globalLogout = () => {
     }
 
     console.log("Redirecting...");
-    window.location.replace("/login");
+    window.location.replace("/");
 };

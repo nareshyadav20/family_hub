@@ -73,6 +73,13 @@ app.post('/api/v1/auth/signup', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists.' });
     }
 
+    if (phone) {
+      const existingPhone = await prisma.user.findFirst({ where: { phone } });
+      if (existingPhone) {
+        return res.status(400).json({ error: 'Phone number already exists.' });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const userRole = role || 'MEMBER';
 
