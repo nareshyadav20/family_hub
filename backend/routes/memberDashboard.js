@@ -57,14 +57,21 @@ router.get('/', async (req, res) => {
         allProfiles.forEach(p => {
              if(p.dob) {
                  const dob = new Date(p.dob);
-                 const bdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
-                 const diffTime = bdayThisYear - today;
-                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                 if(diffDays >= 0 && diffDays <= 30) {
+                 let bdayThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+                 let diffTime = bdayThisYear.getTime() - today.getTime();
+                 let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                 
+                 if (diffDays < 0) {
+                     bdayThisYear.setFullYear(today.getFullYear() + 1);
+                     diffTime = bdayThisYear.getTime() - today.getTime();
+                     diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                 }
+
+                 if (diffDays >= 0 && diffDays <= 30) {
                      upcomingBirthdays.push({
-                         name: `${p.user.firstName} ${p.user.lastName}`,
+                         name: `${p.user.firstName} ${p.user.lastName}`.trim(),
                          avatar: p.user.avatar || `https://ui-avatars.com/api/?name=${p.user.firstName}&background=random&color=fff`,
-                         date: bdayThisYear.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                         date: bdayThisYear.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                          daysLeft: diffDays
                      });
                  }

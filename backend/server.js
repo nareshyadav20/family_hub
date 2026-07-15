@@ -754,6 +754,8 @@ app.put('/api/v1/member/profile', async (req, res) => {
         currentStage, 
         profileCompletion,
         address: profileData.address || '',
+        dob: profileData.dob ? new Date(profileData.dob) : null,
+        bloodGroup: profileData.bloodGroup || null,
         education: profileData.education || '',
         occupation: profileData.occupation || '',
         company: profileData.company || '',
