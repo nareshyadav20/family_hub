@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Search, Filter, Phone, Mail, MapPin, Users, Heart } from 'lucide-react';
-
-const members = [
-  { id: 1, name: 'Robert Smith', relation: 'Patriarch', role: 'Family Head', phone: '+1 555 001 0001', email: 'robert@smith.com', location: 'Springfield, IL', avatar: 'https://i.pravatar.cc/150?img=60', generation: '1st', dob: 'July 14, 1942', online: false },
-  { id: 2, name: 'Martha Smith', relation: 'Matriarch', role: 'Family Head', phone: '+1 555 001 0002', email: 'martha@smith.com', location: 'Springfield, IL', avatar: 'https://i.pravatar.cc/150?img=45', generation: '1st', dob: 'Sep 2, 1945', online: true },
-  { id: 3, name: 'James Smith', relation: 'Son', role: 'Family Admin', phone: '+1 555 001 0003', email: 'james@smith.com', location: 'New York, NY', avatar: 'https://i.pravatar.cc/150?img=53', generation: '2nd', dob: 'Mar 15, 1968', online: true },
-  { id: 4, name: 'Sarah Smith', relation: 'Daughter-in-law', role: 'Member', phone: '+1 555 001 0004', email: 'sarah@smith.com', location: 'New York, NY', avatar: 'https://i.pravatar.cc/150?img=44', generation: '2nd', dob: 'Nov 30, 1970', online: false },
-  { id: 5, name: 'William Smith', relation: 'Son', role: 'Member', phone: '+1 555 001 0005', email: 'will@smith.com', location: 'Los Angeles, CA', avatar: 'https://i.pravatar.cc/150?img=55', generation: '2nd', dob: 'Jun 8, 1972', online: true },
-  { id: 6, name: 'Patricia Dove', relation: 'Daughter', role: 'Member', phone: '+1 555 001 0006', email: 'patricia@dove.com', location: 'Chicago, IL', avatar: 'https://i.pravatar.cc/150?img=38', generation: '2nd', dob: 'Dec 20, 1975', online: false },
-  { id: 7, name: 'Arjun Smith', relation: 'Grandson', role: 'Member', phone: '+1 555 001 0007', email: 'arjun@smith.com', location: 'San Francisco, CA', avatar: 'https://i.pravatar.cc/150?img=12', generation: '3rd', dob: 'Apr 22, 1995', online: true },
-  { id: 8, name: 'Emily Smith', relation: 'Granddaughter', role: 'Member', phone: '+1 555 001 0008', email: 'emily@smith.com', location: 'Austin, TX', avatar: 'https://i.pravatar.cc/150?img=25', generation: '3rd', dob: 'Jul 28, 1998', online: true },
-  { id: 9, name: 'Noah Smith', relation: 'Grandson', role: 'Member', phone: '+1 555 001 0009', email: 'noah@smith.com', location: 'Seattle, WA', avatar: 'https://i.pravatar.cc/150?img=17', generation: '3rd', dob: 'Aug 3, 2001', online: false },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 const roleColors = { 'Family Head': '#EF4444', 'Family Admin': '#4F46E5', 'Member': '#10B981' };
 const genColors = { '1st': '#F59E0B', '2nd': '#4F46E5', '3rd': '#14B8A6' };
@@ -21,6 +11,29 @@ export default function MemberDirectory() {
   const [search, setSearch] = useState('');
   const [genFilter, setGenFilter] = useState('All');
   const [selected, setSelected] = useState(null);
+  const [members, setMembers] = useState([]);
+  
+  useEffect(() => {
+     const token = localStorage.getItem('token');
+     axios.get(`${API_URL}/members`, { headers: { Authorization: `Bearer ${token}` } })
+       .then(res => {
+          const mapped = res.data.map(u => ({
+             id: u.id,
+             name: `${u.firstName} ${u.lastName}`.trim(),
+             relation: u.relationship || 'Relative',
+             role: u.role || 'Member',
+             phone: u.phone || 'N/A',
+             email: u.email || 'N/A',
+             location: 'N/A',
+             avatar: u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}`,
+             generation: '2nd', // fallback
+             dob: 'N/A',
+             online: false
+          }));
+          setMembers(mapped);
+       })
+       .catch(err => console.error(err));
+  }, []);
 
   const filtered = members.filter(m =>
     (genFilter === 'All' || m.generation === genFilter) &&
@@ -63,7 +76,6 @@ export default function MemberDirectory() {
                   <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>{m.relation}</p>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: `${roleColors[m.role] || '#4F46E5'}15`, color: roleColors[m.role] || '#4F46E5' }}>{m.role}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 50, background: `${genColors[m.generation]}15`, color: genColors[m.generation] }}>{m.generation} Gen</span>
                   </div>
                 </div>
               </div>

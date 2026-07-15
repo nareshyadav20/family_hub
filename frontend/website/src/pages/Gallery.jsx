@@ -1,25 +1,9 @@
 import React, { useState } from 'react';
 import { Heart, X, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
-const albums = [
-  { id: 1, title: 'Summer Reunion 2024', year: 2024, count: 48, cover: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=280&fit=crop', tag: 'Reunion' },
-  { id: 2, title: "Grandpa's 80th Birthday", year: 2024, count: 32, cover: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=400&h=280&fit=crop', tag: 'Birthday' },
-  { id: 3, title: 'Beach Vacation Maldives', year: 2023, count: 76, cover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=280&fit=crop', tag: 'Travel' },
-  { id: 4, title: 'James & Sarah Wedding', year: 2023, count: 124, cover: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=280&fit=crop', tag: 'Wedding' },
-  { id: 5, title: 'Christmas 2023', year: 2023, count: 54, cover: 'https://images.unsplash.com/photo-1545566501-4c6d0cbec0c7?w=400&h=280&fit=crop', tag: 'Holiday' },
-  { id: 6, title: 'New York Trip', year: 2022, count: 89, cover: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=280&fit=crop', tag: 'Travel' },
-];
-
-const featured = [
-  { id: 1, src: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=400&fit=crop', caption: 'Family Reunion 2024', likes: 142 },
-  { id: 2, src: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&h=400&fit=crop', caption: "Grandpa's 80th Birthday", likes: 98 },
-  { id: 3, src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop', caption: 'Maldives Vacation', likes: 203 },
-  { id: 4, src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop', caption: 'Wedding Day', likes: 312 },
-  { id: 5, src: 'https://images.unsplash.com/photo-1545566501-4c6d0cbec0c7?w=600&h=400&fit=crop', caption: 'Christmas Morning', likes: 87 },
-  { id: 6, src: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&h=400&fit=crop', caption: 'New York Adventures', likes: 156 },
-  { id: 7, src: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600&h=400&fit=crop', caption: 'City Walks', likes: 74 },
-  { id: 8, src: 'https://images.unsplash.com/photo-1502780809386-d4d374f0ef09?w=600&h=400&fit=crop', caption: 'Garden Party', likes: 118 },
-];
+// Removed mock albums
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 const tags = ['All', 'Reunion', 'Birthday', 'Travel', 'Wedding', 'Holiday'];
 
@@ -28,6 +12,32 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState(null);
   const [likedPhotos, setLikedPhotos] = useState(new Set());
   const [search, setSearch] = useState('');
+  const [albums, setAlbums] = useState([]);
+  const [featured, setFeatured] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/gallery`)
+      .then(res => {
+        const photos = res.data;
+        const mappedFeatured = photos.map(p => ({
+           id: p.id,
+           src: p.url,
+           caption: p.name,
+           likes: p.size || 0
+        }));
+        setFeatured(mappedFeatured);
+
+        // Map photos into mock albums based on categories
+        const categorized = {};
+        photos.forEach(p => {
+           const c = p.category || 'Other';
+           if (!categorized[c]) categorized[c] = { title: c, cover: p.url, count: 0, tag: c, id: c, year: new Date(p.createdAt).getFullYear() };
+           categorized[c].count += 1;
+        });
+        setAlbums(Object.values(categorized));
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const filteredAlbums = albums.filter(a => activeTag === 'All' || a.tag === activeTag);
 

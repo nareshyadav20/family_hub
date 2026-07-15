@@ -50,7 +50,7 @@ export default function Footer() {
           {/* Members */}
           <div>
             <h4 style={{ color: 'white', fontFamily: 'Poppins,sans-serif', fontWeight: 700, marginBottom: 20, fontSize: 16 }}>Members</h4>
-            {[['Member Login', '/login'], ['Join Family', '/login?join=true'], ['Private Gallery', '/private/gallery'], ['Family Events', '/private/events'], ['Documents', '/private/documents'], ['Announcements', '/private/announcements']].map(([label, href]) => (
+            {[['Join Family', '/login?join=true'], ['Private Gallery', '/private/gallery'], ['Family Events', '/private/events'], ['Documents', '/private/documents'], ['Announcements', '/private/announcements']].map(([label, href]) => (
               <Link key={label} to={href} style={{ display: 'block', color: '#64748B', fontSize: 14, marginBottom: 10, transition: 'color 0.2s', textDecoration: 'none' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#4F46E5'}
                 onMouseLeave={e => e.currentTarget.style.color = '#64748B'}>

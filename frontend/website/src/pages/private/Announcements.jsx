@@ -2,34 +2,34 @@ import React, { useState } from 'react';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Pin, Bell, ChevronDown, ChevronUp, Megaphone } from 'lucide-react';
 
-const announcements = [
-  {
-    id: 1, title: '📣 Summer Reunion 2026 — Final Details Released!', author: 'James Smith (Admin)', date: 'July 8, 2026', pinned: true, priority: 'high', avatar: 'https://i.pravatar.cc/50?img=53',
-    content: `Dear Family,\n\nWe are thrilled to announce the final details for our Summer Reunion 2026!\n\n📅 Date: August 15–16, 2026\n📍 Location: Central Park, New York City\n🕙 Start Time: 10:00 AM\n\nThis year's reunion will be a 2-day event with activities for all ages. We have planned:\n• BBQ dinner on Day 1\n• Family sports day on Day 2\n• A special tribute ceremony for Grandpa Robert's 84th birthday\n• A family photo session\n\nPlease RSVP by July 30th. Looking forward to seeing everyone!\n\nWith love,\nJames & the Family Admin Team`
-  },
-  {
-    id: 2, title: '🎂 Birthday Wish Collection for Grandma', author: 'Emily Smith', date: 'July 5, 2026', pinned: true, priority: 'medium', avatar: 'https://i.pravatar.cc/50?img=25',
-    content: "As Grandma Martha's 81st birthday approaches (September 2nd), we are collecting special birthday wishes from all family members for a personalized memory book.\n\nPlease send your wishes, favorite memory with Grandma, or a special photo to this portal or email them to emily@smith.com by August 20th.\n\nWe will compile everything into a beautiful printed book to present to her on her special day! 💝"
-  },
-  {
-    id: 3, title: '🏡 Property Deed Update — Springfield Estate', author: 'James Smith (Admin)', date: 'June 28, 2026', pinned: false, priority: 'high', avatar: 'https://i.pravatar.cc/50?img=53',
-    content: 'Important legal update regarding the Springfield family estate. The property deed has been updated to include all immediate family members in the joint ownership agreement. A copy of the updated deed has been uploaded to the Document Vault.\n\nPlease review the document and confirm receipt by replying to this announcement. If you have any questions, please contact our family legal counsel.'
-  },
-  {
-    id: 4, title: '📸 August Photo Challenge — "Roots & Wings"', author: 'Patricia Dove', date: 'June 20, 2026', pinned: false, priority: 'low', avatar: 'https://i.pravatar.cc/50?img=38',
-    content: 'This month\'s family photo challenge theme is "Roots & Wings"!\n\nShare a photo that represents:\n🌳 Your ROOTS — something that connects you to your family heritage\n🦅 Your WINGS — something that represents how far you\'ve come\n\nUpload your photos to the Private Gallery by July 31st. The family will vote for their favorites and winners will be featured on our family website!'
-  },
-  {
-    id: 5, title: '💰 Family Investment Fund — Annual Report Available', author: 'Robert Smith Jr.', date: 'June 10, 2026', pinned: false, priority: 'medium', avatar: 'https://i.pravatar.cc/50?img=60',
-    content: 'The Annual Smith Family Investment Fund report for 2025 is now available in the Document Vault.\n\nHighlights:\n• Total portfolio value: $2.4M (up 12% YoY)\n• New investments added: 3 real estate holdings\n• Dividend payouts to shareholders: March 2026\n\nAll adult family members are invited to review the report and attend our virtual Q&A session scheduled for July 15, 2026.'
-  },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 const priorityColors = { high: '#EF4444', medium: '#F59E0B', low: '#10B981' };
 const priorityBg = { high: 'rgba(239,68,68,0.08)', medium: 'rgba(245,158,11,0.08)', low: 'rgba(16,185,129,0.08)' };
 
 export default function Announcements() {
-  const [expanded, setExpanded] = useState(new Set([1]));
+  const [expanded, setExpanded] = useState(new Set());
+  const [announcements, setAnnouncements] = useState([]);
+
+  useEffect(() => {
+     const token = localStorage.getItem('token');
+     axios.get(`${API_URL}/member/announcements`, { headers: { Authorization: `Bearer ${token}` } })
+       .then(res => {
+          const mapped = res.data.map(a => ({
+             id: a.id,
+             title: a.title,
+             author: a.author ? `${a.author.firstName} ${a.author.lastName}` : 'Admin',
+             avatar: a.author?.avatar || `https://ui-avatars.com/api/?name=${a.author ? a.author.firstName : 'A'}`,
+             date: new Date(a.createdAt).toLocaleDateString(),
+             pinned: a.isPinned || false,
+             priority: a.priority?.toLowerCase() || 'medium',
+             content: a.content || ''
+          }));
+          setAnnouncements(mapped);
+       })
+       .catch(err => console.error(err));
+  }, []);
 
   const toggleExpand = (id) => setExpanded(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 

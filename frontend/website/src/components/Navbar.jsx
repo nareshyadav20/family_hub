@@ -30,8 +30,15 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
-    setShowUserMenu(false);
+    window.location.href = 'http://localhost:5174/login?join=true';
+  };
+
+  const getDashboardUrl = () => {
+    if (!user) return '/login';
+    const role = user.role || 'MEMBER';
+    return (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') 
+       ? 'http://localhost:5173/admin/dashboard' 
+       : 'http://localhost:5173/member/dashboard';
   };
 
   return (
@@ -100,16 +107,16 @@ export default function Navbar() {
                   background: 'white', borderRadius: 16, border: '1px solid #E5E7EB',
                   boxShadow: '0 20px 60px rgba(0,0,0,0.12)', padding: 8, zIndex: 100,
                 }}>
-                  <Link to="/private" onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
+                  <a href={getDashboardUrl()} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     <Home size={16} color="#4F46E5" /> My Dashboard
-                  </Link>
-                  <Link to="/private/gallery" onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
+                  </a>
+                  <a href={`${getDashboardUrl()}/gallery`} onClick={() => setShowUserMenu(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#374151', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     <Image size={16} color="#4F46E5" /> Private Gallery
-                  </Link>
+                  </a>
                   <div style={{ height: 1, background: '#E5E7EB', margin: '8px 0' }} />
                   <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 500, width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
@@ -120,14 +127,9 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <>
-              <Link to="/login" className="btn btn-ghost" style={{ padding: '10px 20px' }}>
-                <LogIn size={16} /> Login
-              </Link>
-              <Link to="/login?join=true" className="btn btn-primary" style={{ padding: '10px 20px' }}>
-                <UserPlus size={16} /> Join Family
-              </Link>
-            </>
+            <Link to="/login?join=true" className="btn btn-primary" style={{ padding: '10px 20px' }}>
+              <UserPlus size={16} /> Join Family
+            </Link>
           )}
           <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'none', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4 }} className="mobile-menu-btn">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -149,7 +151,6 @@ export default function Navbar() {
             </Link>
           ))}
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <Link to="/login" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center', padding: '12px' }}>Login</Link>
             <Link to="/login?join=true" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center', padding: '12px' }}>Join Family</Link>
           </div>
         </div>

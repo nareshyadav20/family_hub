@@ -2,21 +2,31 @@ import React, { useState } from 'react';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Upload, Image, Heart, X, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 
-const privatePhotos = [
-  { id: 1, src: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=400&fit=crop', caption: 'Family Reunion 2024 — Private', likes: 42, album: 'Reunion 2024', private: true },
-  { id: 2, src: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&h=400&fit=crop', caption: "Grandpa's 80th — Candid Shots", likes: 38, album: "Birthdays", private: true },
-  { id: 3, src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop', caption: 'Maldives — Private Collection', likes: 67, album: 'Travel', private: true },
-  { id: 4, src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop', caption: 'Wedding Day Behind the Scenes', likes: 89, album: 'Weddings', private: true },
-  { id: 5, src: 'https://images.unsplash.com/photo-1545566501-4c6d0cbec0c7?w=600&h=400&fit=crop', caption: 'Christmas Morning 2023', likes: 34, album: 'Holidays', private: true },
-  { id: 6, src: 'https://images.unsplash.com/photo-1502780809386-d4d374f0ef09?w=600&h=400&fit=crop', caption: 'Garden Party Spring 2024', likes: 55, album: 'Gatherings', private: true },
-  { id: 7, src: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600&h=400&fit=crop', caption: 'New York City Trip', likes: 48, album: 'Travel', private: true },
-  { id: 8, src: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600&h=400&fit=crop', caption: "Grandma's Kitchen Secrets", likes: 72, album: 'Daily Life', private: true },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function PrivateGallery() {
   const [liked, setLiked] = useState(new Set());
   const [lightbox, setLightbox] = useState(null);
   const [dragOver, setDragOver] = useState(false);
+  const [privatePhotos, setPrivatePhotos] = useState([]);
+
+  useEffect(() => {
+     const token = localStorage.getItem('token');
+     axios.get(`${API_URL}/gallery`, { headers: { Authorization: `Bearer ${token}` } })
+       .then(res => {
+          const mapped = res.data.map(p => ({
+             id: p.id,
+             src: p.url,
+             caption: p.caption || `Uploaded by ${p.uploader}`,
+             likes: p.hearts || 0,
+             album: p.tag || 'Private',
+             private: true
+          }));
+          setPrivatePhotos(mapped);
+       })
+       .catch(err => console.error(err));
+  }, []);
 
   const toggleLike = (id) => setLiked(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 

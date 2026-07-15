@@ -1,33 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ZoomIn, ZoomOut, X } from 'lucide-react';
-
-const treeData = {
-  id: '1', name: 'Robert Smith', role: 'Patriarch', born: '1942', avatar: 'https://i.pravatar.cc/100?img=60',
-  spouse: { id: '2', name: 'Martha Smith', role: 'Matriarch', born: '1945', avatar: 'https://i.pravatar.cc/100?img=45' },
-  children: [
-    {
-      id: '3', name: 'James Smith', role: 'Son', born: '1968', avatar: 'https://i.pravatar.cc/100?img=53',
-      spouse: { id: '4', name: 'Sarah Smith', role: 'Daughter-in-law', born: '1970', avatar: 'https://i.pravatar.cc/100?img=44' },
-      children: [
-        { id: '6', name: 'Arjun Smith', role: 'Grandson', born: '1995', avatar: 'https://i.pravatar.cc/100?img=12', children: [] },
-        { id: '7', name: 'Emily Smith', role: 'Granddaughter', born: '1998', avatar: 'https://i.pravatar.cc/100?img=25', children: [] },
-      ]
-    },
-    {
-      id: '5', name: 'William Smith', role: 'Son', born: '1972', avatar: 'https://i.pravatar.cc/100?img=55',
-      spouse: { id: '51', name: 'Lisa Smith', role: 'Daughter-in-law', born: '1974', avatar: 'https://i.pravatar.cc/100?img=32' },
-      children: [
-        { id: '8', name: 'Noah Smith', role: 'Grandson', born: '2001', avatar: 'https://i.pravatar.cc/100?img=17', children: [] },
-      ]
-    },
-    {
-      id: '9', name: 'Patricia Dove', role: 'Daughter', born: '1975', avatar: 'https://i.pravatar.cc/100?img=38',
-      children: [
-        { id: '10', name: 'Sophie Dove', role: 'Granddaughter', born: '2004', avatar: 'https://i.pravatar.cc/100?img=29', children: [] },
-      ]
-    },
-  ]
-};
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 function MemberNode({ member, onClick }) {
   return (
@@ -89,6 +63,15 @@ export default function FamilyTree() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [zoom, setZoom] = useState(1);
+  const [treeData, setTreeData] = useState(null);
+
+  useEffect(() => {
+     axios.get(`${API_URL}/tree`)
+       .then(res => setTreeData(res.data))
+       .catch(err => console.error(err));
+  }, []);
+
+  if (!treeData) return <div style={{ paddingTop: 100, textAlign: 'center' }}>Loading...</div>;
 
   return (
     <div style={{ paddingTop: 72, minHeight: '100vh', background: '#F8FAFC' }}>

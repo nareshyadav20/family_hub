@@ -2,16 +2,38 @@ import React, { useState } from 'react';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Calendar, MapPin, Users, Clock, CheckCircle, Plus } from 'lucide-react';
 
-const privateEvents = [
-  { id: 1, title: 'Family Business Strategy Meeting', date: 'July 20, 2026', time: '3:00 PM', location: 'Zoom • Family Meeting Room', attendees: ['https://i.pravatar.cc/50?img=12', 'https://i.pravatar.cc/50?img=53', 'https://i.pravatar.cc/50?img=60'], totalAttendees: 8, type: 'Meeting', color: '#4F46E5', status: 'upcoming', desc: 'Quarterly family business review and succession planning.' },
-  { id: 2, title: 'Private Birthday Dinner — Grandma', date: 'Aug 2, 2026', time: '7:00 PM', location: 'Smith Family Home', attendees: ['https://i.pravatar.cc/50?img=45', 'https://i.pravatar.cc/50?img=25', 'https://i.pravatar.cc/50?img=38'], totalAttendees: 12, type: 'Birthday', color: '#7C3AED', status: 'upcoming', desc: 'Intimate birthday dinner for the family matriarch. RSVP required.' },
-  { id: 3, title: 'Family Tree Documentation Day', date: 'Aug 22, 2026', time: '10:00 AM', location: 'Family Archive Library, LA', attendees: ['https://i.pravatar.cc/50?img=53', 'https://i.pravatar.cc/50?img=60', 'https://i.pravatar.cc/50?img=11'], totalAttendees: 5, type: 'Private', color: '#14B8A6', status: 'upcoming', desc: 'Digitizing old family photos and documenting oral histories.' },
-  { id: 4, title: 'Christmas Private Family Dinner', date: 'Dec 25, 2025', time: '5:00 PM', location: 'Main Family Estate', attendees: [], totalAttendees: 22, type: 'Holiday', color: '#EF4444', status: 'past', desc: 'Our annual private Christmas celebration.' },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function PrivateEvents() {
   const [rsvped, setRsvped] = useState(new Set([1]));
   const [filter, setFilter] = useState('upcoming');
+  const [privateEvents, setPrivateEvents] = useState([]);
+
+  useEffect(() => {
+     const token = localStorage.getItem('token');
+     axios.get(`${API_URL}/admin/events`, { headers: { Authorization: `Bearer ${token}` } })
+       .then(res => {
+          const mapped = res.data.map(e => {
+             const isPast = new Date(e.eventDate) < new Date();
+             return {
+                id: e.id,
+                title: e.name,
+                date: new Date(e.eventDate).toLocaleDateString(),
+                time: e.startTime || 'TBD',
+                location: e.venue || 'TBD',
+                attendees: [], // mock some attendees
+                totalAttendees: e.maxGuests || 0,
+                type: e.category || 'Event',
+                color: '#4F46E5',
+                status: isPast ? 'past' : 'upcoming',
+                desc: e.description || ''
+             }
+          });
+          setPrivateEvents(mapped);
+       })
+       .catch(err => console.error(err));
+  }, []);
 
   const filtered = privateEvents.filter(e => filter === 'all' || e.status === filter);
 

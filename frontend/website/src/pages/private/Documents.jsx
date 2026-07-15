@@ -2,25 +2,38 @@ import React, { useState } from 'react';
 import PrivateLayout from '../../components/PrivateLayout';
 import { Folder, FileText, Download, Eye, Search, Upload, Shield, Lock } from 'lucide-react';
 
-const documents = [
-  { id: 1, name: 'Family Property Deed — Springfield', type: 'Property', size: '2.4 MB', uploaded: 'June 10, 2026', uploadedBy: 'James Smith', icon: '🏡', color: '#4F46E5', sensitive: true },
-  { id: 2, name: 'Robert Smith Birth Certificate', type: 'Certificate', size: '980 KB', uploaded: 'May 22, 2026', uploadedBy: 'Martha Smith', icon: '📜', color: '#7C3AED', sensitive: true },
-  { id: 3, name: 'Family Trust Agreement 2024', type: 'Legal', size: '5.1 MB', uploaded: 'April 8, 2026', uploadedBy: 'Legal Team', icon: '⚖️', color: '#EF4444', sensitive: true },
-  { id: 4, name: 'Smith Family Insurance Policy', type: 'Legal', size: '1.8 MB', uploaded: 'March 15, 2026', uploadedBy: 'James Smith', icon: '🛡️', color: '#F59E0B', sensitive: false },
-  { id: 5, name: 'Vehicle Registration — All Vehicles', type: 'Property', size: '1.2 MB', uploaded: 'Feb 28, 2026', uploadedBy: 'William Smith', icon: '🚗', color: '#14B8A6', sensitive: false },
-  { id: 6, name: 'Family Investment Portfolio 2025', type: 'Finance', size: '3.7 MB', uploaded: 'Jan 10, 2026', uploadedBy: 'Robert Smith', icon: '📈', color: '#10B981', sensitive: true },
-  { id: 7, name: 'Estate Will — Robert & Martha', type: 'Legal', size: '890 KB', uploaded: 'Dec 5, 2025', uploadedBy: 'Legal Team', icon: '📋', color: '#6366F1', sensitive: true },
-  { id: 8, name: 'Medical Records — Emergency', type: 'Medical', size: '2.0 MB', uploaded: 'Nov 18, 2025', uploadedBy: 'Family Admin', icon: '🏥', color: '#F43F5E', sensitive: true },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 const types = ['All', 'Property', 'Certificate', 'Legal', 'Finance', 'Medical'];
 
 export default function Documents() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
+  const [documents, setDocuments] = useState([]);
+
+  useEffect(() => {
+     const token = localStorage.getItem('token');
+     axios.get(`${API_URL}/documents`, { headers: { Authorization: `Bearer ${token}` } })
+       .then(res => {
+          const mapped = res.data.map(d => ({
+             id: d.id,
+             name: d.name,
+             type: d.category || 'Other',
+             size: (d.size / 1024 / 1024).toFixed(2) + ' MB',
+             uploaded: new Date(d.createdAt).toLocaleDateString(),
+             uploadedBy: d.uploader ? `${d.uploader.firstName} ${d.uploader.lastName}` : 'Admin',
+             icon: '📄',
+             color: '#4F46E5',
+             sensitive: d.visibility === 'PRIVATE'
+          }));
+          setDocuments(mapped);
+       })
+       .catch(err => console.error(err));
+  }, []);
 
   const filtered = documents.filter(d =>
-    (typeFilter === 'All' || d.type === typeFilter) &&
+    (typeFilter === 'All' || d.type.includes(typeFilter)) &&
     d.name.toLowerCase().includes(search.toLowerCase())
   );
 

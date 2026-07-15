@@ -1,26 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Image, Calendar, BookOpen, Star, Play, ChevronDown, Heart, Globe, Shield } from 'lucide-react';
-
-const stats = [
-  { label: 'Family Members', value: '247', icon: Users, color: '#4F46E5' },
-  { label: 'Photos Shared', value: '12,580', icon: Image, color: '#7C3AED' },
-  { label: 'Events Celebrated', value: '384', icon: Calendar, color: '#14B8A6' },
-  { label: 'Stories Written', value: '1,240', icon: BookOpen, color: '#F59E0B' },
-];
-
-const memories = [
-  { year: '2024', title: 'Grand Reunion', img: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=280&fit=crop', likes: 142 },
-  { year: '2023', title: "Grandpa's 80th", img: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=400&h=280&fit=crop', likes: 98 },
-  { year: '2023', title: 'Beach Vacation', img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=280&fit=crop', likes: 203 },
-  { year: '2022', title: 'Wedding Ceremony', img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=280&fit=crop', likes: 312 },
-];
-
-const upcomingEvents = [
-  { title: 'Summer Family Reunion 2026', date: 'Aug 15, 2026', location: 'Central Park, NY', type: 'Reunion', color: '#4F46E5', attendees: 45 },
-  { title: "Grandma's 75th Birthday", date: 'Sep 02, 2026', location: 'Family Home, LA', type: 'Birthday', color: '#7C3AED', attendees: 88 },
-  { title: '25th Anniversary Dinner', date: 'Oct 12, 2026', location: 'The Ritz Carlton', type: 'Anniversary', color: '#14B8A6', attendees: 30 },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 const features = [
   { icon: Shield, title: 'Bank-Level Security', desc: 'Your family\'s data is protected with AES-256 encryption and zero-knowledge architecture.', color: '#4F46E5' },
@@ -37,11 +19,30 @@ const testimonials = [
 
 export default function Home() {
   const [activeMemory, setActiveMemory] = useState(0);
+  const [homeData, setHomeData] = useState({ stats: null, memories: [], upcomingEvents: [] });
 
   useEffect(() => {
-    const t = setInterval(() => setActiveMemory(p => (p + 1) % memories.length), 4000);
+    axios.get(`${API_URL}/home`)
+      .then(res => setHomeData(res.data))
+      .catch(err => console.error(err));
+      
+    const t = setInterval(() => {
+      setHomeData(prev => {
+         if (prev.memories.length > 0) {
+            setActiveMemory(val => (val + 1) % prev.memories.length);
+         }
+         return prev;
+      });
+    }, 4000);
     return () => clearInterval(t);
   }, []);
+
+  const statsList = [
+    { label: 'Family Members', value: homeData.stats?.totalMembers || '0', icon: Users, color: '#4F46E5' },
+    { label: 'Generations', value: homeData.stats?.generations || '0', icon: Image, color: '#7C3AED' },
+    { label: 'Countries', value: homeData.stats?.countries || '0', icon: Calendar, color: '#14B8A6' },
+    { label: 'Photos Shared', value: homeData.stats?.photos || '0', icon: BookOpen, color: '#F59E0B' },
+  ];
 
   return (
     <div style={{ paddingTop: 72 }}>
@@ -150,7 +151,7 @@ export default function Home() {
       <section style={{ padding: '80px 0', background: 'white' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
-            {stats.map((stat, i) => (
+            {statsList.map((stat, i) => (
               <div key={i} style={{ animation: `fadeInUp 0.6s ease ${i * 0.1}s both`, textAlign: 'center', padding: 32, borderRadius: 20, border: '1px solid #F3F4F6', boxShadow: '0 4px 24px rgba(0,0,0,0.04)', transition: 'all 0.3s', cursor: 'default' }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = `0 20px 60px rgba(0,0,0,0.10)`}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.04)'}>
@@ -203,18 +204,21 @@ export default function Home() {
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {memories.map((m, i) => (
+              {homeData.memories.map((m, i) => (
                 <div key={i} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.3s' }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                  <img src={m.img} alt={m.title} style={{ width: '100%', height: i === 0 ? 200 : 130, objectFit: 'cover' }} />
+                  <img src={m.thumbnailUrl || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=280&fit=crop'} alt={m.title} style={{ width: '100%', height: i === 0 ? 200 : 130, objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }} />
                   <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14 }}>
                     <div style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 700, fontSize: 13, color: 'white' }}>{m.title}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{m.year} • ❤ {m.likes}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>{new Date(m.eventDate).getFullYear()} • ❤ 0</div>
                   </div>
                 </div>
               ))}
+              {homeData.memories.length === 0 && (
+                <div style={{color: '#9CA3AF', fontSize: 14}}>No recent memories.</div>
+              )}
             </div>
           </div>
         </div>
@@ -233,24 +237,27 @@ export default function Home() {
             </Link>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-            {upcomingEvents.map((ev, i) => (
+            {homeData.upcomingEvents.map((ev, i) => (
               <div key={i} style={{ borderRadius: 20, padding: 24, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', transition: 'all 0.3s', cursor: 'pointer' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                  <span style={{ padding: '5px 14px', borderRadius: 50, fontSize: 12, fontWeight: 700, background: `${ev.color}25`, color: ev.color }}>{ev.type}</span>
-                  <div style={{ textAlign: 'right', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{ev.attendees} attending</div>
+                  <span style={{ padding: '5px 14px', borderRadius: 50, fontSize: 12, fontWeight: 700, background: `#4F46E525`, color: '#4F46E5' }}>{ev.category}</span>
+                  <div style={{ textAlign: 'right', fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{ev.maxGuests || 0} max attending</div>
                 </div>
-                <h3 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 700, fontSize: 18, color: 'white', marginBottom: 12 }}>{ev.title}</h3>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>📅 {ev.date}</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>📍 {ev.location}</div>
-                <button style={{ width: '100%', padding: '12px', borderRadius: 12, border: `1px solid ${ev.color}`, color: ev.color, background: 'transparent', fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = ev.color; e.currentTarget.style.color = 'white'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = ev.color; }}>
+                <h3 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 700, fontSize: 18, color: 'white', marginBottom: 12 }}>{ev.name}</h3>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>📅 {new Date(ev.eventDate).toLocaleDateString()}</div>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>📍 {ev.venue}</div>
+                <button style={{ width: '100%', padding: '12px', borderRadius: 12, border: `1px solid #4F46E5`, color: '#4F46E5', background: 'transparent', fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#4F46E5'; e.currentTarget.style.color = 'white'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#4F46E5'; }}>
                   RSVP Now
                 </button>
               </div>
             ))}
+            {homeData.upcomingEvents.length === 0 && (
+               <div style={{color: 'white', fontSize: 14}}>No upcoming public events.</div>
+            )}
           </div>
         </div>
       </section>

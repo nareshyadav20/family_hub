@@ -1,26 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Heart, Clock, User, ArrowRight, Search } from 'lucide-react';
-
-const stories = [
-  {
-    id: 1, title: "Grandpa's Journey from Springfield to Success", author: 'Robert Smith Jr.', authorAvatar: 'https://i.pravatar.cc/100?img=12', date: 'June 15, 2026', readTime: '8 min read', category: 'Elder Stories', image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=340&fit=crop', excerpt: 'In 1952, a 10-year-old Robert Smith walked into his first day of school with nothing but a suitcase and a dream. What followed was a remarkable 70-year journey of love, loss, and legacy...', likes: 234, color: '#4F46E5'
-  },
-  {
-    id: 2, title: "The Beach Vacation That Changed Everything", author: 'Emily Smith', authorAvatar: 'https://i.pravatar.cc/100?img=25', date: 'May 20, 2026', readTime: '5 min read', category: 'Memories', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=340&fit=crop', excerpt: 'We almost didnt go. Dad was tired, mom was stressed, and we kids were fighting. But that one weekend in Maldives in 2023 became the most beautiful memory of my childhood...', likes: 187, color: '#7C3AED'
-  },
-  {
-    id: 3, title: "How I Met Your Grandmother: A Love Story", author: 'Robert Smith Sr.', authorAvatar: 'https://i.pravatar.cc/100?img=60', date: 'April 10, 2026', readTime: '12 min read', category: 'Elder Stories', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=340&fit=crop', excerpt: 'It was a rainy Tuesday in October 1969. I walked into the local library, late for my study session, and bumped into the most beautiful woman I had ever seen...', likes: 412, color: '#14B8A6'
-  },
-  {
-    id: 4, title: "Growing Up in the Smith Household", author: 'James Smith', authorAvatar: 'https://i.pravatar.cc/100?img=53', date: 'March 5, 2026', readTime: '7 min read', category: 'Articles', image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=340&fit=crop', excerpt: 'Our household was always loud, always messy, and always full of love. Mom kept 7 of us kids in line while Dad worked double shifts. But dinner table was always our sacred gathering spot...', likes: 156, color: '#F59E0B'
-  },
-  {
-    id: 5, title: "Passing Down the Family Recipe", author: 'Martha Smith', authorAvatar: 'https://i.pravatar.cc/100?img=45', date: 'February 14, 2026', readTime: '4 min read', category: 'Memories', image: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600&h=340&fit=crop', excerpt: "My mother's apple pie recipe is more than instructions on paper. It is a thread connecting five generations of Smith women who have baked this same pie on Sunday mornings...", likes: 298, color: '#EF4444'
-  },
-  {
-    id: 6, title: "The Annual Reunion: A Family Tradition", author: 'Patricia Dove', authorAvatar: 'https://i.pravatar.cc/100?img=38', date: 'January 22, 2026', readTime: '6 min read', category: 'Articles', image: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&h=340&fit=crop', excerpt: 'For 40 years, every summer without fail, the entire Smith clan has gathered. What started as a backyard barbecue has evolved into a multi-day celebration spanning generations...', likes: 145, color: '#10B981'
-  },
-];
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 const categories = ['All', 'Elder Stories', 'Memories', 'Articles'];
 
@@ -28,6 +9,28 @@ export default function Stories() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch] = useState('');
   const [liked, setLiked] = useState(new Set());
+  const [stories, setStories] = useState([]);
+
+  useEffect(() => {
+     axios.get(`${API_URL}/stories`)
+        .then(res => {
+           const mapped = res.data.map(s => ({
+              id: s.id,
+              title: s.title,
+              author: s.addedBy ? `${s.addedBy.firstName} ${s.addedBy.lastName}` : 'Anonymous',
+              authorAvatar: s.addedBy?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.addedBy ? s.addedBy.firstName : 'A')}&background=random`,
+              date: new Date(s.eventDate).toLocaleDateString(),
+              readTime: '5 min read',
+              category: s.category || 'Memories',
+              image: s.thumbnailUrl || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=340&fit=crop',
+              excerpt: s.description || '',
+              likes: 0,
+              color: '#4F46E5'
+           }));
+           setStories(mapped);
+        })
+        .catch(err => console.error(err));
+  }, []);
 
   const filtered = stories.filter(s =>
     (activeCategory === 'All' || s.category === activeCategory) &&
@@ -78,7 +81,7 @@ export default function Stories() {
                   </div>
                 </div>
                 <h2 style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, fontSize: 26, color: '#111827', marginBottom: 16, lineHeight: 1.3 }}>{filtered[0].title}</h2>
-                <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.8, marginBottom: 24 }}>{filtered[0].excerpt}</p>
+                <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.8, marginBottom: 24 }}>{filtered[0].excerpt.substring(0, 200)}...</p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#9CA3AF' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={14} /> {filtered[0].readTime}</span>
@@ -88,6 +91,9 @@ export default function Stories() {
                 </div>
               </div>
             </div>
+          )}
+          {filtered.length === 0 && (
+             <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>No stories available yet.</div>
           )}
 
           {/* Story grid */}

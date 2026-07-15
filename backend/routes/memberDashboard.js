@@ -126,20 +126,35 @@ router.get('/', async (req, res) => {
         feedPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         feedPosts = feedPosts.slice(0, 10);
         
+        const activityData = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const nextD = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
+            
+            const monthName = d.toLocaleString('en-US', { month: 'short' });
+            
+            const postsCount = await prisma.document.count({
+                where: { type: { startsWith: 'image/' }, createdAt: { gte: d, lt: nextD } }
+            });
+            const memoriesCount = await prisma.familyHistory.count({
+                where: { createdAt: { gte: d, lt: nextD } }
+            });
+            activityData.push({ month: monthName, posts: postsCount, memories: memoriesCount });
+        }
+        
+        const newMessagesCount = await prisma.message.count({
+            where: {
+                receiverId: req.user.userId,
+                isRead: false
+            }
+        });
+        
         res.json({
-            stats: { familyMembers: totalMembers, myPhotos, eventsThisMonth, newMessages: 0 },
+            stats: { familyMembers: totalMembers, myPhotos, eventsThisMonth, newMessages: newMessagesCount },
             upcomingEvents,
             upcomingBirthdays: upcomingBirthdays.slice(0,3),
             feedPosts,
-            activityData: [
-               { month: 'Jan', posts: 0, memories: 0 },
-               { month: 'Feb', posts: 0, memories: 0 },
-               { month: 'Mar', posts: 0, memories: 0 },
-               { month: 'Apr', posts: 0, memories: 0 },
-               { month: 'May', posts: 0, memories: 0 },
-               { month: 'Jun', posts: 1, memories: 2 },
-               { month: 'Jul', posts: 4, memories: 5 },
-            ]
+            activityData
         });
 
     } catch (err) {

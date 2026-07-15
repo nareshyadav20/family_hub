@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Users, Clock, ArrowRight, Filter, CheckCircle } from 'lucide-react';
+import axios from 'axios';
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
-const events = [
-  { id: 1, title: 'Summer Family Reunion 2026', date: 'August 15, 2026', time: '10:00 AM', location: 'Central Park, New York', type: 'Reunion', attendees: 45, status: 'upcoming', image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=350&fit=crop', color: '#4F46E5', desc: 'Our biggest family gathering of the year! Two days of fun, food, and family bonding. All branches of the Smith family are invited.' },
-  { id: 2, title: "Grandma's 75th Birthday Celebration", date: 'September 2, 2026', time: '6:00 PM', location: 'Smith Family Estate, Los Angeles', type: 'Birthday', attendees: 88, status: 'upcoming', image: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&h=350&fit=crop', color: '#7C3AED', desc: "A grand celebration for the family matriarch! Join us as we honor Grandma Martha on her milestone 75th birthday." },
-  { id: 3, title: 'James & Sarah 25th Anniversary', date: 'October 12, 2026', time: '7:00 PM', location: 'The Ritz Carlton, Beverly Hills', type: 'Anniversary', attendees: 30, status: 'upcoming', image: 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=600&h=350&fit=crop', color: '#14B8A6', desc: 'A black-tie celebration of 25 beautiful years of love, laughter, and togetherness.' },
-  { id: 4, title: 'Christmas Family Gathering', date: 'December 25, 2025', time: '2:00 PM', location: 'Smith Family Home, Springfield', type: 'Holiday', attendees: 62, status: 'past', image: 'https://images.unsplash.com/photo-1545566501-4c6d0cbec0c7?w=600&h=350&fit=crop', color: '#EF4444', desc: 'Our annual Christmas celebration with the whole family.' },
-  { id: 5, title: 'Summer Reunion 2025', date: 'July 20, 2025', time: '11:00 AM', location: 'Lake Tahoe, California', type: 'Reunion', attendees: 78, status: 'past', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=350&fit=crop', color: '#F59E0B', desc: 'A wonderful reunion at the beautiful Lake Tahoe.' },
-];
-
-const types = ['All', 'Reunion', 'Birthday', 'Anniversary', 'Holiday'];
+const types = ['All', 'Reunion', 'Birthday', 'Anniversary', 'Holiday', 'Other'];
 
 export default function Events() {
   const [filter, setFilter] = useState('upcoming');
   const [typeFilter, setTypeFilter] = useState('All');
   const [rsvped, setRsvped] = useState(new Set());
+  const [events, setEvents] = useState([]);
+  
+  useEffect(() => {
+    axios.get(`${API_URL}/events`)
+      .then(res => {
+         const mapped = res.data.map(e => {
+            const isPast = new Date(e.eventDate) < new Date();
+            return {
+               id: e.id,
+               title: e.name,
+               date: new Date(e.eventDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'}),
+               shortMonth: new Date(e.eventDate).toLocaleString('default', { month: 'short' }),
+               day: new Date(e.eventDate).getDate(),
+               time: e.startTime || '12:00 PM',
+               location: e.venue || 'TBD',
+               type: e.category || 'Other',
+               attendees: e.maxGuests || 0,
+               status: isPast ? 'past' : 'upcoming',
+               image: e.bannerImage || 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=350&fit=crop',
+               color: '#4F46E5',
+               desc: e.description || 'Join us for this family event.'
+            };
+         });
+         setEvents(mapped);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const filtered = events.filter(e => (filter === 'all' || e.status === filter) && (typeFilter === 'All' || e.type === typeFilter));
 
@@ -72,8 +93,8 @@ export default function Events() {
                     {event.status === 'past' && <span style={{ padding: '5px 14px', borderRadius: 50, background: 'rgba(0,0,0,0.5)', color: 'white', fontSize: 12, fontWeight: 700 }}>Past</span>}
                   </div>
                   <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'white', borderRadius: 12, padding: '8px 16px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: '#EF4444' }}>{event.date.split(' ')[0].toUpperCase()}</div>
-                    <div style={{ fontSize: 22, fontWeight: 900, color: '#111827', lineHeight: 1 }}>{event.date.split(' ')[1].replace(',', '')}</div>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#EF4444' }}>{event.shortMonth.toUpperCase()}</div>
+                    <div style={{ fontSize: 22, fontWeight: 900, color: '#111827', lineHeight: 1 }}>{event.day}</div>
                   </div>
                 </div>
                 <div style={{ padding: 24 }}>

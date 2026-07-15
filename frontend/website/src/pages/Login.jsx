@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Phone, CheckCircle } from 'lucide-react';
+import axios from 'axios';
 
 export default function Login() {
   const [params] = useSearchParams();
@@ -11,16 +12,49 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [form, setForm] = useState({ email: '', password: '', name: '', phone: '' });
-  const navigate = useNavigate();
+  const navigate = null; // Removed hook since we are hard redirecting
+  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
-  const handleLogin = (e) => {
+  // Requirement 7: If the user is already logged in, automatically redirect them based on their role
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (token && userStr) {
+       try {
+         const user = JSON.parse(userStr);
+         const targetUrl = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'FAMILY_ADMIN' 
+             ? 'http://localhost:5173/admin/dashboard' 
+             : 'http://localhost:5173/member/dashboard';
+         window.location.replace(`${targetUrl}?token=${token}&user=${encodeURIComponent(userStr)}`);
+       } catch(e) {}
+    }
+  }, []);
+
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      localStorage.setItem('token', 'mock_website_token');
-      localStorage.setItem('user', JSON.stringify({ name: 'Arjun Smith', email: form.email, role: 'member' }));
-      navigate('/private');
-    }, 1500);
+    setErrorMsg('');
+    try {
+      const res = await axios.post(`${API_URL}/auth/login`, { email: form.email, password: form.password });
+      const payload = res.data.success !== undefined ? res.data : res.data; 
+      
+      const { token, user } = payload;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      const role = user.role;
+      const targetUrl = (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')
+        ? 'http://localhost:5173/admin/dashboard'
+        : 'http://localhost:5173/member/dashboard';
+      
+      window.location.replace(`${targetUrl}?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`);
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error || 'Invalid email or password.');
+      setLoading(false);
+    }
   };
 
   const handleSendOtp = (e) => {
@@ -127,6 +161,8 @@ export default function Login() {
               <p style={{ color: '#6B7280', fontSize: 15, marginBottom: 32 }}>
                 {mode === 'login' ? 'Sign in to access your family\'s private space' : 'Request access to your family\'s FamilyHub'}
               </p>
+
+              {errorMsg && <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', fontWeight: 600 }}>{errorMsg}</div>}
 
               <form onSubmit={mode === 'login' ? handleLogin : handleSendOtp}>
                 {mode === 'join' && (

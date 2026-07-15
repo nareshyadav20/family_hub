@@ -112,19 +112,38 @@ function ComingSoon({ title }) {
   );
 }
 
+function RedirectExternal({ to }) {
+  React.useEffect(() => {
+    window.location.replace(to);
+  }, [to]);
+  return null;
+}
+
+function LogoutAndRedirect() {
+  React.useEffect(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.replace('http://localhost:5174/login?join=true');
+  }, []);
+  return null;
+}
+
 function ProtectedAdminRoute({ children }) {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   let isValid = false;
+  let role = null;
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
-      if (user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'FAMILY_ADMIN')) {
+      role = user?.role;
+      if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
         isValid = true;
       }
     } catch (e) {}
   }
-  if (!isValid) return <Navigate to="/login" replace />;
+  if (role === 'MEMBER' && !isValid) return <RedirectExternal to="http://localhost:5173/member/dashboard" />;
+  if (!isValid) return <RedirectExternal to="http://localhost:5174/login?join=true" />;
   return children;
 }
 
@@ -132,15 +151,18 @@ function ProtectedMemberRoute({ children }) {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   let isValid = false;
+  let role = null;
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
-      if (user && user.role === 'MEMBER') {
+      role = user?.role;
+      if (role === 'MEMBER') {
         isValid = true;
       }
     } catch (e) {}
   }
-  if (!isValid) return <Navigate to="/login" replace />;
+  if (!isValid && (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')) return <RedirectExternal to="http://localhost:5173/admin/dashboard" />;
+  if (!isValid) return <RedirectExternal to="http://localhost:5174/login?join=true" />;
   return children;
 }
 
@@ -160,9 +182,9 @@ function AppLayer() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path="/" element={<RedirectExternal to="http://localhost:5174/login?join=true" />} />
+          <Route path="/login" element={<LogoutAndRedirect />} />
+          <Route path="/signup" element={<RedirectExternal to="http://localhost:5174/login?join=true" />} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/member" element={<Navigate to="/member/dashboard" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
@@ -223,6 +245,16 @@ function AppLayer() {
 
 function App() {
   useEffect(() => {
+    // Intercept auth tokens passed from the website portal
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userStr = params.get('user');
+    if (token && userStr) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', userStr);
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
     const socketURL = (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com');
     const socket = io(socketURL);
     socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));
