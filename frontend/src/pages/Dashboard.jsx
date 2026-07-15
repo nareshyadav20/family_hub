@@ -119,8 +119,8 @@ export default function Dashboard() {
           <button onClick={() => navigate('/admin/dashboard/events/create')} className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl font-medium transition-all shadow-sm">
              <CalendarDays size={18} /> Schedule Event
           </button>
-          <button onClick={copyInviteLink} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/30">
-             {copied ? <Check size={18} /> : <Link size={18} />} Invite Link
+          <button onClick={() => navigate('/admin/dashboard/members/invite')} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/30">
+             <Link size={18} /> Invite Member
           </button>
           <button onClick={() => navigate('/admin/dashboard/members/add')} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30">
              <Plus size={18} /> Add Member
