@@ -10,7 +10,8 @@ export default function Documents() {
   const [activeFolder, setActiveFolder] = useState('All');
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
-  
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileBase64, setFileBase64] = useState(null);
   const [uploadData, setUploadData] = useState({ name: '', category: 'Legal', visibility: 'PRIVATE' });
   const activeUser = JSON.parse(localStorage.getItem('user')) || {};
 
@@ -28,15 +29,36 @@ export default function Documents() {
     }
   });
 
+  const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          if (file.size > 15 * 1024 * 1024) {
+              alert('File size exceeds 15MB limit.');
+              return;
+          }
+          setSelectedFile(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setFileBase64(reader.result);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
   const uploadDoc = useMutation({
     mutationFn: async () => {
+      if (!selectedFile) return;
+      const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'pdf';
+      const fileSize = (selectedFile.size / (1024*1024)).toFixed(2) + ' MB';
+
       const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
          name: uploadData.name,
          category: uploadData.category,
          visibility: uploadData.visibility,
-         type: 'pdf',
-         size: '1.2 MB',
-         uploaderId: activeUser.memberId || activeUser.id
+         type: fileType,
+         size: fileSize,
+         fileUrl: fileBase64,
+         uploaderId: activeUser.id
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -44,6 +66,9 @@ export default function Documents() {
     },
     onSuccess: () => {
       setShowModal(false);
+      setSelectedFile(null);
+      setFileBase64(null);
+      setUploadData({ name: '', category: 'Legal', visibility: 'PRIVATE' });
       queryClient.invalidateQueries(['memberDocuments']);
       alert('Document Uploaded Successfully. Please wait for Admin verification.');
     }
@@ -167,17 +192,28 @@ export default function Documents() {
                    </select>
                 </div>
                 <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative">
-                   <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                   <Upload size={32} className="text-blue-500 mb-3" />
-                   <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop document here</span>
-                   <span className="text-xs text-slate-400 mt-1">PDF, DOCX, ZIP (Max 15MB)</span>
+                   <input type="file" onChange={handleFileChange} accept=".pdf,.doc,.docx,.zip,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                   
+                   {selectedFile ? (
+                     <div className="text-center">
+                        <FileText size={32} className="text-emerald-500 mb-2 mx-auto" />
+                        <span className="text-sm font-bold text-emerald-600 block">{selectedFile.name}</span>
+                        <span className="text-xs text-slate-500">{(selectedFile.size / (1024*1024)).toFixed(2)} MB</span>
+                     </div>
+                   ) : (
+                     <div className="text-center flex flex-col items-center">
+                        <Upload size={32} className="text-blue-500 mb-3" />
+                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop document here</span>
+                        <span className="text-xs text-slate-400 mt-1">PDF, DOCX, ZIP, Image (Max 15MB)</span>
+                     </div>
+                   )}
                 </label>
               </div>
               
               <div className="mt-5 flex gap-3">
                  <button 
                   onClick={() => uploadDoc.mutate()} 
-                  disabled={!uploadData.name || uploadDoc.isPending}
+                  disabled={!uploadData.name || !selectedFile || uploadDoc.isPending}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">
                     {uploadDoc.isPending ? 'Uploading...' : 'Secure Upload'}
                  </button>

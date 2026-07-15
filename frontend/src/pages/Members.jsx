@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, Filter, Plus, Mail, MessageCircle, MoreHorizontal, Edit2, Trash2, ShieldAlert,
   Users, UserCheck, Clock, CheckCircle2, AlertCircle, X, ChevronDown, Download, Users as FamilyIcon, FileText
@@ -33,6 +33,16 @@ const getRoleBadge = (role) => {
 
 export default function Members() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return new window.URLSearchParams(location.search).get('search') || '';
+  });
+
+  useEffect(() => {
+    const query = new window.URLSearchParams(location.search).get('search');
+    if (query !== null) setSearchQuery(query);
+  }, [location.search]);
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [activeDrawer, setActiveDrawer] = useState(null); // holds member object
   const queryClient = useQueryClient();
@@ -120,7 +130,13 @@ export default function Members() {
     currentStep: m.currentProfileStep || 'Basic Information',
     lastActive: m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : 'Never',
     avatar: m.avatar || ''
-  }));
+  })).filter(m => 
+    !searchQuery || 
+    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.memId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.phone.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   
   const today = new Date();
   const liveMetrics = [
@@ -174,7 +190,7 @@ export default function Members() {
             <div className="flex items-center gap-3">
                <div className="relative w-64 md:w-80">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input type="text" placeholder="Search by name, ID, email, or mobile..." className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                  <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, ID, email, or mobile..." className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
                </div>
                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
                   <Filter size={16} /> Filters <ChevronDown size={14} className="opacity-50" />

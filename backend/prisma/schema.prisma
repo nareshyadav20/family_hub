@@ -70,6 +70,8 @@ model User {
   
   groupMembers    GroupMember[]
   groupMessages   GroupMessage[]
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 
   @@map("users")
 }
@@ -326,4 +328,18 @@ model GroupMessage {
   createdAt DateTime @default(now())
 
   @@map("group_messages")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  text        String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("messages")
 }

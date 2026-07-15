@@ -1,28 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download } from 'lucide-react';
-
-const photos = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&q=80', h: 320, hearts: 24, comments: 8, uploader: 'Sarah M.', avatar: 'https://i.pravatar.cc/100?img=1', tag: 'Reunion', year: '2024' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80', h: 220, hearts: 15, comments: 4, uploader: 'Arjun M.', avatar: 'https://i.pravatar.cc/100?img=2', tag: 'Travel', year: '2024' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1530103862676-de8892cb7370?w=600&q=80', h: 400, hearts: 42, comments: 17, uploader: 'Emily S.', avatar: 'https://i.pravatar.cc/100?img=3', tag: 'Birthday', year: '2023' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80', h: 260, hearts: 18, comments: 6, uploader: 'James S.', avatar: 'https://i.pravatar.cc/100?img=4', tag: 'Reunion', year: '2024' },
-  { id: 5, url: 'https://images.unsplash.com/photo-1470116945706-e6bf5d5a53ca?w=600&q=80', h: 300, hearts: 33, comments: 11, uploader: 'Sarah M.', avatar: 'https://i.pravatar.cc/100?img=5', tag: 'Holiday', year: '2023' },
-  { id: 6, url: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600&q=80', h: 240, hearts: 9, comments: 2, uploader: 'Priya K.', avatar: 'https://i.pravatar.cc/100?img=6', tag: 'Festival', year: '2024' },
-  { id: 7, url: 'https://images.unsplash.com/photo-1542773998-9325f0a098d7?w=600&q=80', h: 360, hearts: 51, comments: 23, uploader: 'Arjun M.', avatar: 'https://i.pravatar.cc/100?img=7', tag: 'Wedding', year: '2022' },
-  { id: 8, url: 'https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=600&q=80', h: 280, hearts: 21, comments: 9, uploader: 'Emily S.', avatar: 'https://i.pravatar.cc/100?img=8', tag: 'Travel', year: '2023' },
-  { id: 9, url: 'https://images.unsplash.com/photo-1425421669292-0c3da3b8f529?w=600&q=80', h: 200, hearts: 7, comments: 1, uploader: 'James S.', avatar: 'https://i.pravatar.cc/100?img=9', tag: 'Festival', year: '2024' },
-  { id: 10, url: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&q=80', h: 340, hearts: 38, comments: 14, uploader: 'Sarah M.', avatar: 'https://i.pravatar.cc/100?img=10', tag: 'Birthday', year: '2022' },
-  { id: 11, url: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c?w=600&q=80', h: 220, hearts: 12, comments: 3, uploader: 'Priya K.', avatar: 'https://i.pravatar.cc/100?img=11', tag: 'Holiday', year: '2023' },
-  { id: 12, url: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&q=80', h: 290, hearts: 29, comments: 10, uploader: 'Arjun M.', avatar: 'https://i.pravatar.cc/100?img=12', tag: 'Reunion', year: '2023' },
-];
+import axios from 'axios';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const tags = ['All', 'Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
+const uploadTags = ['Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
 
 export default function Gallery() {
   const [activeTag, setActiveTag] = useState('All');
   const [search, setSearch] = useState('');
   const [likedIds, setLikedIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [uploadCategory, setUploadCategory] = useState(uploadTags[0]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadPreview, setUploadPreview] = useState(null);
+
+  const queryClient = useQueryClient();
+  const token = localStorage.getItem('token');
+  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+
+  const { data: photos = [], isLoading } = useQuery({
+      queryKey: ['gallery'],
+      queryFn: async () => {
+          const res = await axios.get(`${API_URL}/gallery`, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      }
+  });
+
+  const uploadMutation = useMutation({
+      mutationFn: async (payload) => {
+          const res = await axios.post(`${API_URL}/gallery`, payload, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries(['gallery']);
+          setShowModal(false);
+          setSelectedFile(null);
+          setUploadPreview(null);
+      }
+  });
+
+  const deleteMutation = useMutation({
+      mutationFn: async (id) => {
+          const res = await axios.delete(`${API_URL}/gallery/${id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries(['gallery']);
+      }
+  });
 
   const filtered = photos.filter(p => 
     (activeTag === 'All' || p.tag === activeTag) && 
@@ -30,6 +62,36 @@ export default function Gallery() {
   );
 
   const toggleLike = (id) => setLikedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const handleFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+              alert('File size exceeds 5MB limit.');
+              return;
+          }
+          setSelectedFile(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setUploadPreview(reader.result);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
+  const handleUpload = () => {
+      if (!selectedFile || !uploadPreview) {
+          alert('Please select a file first.');
+          return;
+      }
+      uploadMutation.mutate({
+          category: uploadCategory,
+          fileUrl: uploadPreview, 
+          fileName: selectedFile.name,
+          fileSize: (selectedFile.size / (1024*1024)).toFixed(2) + 'MB',
+          fileType: selectedFile.type
+      });
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
@@ -64,6 +126,7 @@ export default function Gallery() {
 
       {/* Masonry Grid */}
       <div className="columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
+        {isLoading && <div className="text-slate-500 col-span-full">Loading gallery...</div>}
         {filtered.map(photo => (
           <div key={photo.id} className="break-inside-avoid relative rounded-2xl overflow-hidden group cursor-pointer bg-slate-100 dark:bg-slate-800 shadow-sm hover:shadow-xl transition-all duration-500" style={{ height: photo.h }}>
             <img src={photo.url} alt="family" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
@@ -75,7 +138,7 @@ export default function Gallery() {
             </div>
 
             {/* Admin Delete btn */}
-            <button className="absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+            <button onClick={(e) => { e.stopPropagation(); if(window.confirm('Delete photo?')) deleteMutation.mutate(photo.id); }} className="absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
               <Trash2 size={14} />
             </button>
 
@@ -83,10 +146,10 @@ export default function Gallery() {
             <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between translate-y-2 group-hover:translate-y-0">
               <div className="flex items-center gap-2">
                 <img src={photo.avatar} className="w-7 h-7 rounded-full border border-white/30" alt="" />
-                <span className="text-white text-xs font-semibold">{photo.uploader}</span>
+                <span className="text-white text-xs font-semibold truncate w-16">{photo.uploader}</span>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => toggleLike(photo.id)} className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full backdrop-blur-md ${likedIds.includes(photo.id) ? 'bg-red-500 text-white' : 'bg-black/30 text-white/90'}`}>
+                <button onClick={(e) => { e.stopPropagation(); toggleLike(photo.id); }} className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full backdrop-blur-md ${likedIds.includes(photo.id) ? 'bg-red-500 text-white' : 'bg-black/30 text-white/90'}`}>
                   <Heart size={12} fill={likedIds.includes(photo.id) ? 'white' : 'none'} />
                   {photo.hearts + (likedIds.includes(photo.id) ? 1 : 0)}
                 </button>
@@ -98,9 +161,9 @@ export default function Gallery() {
           </div>
         ))}
       </div>
-      {filtered.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <div className="text-center py-20 text-slate-400">
-          <p className="font-medium">No photos found</p>
+          <p className="font-medium">No photos found in this category.</p>
         </div>
       )}
 
@@ -108,15 +171,43 @@ export default function Gallery() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Upload Photos</h2>
+              
+              <div className="mb-4">
+                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Category</label>
+                 <select 
+                    value={uploadCategory} 
+                    onChange={e => setUploadCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                 >
+                    {uploadTags.map(tag => (
+                       <option key={tag} value={tag}>{tag}</option>
+                    ))}
+                 </select>
+              </div>
+
               <label className="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative">
-                 <input type="file" multiple accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                 <Upload size={40} className="text-blue-500 mb-3" />
-                 <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop photos here</span>
-                 <span className="text-xs text-slate-400 mt-1">Supports JPG, PNG (Max 5MB each)</span>
+                 <input type="file" accept="image/jpeg, image/png" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                 
+                 {uploadPreview ? (
+                     <div className="text-center">
+                        <img src={uploadPreview} alt="Preview" className="w-24 h-24 object-cover rounded-lg mx-auto mb-2 shadow-md" />
+                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{selectedFile?.name}</span>
+                     </div>
+                 ) : (
+                     <div className="text-center flex flex-col items-center">
+                        <Upload size={40} className="text-blue-500 mb-3" />
+                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">No file chosen</span>
+                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop photos here</span>
+                        <span className="text-xs text-slate-400 mt-1">Supports JPG, PNG (Max 5MB each)</span>
+                     </div>
+                 )}
               </label>
+
               <div className="mt-5 flex gap-3">
-                 <button onClick={() => { alert('Photos uploaded successfully!'); setShowModal(false); }} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">Upload Now</button>
-                 <button onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">
+                    {uploadMutation.isPending ? 'Uploading...' : 'Upload Now'}
+                 </button>
+                 <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </div>

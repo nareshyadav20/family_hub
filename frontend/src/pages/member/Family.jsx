@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Users, MapPin, Phone, Mail, Heart, MessageCircle, Crown, Shield, User } from 'lucide-react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -11,8 +12,17 @@ const ROLE_BADGE = {
 };
 
 export default function Family() {
+  const location = useLocation();
   const [selected, setSelected] = useState(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => {
+    return new window.URLSearchParams(location.search).get('search') || '';
+  });
+
+  useEffect(() => {
+    const query = new window.URLSearchParams(location.search).get('search');
+    if (query !== null) setSearch(query);
+  }, [location.search]);
+
 
   const { data: rawMembers = [], isLoading } = useQuery({
     queryKey: ['members'],

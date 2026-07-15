@@ -24,7 +24,8 @@ const io = new Server(server, {
 app.set('socketio', io); // Keep accessible globally
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const memberSettingsRouter = require('./routes/memberSettings');
 const dashboardRouter = require('./routes/dashboard');
@@ -32,6 +33,8 @@ const announcementsRouter = require('./routes/announcements');
 const pollsRouter = require('./routes/polls');
 const notificationsRouter = require('./routes/notifications');
 const groupsRouter = require('./routes/groups');
+const messagesRouter = require('./routes/messages');
+const galleryRouter = require('./routes/gallery');
 
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
@@ -39,8 +42,11 @@ app.use('/api/v1/admin/announcements', announcementsRouter);
 app.use('/api/v1/member/announcements', announcementsRouter);
 app.use('/api/v1/admin/polls', pollsRouter);
 app.use('/api/v1/member/polls', pollsRouter);
+app.use('/api/v1/polls', pollsRouter);
 app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/groups', groupsRouter);
+app.use('/api/v1/messages', messagesRouter);
+app.use('/api/v1/gallery', galleryRouter);
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
@@ -589,11 +595,11 @@ app.get('/api/v1/documents', async (req, res) => {
 
 app.post('/api/v1/documents', async (req, res) => {
   try {
-     const { name, type, size, category, visibility, uploaderId } = req.body;
+     const { name, type, size, category, visibility, uploaderId, fileUrl } = req.body;
      const doc = await prisma.document.create({
         data: {
            name, type, size, category,
-           url: `#${Date.now()}`,
+           url: fileUrl || `#${Date.now()}`,
            visibility: visibility || 'PRIVATE',
            uploaderId,
            status: 'PENDING'

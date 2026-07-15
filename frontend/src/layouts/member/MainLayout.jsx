@@ -63,6 +63,12 @@ export default function MainLayout({ navItems, bottomNav }) {
      navigate('/login');
   };
 
+  const handleGlobalSearch = (e) => {
+     if (e.key === 'Enter' && e.target.value.trim()) {
+        navigate(`/member/dashboard/family?search=${encodeURIComponent(e.target.value.trim())}`);
+     }
+  };
+
   return (
     <div className="flex h-screen w-full bg-[#F4F7FB] dark:bg-slate-900 overflow-hidden font-sans text-slate-800 dark:text-slate-200">
       
@@ -148,12 +154,12 @@ export default function MainLayout({ navItems, bottomNav }) {
              {isSearchOpen ? (
                 <div className="relative w-full max-w-[300px] animate-in fade-in slide-in-from-right-4">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input autoFocus onBlur={() => setIsSearchOpen(false)} placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
+                  <input autoFocus onBlur={() => setIsSearchOpen(false)} onKeyDown={handleGlobalSearch} placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
                 </div>
              ) : (
                 <div className="relative w-full max-w-sm hidden md:block">
                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                   <input placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
+                   <input onKeyDown={handleGlobalSearch} placeholder="Search family..." className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-full text-sm border-transparent focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700" />
                 </div>
              )}
           </div>

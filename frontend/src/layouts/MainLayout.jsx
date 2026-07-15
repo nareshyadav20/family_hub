@@ -63,6 +63,12 @@ export default function MainLayout({ navItems, bottomNav }) {
      navigate('/login');
   };
 
+  const handleGlobalSearch = (e) => {
+     if (e.key === 'Enter' && e.target.value.trim()) {
+        navigate(`/admin/dashboard/members?search=${encodeURIComponent(e.target.value.trim())}`);
+     }
+  };
+
   const activeUser = memberData?.user || JSON.parse(localStorage.getItem('user')) || {};
   const fullName = `${activeUser.firstName || 'System'} ${activeUser.lastName || 'Admin'}`.trim();
   const userRole = activeUser.role === 'SUPER_ADMIN' ? 'Super Admin' : activeUser.role === 'ADMIN' ? 'Family Admin' : 'Admin';
@@ -160,12 +166,12 @@ export default function MainLayout({ navItems, bottomNav }) {
              {isSearchOpen ? (
                 <div className="relative w-full max-w-[300px] animate-in fade-in slide-in-from-right-4">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input autoFocus onBlur={() => setIsSearchOpen(false)} placeholder="Search..." className="w-full h-10 pl-10 pr-4 rounded-full bg-slate-50 dark:bg-slate-900 border-none text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#12b0ad]/10 transition-all" />
+                  <input autoFocus onBlur={() => setIsSearchOpen(false)} onKeyDown={handleGlobalSearch} placeholder="Search..." className="w-full h-10 pl-10 pr-4 rounded-full bg-slate-50 dark:bg-slate-900 border-none text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#12b0ad]/10 transition-all" />
                 </div>
              ) : (
                 <div className="relative w-72 hidden md:block">
                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                   <input autoFocus={false} placeholder="Search family, events..." className="w-full h-10 pl-10 pr-4 rounded-full bg-slate-50 dark:bg-slate-900 border-none text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#12b0ad]/10 transition-all text-slate-700 dark:text-slate-300" />
+                   <input autoFocus={false} onKeyDown={handleGlobalSearch} placeholder="Search family, events..." className="w-full h-10 pl-10 pr-4 rounded-full bg-slate-50 dark:bg-slate-900 border-none text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#12b0ad]/10 transition-all text-slate-700 dark:text-slate-300" />
                 </div>
              )}
           </div>
