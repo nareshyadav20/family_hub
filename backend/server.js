@@ -438,7 +438,8 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
        emailResult = await sendInvitationEmail(
            { email, firstName: firstName, lastName: lastName?.trim() || '' },
            'Admin', // the inviter
-           'FamilyHub' // the family
+           'FamilyHub', // the family
+           generatedToken
        );
        if (!emailResult.success) {
            emailStatus = 'EMAIL_FAILED';
@@ -530,7 +531,8 @@ app.post('/api/v1/admin/members/invite/resend', async (req, res) => {
        emailResult = await sendInvitationEmail(
            { email: user.email, firstName: user.firstName, lastName: user.lastName },
            'Admin',
-           'FamilyHub'
+           'FamilyHub',
+           token
        );
        if (!emailResult.success) {
            emailStatus = 'EMAIL_FAILED';

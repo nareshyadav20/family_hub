@@ -58,10 +58,66 @@ router.post('/families', async (req, res) => {
       return { family, admin };
     });
 
-    // Send Brevo Email asynchronously
-    sendFamilyAdminEmail(adminName, adminEmail, familyName, adminPassword).catch(err => console.error(err));
+    // Send Brevo Email
+    let emailSent = false;
+    try {
+      const emailResult = await sendFamilyAdminEmail(adminName, adminEmail, familyName, result.family.id, adminPassword);
+      if (emailResult.success) {
+        emailSent = true;
+      }
+    } catch (err) {
+      console.error(err);
+    }
 
-    res.status(201).json({ success: true, data: result.family });
+    res.status(201).json({ success: true, data: result.family, emailSent });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Resend credentials
+router.post('/families/resend-email', async (req, res) => {
+  const { familyId } = req.body;
+  try {
+    const family = await prisma.family.findUnique({
+      where: { id: familyId },
+      include: { members: { where: { role: 'ADMIN' } } }
+    });
+
+    if (!family || !family.members || family.members.length === 0) {
+      return res.status(404).json({ success: false, message: 'Admin not found for this family' });
+    }
+
+    const admin = family.members[0];
+    
+    // Generate new temporary password
+    const crypto = require('crypto');
+    const newTempPassword = crypto.randomBytes(4).toString('hex') + 'A1!';
+    const hashedPassword = await bcrypt.hash(newTempPassword, 10);
+
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: {
+        password: hashedPassword,
+        isTemporaryPassword: true,
+        mustChangePassword: true
+      }
+    });
+
+    const emailResult = await sendFamilyAdminEmail(
+      admin.firstName + ' ' + (admin.lastName || ''),
+      admin.email,
+      family.name,
+      family.id,
+      newTempPassword
+    );
+
+    if (emailResult.success) {
+      res.json({ success: true, message: 'Credentials sent successfully' });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to send credentials email' });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });

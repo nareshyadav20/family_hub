@@ -7,6 +7,7 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -26,6 +27,20 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
+
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('onboarding') === 'true') {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const closeWelcome = () => {
+    setShowWelcome(false);
+    navigate('/admin/dashboard', { replace: true });
+  };
 
   const copyInviteLink = () => {
     navigator.clipboard.writeText("http://localhost:5173/login?mode=signup");
@@ -232,6 +247,46 @@ export default function Dashboard() {
            </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showWelcome && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-2xl shadow-2xl relative w-full max-w-md overflow-hidden z-10 p-8 border border-slate-100"
+            >
+               <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 mb-6">
+                 <CheckCircle className="h-8 w-8 text-purple-600" />
+               </div>
+               <div className="text-center mb-8">
+                 <h2 className="text-2xl font-bold text-slate-900 mb-2">Welcome to FamilyHub OS!</h2>
+                 <p className="text-slate-500 font-medium">Your administrator account is now active.</p>
+               </div>
+               
+               <div className="mb-8">
+                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Next Steps</h3>
+                 <ul className="space-y-3">
+                    <li className="flex items-center text-slate-600 font-medium"><Check className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> Complete Family Profile</li>
+                    <li className="flex items-center text-slate-600 font-medium"><Check className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> Add Family Members</li>
+                    <li className="flex items-center text-slate-600 font-medium"><Check className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> Create Family Tree</li>
+                    <li className="flex items-center text-slate-600 font-medium"><Check className="w-5 h-5 text-emerald-500 mr-3 shrink-0" /> Schedule Your First Event</li>
+                 </ul>
+               </div>
+
+               <button 
+                 onClick={closeWelcome}
+                 className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/30"
+               >
+                 Go to Dashboard
+               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

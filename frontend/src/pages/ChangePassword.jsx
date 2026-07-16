@@ -58,7 +58,7 @@ export default function ChangePassword() {
         }
         
         // Ensure all other tabs logout or are fine. In our flow, we redirect to dashboard
-        navigate('/admin/dashboard', { replace: true });
+        navigate('/admin/dashboard?onboarding=true', { replace: true });
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to change password');

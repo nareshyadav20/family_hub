@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, LogIn, Plus, X, Loader2 } from 'lucide-react';
+import { Search, Eye, LogIn, Plus, X, Loader2, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/v1/superadmin/families';
+const API_URL_RESEND = 'http://localhost:5000/api/v1/superadmin/families/resend-email';
 
 export default function Families() {
   const [families, setFamilies] = useState([]);
@@ -65,7 +66,11 @@ export default function Families() {
     try {
       const res = await axios.post(API_URL, formData);
       if (res.data.success) {
-        toast.success('Family and admin created successfully!');
+        if (res.data.emailSent === false) {
+           toast.success('Family created, but welcome email could not be sent. You can resend it later.');
+        } else {
+           toast.success('Family and admin created successfully!');
+        }
         setIsModalOpen(false);
         fetchFamilies();
         // Reset form
@@ -79,6 +84,20 @@ export default function Families() {
       toast.error(err.response?.data?.message || 'Error creating family.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const resendWelcomeEmail = async (familyId) => {
+    const loadingToast = toast.loading('Resending credentials...');
+    try {
+      const res = await axios.post(API_URL_RESEND, { familyId });
+      if (res.data.success) {
+        toast.success('Credentials sent successfully!', { id: loadingToast });
+      } else {
+        toast.error('Failed to send credentials.', { id: loadingToast });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error resending email.', { id: loadingToast });
     }
   };
 
@@ -185,6 +204,9 @@ export default function Families() {
                         </button>
                         <button className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Login as Admin">
                           <LogIn className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => resendWelcomeEmail(family.id)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Resend Credentials">
+                          <Mail className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
