@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import MainLayout from './layouts/MainLayout';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Families from './pages/Families';
 import FamilyDetails from './pages/FamilyDetails';
@@ -22,14 +24,36 @@ import Profile from './pages/Profile';
 
 const queryClient = new QueryClient();
 
+// Protected Route Wrapper
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('superadmin_token');
+  const user = localStorage.getItem('superadmin_user');
+  
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  const role = JSON.parse(user).role?.toUpperCase();
+  if (role !== 'SUPER_ADMIN') {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
-          <Route element={<MainLayout />}>
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/families" element={<Families />} />
             <Route path="/families/:id" element={<FamilyDetails />} />
