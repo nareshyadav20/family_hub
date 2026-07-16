@@ -260,7 +260,7 @@ model Poll {
   votes       Json     // store key/value map { "userId": optionId }
   endDate     DateTime
   authorId    String
-  author      User     @relation("UserPolls", fields: [authorId], references: [id])
+  author      User     @relation("UserPolls", fields: [authorId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -367,9 +367,8 @@ model FamilyHistory {
   visibility    String   @default("Family Only")
   status        String   @default("Published")
   thumbnailUrl  String?
-  
   addedById     String
-  addedBy       User     @relation(fields: [addedById], references: [id])
+  addedBy       User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
   
   relatedMembers Json?    
 
