@@ -87,4 +87,52 @@ const sendInvitationEmail = async (member, adminName, familyName) => {
   }
 };
 
-module.exports = { sendInvitationEmail };
+const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, tempPassword) => {
+  const appUrl = process.env.APP_URL;
+  const brevoApiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderName = process.env.BREVO_SENDER_NAME;
+
+  if (!brevoApiKey || typeof brevoApiKey !== 'string' || brevoApiKey.length < 20) {
+    return { success: false, error: 'Invalid Brevo API key.', errorCode: 'INVALID_API_KEY' };
+  }
+
+  const loginUrl = `${appUrl}/admin/login`; // Ensure this is the correct login route
+
+  const payload = {
+    sender: { name: senderName, email: senderEmail },
+    to: [{ email: adminEmail, name: adminName }],
+    subject: "Welcome to FamilyHub OS - Administrator Account",
+    htmlContent: `
+      <p>Hello ${adminName},</p>
+      <p>Your FamilyHub OS administrator account for <strong>${familyName}</strong> has been created successfully.</p>
+      <p>Login URL: <a href="${loginUrl}">${loginUrl}</a></p>
+      <p>Username: ${adminEmail}</p>
+      <p>Temporary Password: <strong>${tempPassword}</strong></p>
+      <p>For security reasons, you must change your password during your first login.</p>
+      <p>FamilyHub OS Team</p>
+    `
+  };
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'api-key': brevoApiKey
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      return { success: false, error: errorData };
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+module.exports = { sendInvitationEmail, sendFamilyAdminEmail };

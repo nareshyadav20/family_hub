@@ -38,6 +38,7 @@ const galleryRouter = require('./routes/gallery');
 const familyHistoryRouter = require('./routes/familyHistory');
 const memberDashboardRouter = require('./routes/memberDashboard');
 const websiteRouter = require('./routes/website');
+const superadminRouter = require('./routes/superadmin');
 
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
@@ -53,6 +54,7 @@ app.use('/api/v1/gallery', galleryRouter);
 app.use('/api/v1/family-history', familyHistoryRouter);
 app.use('/api/v1/member/dashboard', memberDashboardRouter);
 app.use('/api/v1/website', websiteRouter);
+app.use('/api/v1/superadmin', superadminRouter);
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
@@ -177,7 +179,9 @@ app.post('/api/v1/auth/login', async (req, res) => {
         status: user.status || 'ACTIVE',
         profileCompletion: user.profileCompletion || 25,
         currentProfileStep: user.currentProfileStep || 'Basic Information',
-        isProfileCompleted: user.isProfileCompleted || false
+        isProfileCompleted: user.isProfileCompleted || false,
+        mustChangePassword: user.mustChangePassword || false,
+        isTemporaryPassword: user.isTemporaryPassword || false
       }
     });
 
@@ -186,6 +190,40 @@ app.post('/api/v1/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Change Password Endpoint (First Login Flow)
+app.post('/api/v1/auth/change-password', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { currentPassword, newPassword } = req.body;
+    
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Incorrect current password' });
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        mustChangePassword: false,
+        isTemporaryPassword: false
+      }
+    });
+    
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Fetch All Members Endpoint (Admin Legacy)
 app.get('/api/v1/admin/members', async (req, res) => {
   try {

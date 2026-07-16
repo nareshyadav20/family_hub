@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import api from './services/api';
 import { globalLogout } from './utils/auth';
@@ -116,6 +117,7 @@ function ComingSoon({ title }) {
 }
 
 
+import ChangePassword from './pages/ChangePassword';
 
 function ProtectedAdminRoute({ children }) {
   const params = new URLSearchParams(window.location.search);
@@ -123,17 +125,26 @@ function ProtectedAdminRoute({ children }) {
   const userStr = localStorage.getItem('user') || params.get('user');
   let isValid = false;
   let role = null;
+  let mustChange = false;
+  
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
       role = user?.role?.toUpperCase();
+      mustChange = user?.mustChangePassword === true;
       if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
         isValid = true;
       }
     } catch (e) {}
   }
-  if (role === 'MEMBER' && !isValid) return <Navigate to="/member/dashboard" replace />;
   if (!isValid) return <Navigate to="/login" replace />;
+  if (role === 'MEMBER' && !isValid) return <Navigate to="/member/dashboard" replace />;
+  
+  // Enforce First Login Flow
+  if (mustChange) {
+    return <Navigate to="/admin/change-password" replace />;
+  }
+
   return children;
 }
 
@@ -157,6 +168,24 @@ function ProtectedMemberRoute({ children }) {
   return children;
 }
 
+function ChangePasswordRoute({ children }) {
+  const params = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('token') || params.get('token');
+  const userStr = localStorage.getItem('user') || params.get('user');
+  let isValid = false;
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      const role = user?.role?.toUpperCase();
+      if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+        isValid = true;
+      }
+    } catch (e) {}
+  }
+  if (!isValid) return <Navigate to="/login" replace />;
+  return children;
+}
+
 function PublicRoute({ children }) {
   // Purposefully stripped of automatic redirect logic.
   // The system must explicitly force manual login as per strict architectural requirements.
@@ -166,7 +195,7 @@ function PublicRoute({ children }) {
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 
-export const queryClient = new QueryClient();
+const queryClient = new QueryClient();
 window.__queryClient = queryClient;
 
 function AppLayer() {
@@ -178,6 +207,9 @@ function AppLayer() {
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/member/login" element={<Navigate to="/login" replace />} />
+
+          {/* FIRST LOGIN ROUTE */}
+          <Route path="/admin/change-password" element={<ChangePasswordRoute><ChangePassword /></ChangePasswordRoute>} />
 
           {/* ADMIN PORTAL */}
           <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminMainLayout navItems={adminNavSidebarItems} bottomNav={bottomNavItems} /></ProtectedAdminRoute>}>
@@ -284,6 +316,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
        <AppLayer />
+       <Toaster position="top-right" />
     </QueryClientProvider>
   );
 }
