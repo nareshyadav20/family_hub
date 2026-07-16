@@ -203,7 +203,20 @@ export default function FamilyHistory() {
                    <tr><td colSpan="8" className="p-8 text-center text-slate-500 font-bold tracking-wider text-sm">Loading database...</td></tr>
                 )}
                 {!isLoading && filtered.length === 0 && (
-                   <tr><td colSpan="8" className="p-12 text-center text-slate-500 font-bold text-sm tracking-wider">No history records found.</td></tr>
+                   <tr>
+                      <td colSpan="8" className="p-16 text-center">
+                         <div className="flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 bg-purple-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-purple-500">
+                               <BookOpen size={32} />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">No history records yet</h3>
+                            <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">Begin documenting your family’s legacy. Add key milestones, properties, or ancestral origins.</p>
+                            <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all">
+                               <Plus size={16} /> Add First Event
+                            </button>
+                         </div>
+                      </td>
+                   </tr>
                 )}
                 {filtered.map(item => (
                   <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
@@ -310,7 +323,10 @@ export default function FamilyHistory() {
                  </div>
                ))}
                {filtered.length === 0 && (
-                  <div className="text-slate-400 text-sm font-bold text-center mt-20">No Timeline Data Found.</div>
+                  <div className="flex flex-col items-center justify-center pt-20 pb-10 text-slate-400">
+                     <span className="text-[40px] mb-2 opacity-50">⏳</span>
+                     <p className="text-sm font-bold text-center">Your timeline is waiting...</p>
+                  </div>
                )}
              </div>
           </div>

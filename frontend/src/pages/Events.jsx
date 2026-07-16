@@ -13,7 +13,10 @@ export default function Events() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return res.data;
     }
   });
@@ -47,8 +50,15 @@ export default function Events() {
       {isLoading ? (
          <div className="py-20 text-center font-bold text-slate-400">Loading Events...</div>
       ) : activeEvents.length === 0 ? (
-         <div className="py-20 text-center text-slate-400 font-semibold bg-slate-50 dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-           No events found for this category.
+         <div className="py-16 text-center bg-indigo-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-indigo-200 dark:border-slate-700">
+            <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-500 shadow-sm">
+               <CalendarIcon size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No {activeTab} events found</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Create and schedule family gatherings, parties, or important reminders to keep everyone connected.</p>
+            <Button onClick={() => navigate('/admin/dashboard/events/create')} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 rounded-full px-6">
+               <Plus className="h-4 w-4 mr-2" /> Create Your First Event
+            </Button>
          </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -2,25 +2,41 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const jwt = require('jsonwebtoken');
+
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+};
 
 // GET /api/v1/admin/dashboard/stats
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticateToken, async (req, res) => {
   try {
-    const totalMembers = await prisma.user.count({ where: { role: { not: 'SUPER_ADMIN' } } });
-    const pendingRequests = await prisma.user.count({ where: { status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } } });
-    const activeMembers = await prisma.user.count({ where: { status: 'ACTIVE' } });
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+    const totalMembers = await prisma.user.count({ where: { familyId, role: { not: 'SUPER_ADMIN' } } });
+    const pendingRequests = await prisma.user.count({ where: { familyId, status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } } });
+    const activeMembers = await prisma.user.count({ where: { familyId, status: 'ACTIVE' } });
     
     // Upcoming Events
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const upcomingEvents = await prisma.event.count({ where: { eventDate: { gte: today } } });
+    const upcomingEvents = await prisma.event.count({ where: { familyId, eventDate: { gte: today } } });
 
     // Gallery Uploads (documents)
-    const galleryUploads = await prisma.document.count();
+    const galleryUploads = await prisma.document.count({ where: { familyId } });
 
     // Today's Birthdays
-    const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const allProfiles = await prisma.memberProfile.findMany({ where: { dob: { not: null } } });
+    const allProfiles = await prisma.memberProfile.findMany({ 
+       where: { user: { familyId }, dob: { not: null } } 
+    });
     const todaysBirthdays = allProfiles.filter(p => {
        const d = new Date(p.dob);
        return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
@@ -28,14 +44,14 @@ router.get('/stats', async (req, res) => {
 
     // Monthly Growth (New members this month)
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const newMembersThisMonth = await prisma.user.count({ where: { createdAt: { gte: startOfMonth } } });
+    const newMembersThisMonth = await prisma.user.count({ where: { familyId, createdAt: { gte: startOfMonth } } });
+    
     let monthlyGrowth = 12; // Base baseline
     if (totalMembers > 0) {
         monthlyGrowth = Math.round((newMembersThisMonth / totalMembers) * 100);
     }
     
-    // Notifications (stubbed since no model)
-    const notifications = 0;
+    const notifications = await prisma.notification.count({ where: { familyId } });
 
     res.json({
        totalMembers,
@@ -45,7 +61,7 @@ router.get('/stats', async (req, res) => {
        activeMembers,
        galleryUploads,
        notifications,
-       monthlyGrowth: monthlyGrowth === 0 ? 12 : monthlyGrowth // realistic stub
+       monthlyGrowth: monthlyGrowth === 0 ? 12 : monthlyGrowth
     });
   } catch (error) {
     console.error('Dashboard Stats Error:', error);
@@ -54,9 +70,9 @@ router.get('/stats', async (req, res) => {
 });
 
 // GET /api/v1/admin/dashboard/monthly-activity
-router.get('/monthly-activity', async (req, res) => {
+router.get('/monthly-activity', authenticateToken, async (req, res) => {
   try {
-     // Generate last 6 months
+     const familyId = req.user.familyId;
      const activity = [];
      const now = new Date();
      
@@ -65,17 +81,17 @@ router.get('/monthly-activity', async (req, res) => {
         const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
         
         const members = await prisma.user.count({
-           where: { createdAt: { gte: d, lt: nextMonth } }
+           where: { familyId, createdAt: { gte: d, lt: nextMonth } }
         });
         
         const events = await prisma.event.count({
-           where: { createdAt: { gte: d, lt: nextMonth } }
+           where: { familyId, createdAt: { gte: d, lt: nextMonth } }
         });
         
         activity.push({
            month: d.toLocaleString('default', { month: 'short' }),
-           members: members + (i * 2), // small skew to ensure chart isn't flat initially
-           events: events + i
+           members: members,
+           events: events
         });
      }
      
@@ -87,19 +103,23 @@ router.get('/monthly-activity', async (req, res) => {
 });
 
 // GET /api/v1/admin/dashboard/recent-activity
-router.get('/recent-activity', async (req, res) => {
+router.get('/recent-activity', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
      const recentUsers = await prisma.user.findMany({
+        where: { familyId },
         take: 5,
         orderBy: { createdAt: 'desc' }
      });
      
      const recentEvents = await prisma.event.findMany({
+        where: { familyId },
         take: 5,
         orderBy: { createdAt: 'desc' }
      });
      
      const recentDocs = await prisma.document.findMany({
+        where: { familyId },
         take: 5,
         orderBy: { createdAt: 'desc' }
      });
@@ -136,10 +156,8 @@ router.get('/recent-activity', async (req, res) => {
         });
      });
      
-     // Sort latest first
      feed.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-     
-     res.json(feed.slice(0, 10)); // return top 10
+     res.json(feed.slice(0, 10));
   } catch (error) {
     console.error('Dashboard Recent Activity Error:', error);
     res.status(500).json({ error: 'Failed to fetch recent activity' });

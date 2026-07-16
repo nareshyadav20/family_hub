@@ -12,7 +12,10 @@ export default function Events() {
     queryFn: async () => {
       // Re-using the unified admin fetch endpoint for data continuity 
       // (in a full production app, this would be grouped slightly differently)
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       return res.data;
     }
   });

@@ -181,7 +181,13 @@ export default function Calendar() {
             </div>
           ))}
           {events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length === 0 && (
-             <div className="text-sm text-slate-500 font-medium py-4 text-center">No events scheduled.</div>
+             <div className="flex flex-col items-center justify-center py-10">
+                <div className="w-12 h-12 bg-indigo-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3 text-indigo-500">
+                   <span className="text-[24px]">📅</span>
+                </div>
+                <h4 className="font-bold text-slate-800 dark:text-white mb-1">No upcoming events</h4>
+                <p className="text-xs text-slate-500">Your schedule for this month is clear.</p>
+             </div>
           )}
         </div>
       </div>

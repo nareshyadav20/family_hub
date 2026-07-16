@@ -31,7 +31,10 @@ export default function AddMember() {
 
   const mutation = useMutation({
     mutationFn: async ({ payload }) => {
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/add`, payload);
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/add`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (res.data.success === false) {
         throw new Error(res.data.error || 'Server rejected payload');
       }

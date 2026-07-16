@@ -198,9 +198,61 @@ import { io } from 'socket.io-client';
 const queryClient = new QueryClient();
 window.__queryClient = queryClient;
 
+function SessionWatcher() {
+  const [showConflict, setShowConflict] = React.useState(false);
+
+  React.useEffect(() => {
+    // Current valid tokens initialized on mount for this specific tab's React tree
+    let initialToken = localStorage.getItem('token');
+    
+    const handleStorageChange = (e) => {
+      // If another tab wiped the token entirely (pure logout)
+      if (e.key === 'token' && !e.newValue) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // If another tab set a NEW active token (switched user/login)
+      if (e.key === 'token' && e.newValue && e.newValue !== initialToken) {
+        setShowConflict(true);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  if (!showConflict) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-300">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Session Changed</h2>
+        <p className="text-sm text-slate-500 max-w-[300px] mb-6">
+          Your account has been changed in another tab. 
+          Please refresh to continue with the new session or log out completely.
+        </p>
+        <div className="flex gap-3 mt-6">
+          <button onClick={() => {
+             localStorage.removeItem('token');
+             localStorage.removeItem('user');
+             window.location.href = '/login';
+          }} className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-colors">
+            Logout
+          </button>
+          <button onClick={() => window.location.reload()} className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-blue-600/30">
+            Refresh Session
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AppLayer() {
   return (
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <SessionWatcher />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
@@ -280,7 +332,10 @@ function App() {
       (response) => response,
       (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          globalLogout();
+          const url = error.config?.url || '';
+          if (!url.includes('/auth/') && !url.includes('/login') && !url.includes('/signup')) {
+             globalLogout();
+          }
         }
         return Promise.reject(error);
       }
@@ -289,7 +344,10 @@ function App() {
       (response) => response,
       (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          globalLogout();
+          const url = error.config?.url || '';
+          if (!url.includes('/auth/') && !url.includes('/login') && !url.includes('/signup')) {
+             globalLogout();
+          }
         }
         return Promise.reject(error);
       }

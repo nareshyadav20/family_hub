@@ -22,8 +22,11 @@ router.use(authMiddleware);
 // GET /api/v1/gallery
 router.get('/', async (req, res) => {
     try {
+        const familyId = req.user.familyId;
+        if (!familyId) return res.json([]);
+        
         const photos = await prisma.document.findMany({
-            where: { type: { startsWith: 'image/' }, visibility: 'FAMILY' }, // Using visibility FAMILY to distinguish gallery photos
+            where: { familyId, type: { startsWith: 'image/' }, visibility: 'FAMILY' }, // Using visibility FAMILY to distinguish gallery photos
             include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
             orderBy: { createdAt: 'desc' }
         });
@@ -49,6 +52,9 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { category, fileUrl, fileName, fileSize, fileType } = req.body;
+        const familyId = req.user.familyId;
+        if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+        
         const photo = await prisma.document.create({
             data: {
                name: fileName || `Photo_${Date.now()}`,
@@ -57,6 +63,7 @@ router.post('/', async (req, res) => {
                category: category || 'Family',
                url: fileUrl,
                uploaderId: req.user.userId,
+               familyId: familyId,
                visibility: 'FAMILY',
                status: 'VERIFIED'
             }
@@ -70,7 +77,8 @@ router.post('/', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        await prisma.document.delete({ where: { id: req.params.id } });
+        const familyId = req.user.familyId;
+        await prisma.document.delete({ where: { id: req.params.id, familyId } });
         res.json({ success: true });
     } catch(err) {
         console.error(err);

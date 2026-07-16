@@ -103,30 +103,47 @@ export default function FamilyGroups() {
                      </tr>
                   </thead>
                   <tbody>
-                     {groups.map(g => (
-                        <tr key={g.id} className="border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                           <td className="p-4">
-                              <div className="flex items-center gap-3 cursor-pointer" onClick={() => goDetails(g.id)}>
-                                 <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold">{g.name.charAt(0)}</div>
-                                 <div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white">{g.name}</h4>
-                                    <p className="text-xs text-slate-500 truncate w-40">{g.description}</p>
+                     {groups.length === 0 ? (
+                        <tr>
+                           <td colSpan="6" className="py-16 text-center">
+                              <div className="flex flex-col items-center justify-center">
+                                 <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-blue-500 shadow-sm">
+                                    <Users size={32} />
                                  </div>
+                                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No groups created</h3>
+                                 <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create dedicated groups for branches of the family, specific events, or interest circles.</p>
+                                 <button onClick={goCreate} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all">
+                                    <Plus size={16} /> Create First Group
+                                 </button>
                               </div>
                            </td>
-                           <td className="p-4 text-slate-600 font-medium">{g.category}</td>
-                           <td className="p-4">
-                              <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${g.privacy === 'Private' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                                 {g.privacy}
-                              </span>
-                           </td>
-                           <td className="p-4 text-slate-600 font-bold">{g._count?.members || 0}</td>
-                           <td className="p-4 text-slate-600 font-medium">{g.status}</td>
-                           <td className="p-4 text-right">
-                              <button onClick={() => goDetails(g.id)} className="text-blue-600 hover:text-blue-800 font-bold text-sm px-3 py-1.5 bg-blue-50 rounded-lg">View</button>
-                           </td>
                         </tr>
-                     ))}
+                     ) : (
+                        groups.map(g => (
+                           <tr key={g.id} className="border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                              <td className="p-4">
+                                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => goDetails(g.id)}>
+                                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold">{g.name.charAt(0)}</div>
+                                    <div>
+                                       <h4 className="font-bold text-slate-900 dark:text-white">{g.name}</h4>
+                                       <p className="text-xs text-slate-500 truncate w-40">{g.description}</p>
+                                    </div>
+                                 </div>
+                              </td>
+                              <td className="p-4 text-slate-600 font-medium">{g.category}</td>
+                              <td className="p-4">
+                                 <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${g.privacy === 'Private' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                    {g.privacy}
+                                 </span>
+                              </td>
+                              <td className="p-4 text-slate-600 font-bold">{g._count?.members || 0}</td>
+                              <td className="p-4 text-slate-600 font-medium">{g.status}</td>
+                              <td className="p-4 text-right">
+                                 <button onClick={() => goDetails(g.id)} className="text-blue-600 hover:text-blue-800 font-bold text-sm px-3 py-1.5 bg-blue-50 rounded-lg">View</button>
+                              </td>
+                           </tr>
+                        ))
+                     )}
                   </tbody>
                </table>
              </div>

@@ -97,6 +97,13 @@ model Family {
   updatedAt   DateTime @updatedAt
 
   members User[]
+  events          Event[]         @relation("FamilyEvents")
+  documents       Document[]      @relation("FamilyDocuments")
+  announcements   Announcement[]  @relation("FamilyAnnouncements")
+  polls           Poll[]          @relation("FamilyPolls")
+  notifications   Notification[]  @relation("FamilyNotifications")
+  groups          Group[]         @relation("FamilyGroups")
+  familyHistories FamilyHistory[] @relation("FamilyHistories")
 
   @@map("families")
 }
@@ -149,6 +156,8 @@ model Event {
   country         String
   googleMapsUrl   String?
   organizerId     String
+  familyId        String?
+  family          Family?  @relation("FamilyEvents", fields: [familyId], references: [id], onDelete: Cascade)
   familyBranch    String
   visibility      String   @default("Private")
   inviteType      String   @default("All Members")
@@ -197,6 +206,9 @@ model Document {
   uploaderId  String
   uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   
+  familyId    String?
+  family      Family?  @relation("FamilyDocuments", fields: [familyId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -247,6 +259,9 @@ model Announcement {
   authorId    String
   author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   
+  familyId    String?
+  family      Family?  @relation("FamilyAnnouncements", fields: [familyId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -262,6 +277,9 @@ model Poll {
   authorId    String
   author      User     @relation("UserPolls", fields: [authorId], references: [id], onDelete: Cascade)
   
+  familyId    String?
+  family      Family?  @relation("FamilyPolls", fields: [familyId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -276,6 +294,9 @@ model Notification {
   targetType  String   @default("All") // 'All', 'Admin', or specific userId
   isRead      Boolean  @default(false)
   
+  familyId    String?
+  family      Family?  @relation("FamilyNotifications", fields: [familyId], references: [id], onDelete: Cascade)
+
   createdAt   DateTime @default(now())
   
   @@map("notifications")
@@ -300,6 +321,9 @@ model Group {
   welcomeMessage  String?
   
   ownerId         String
+  familyId        String?
+  family          Family?  @relation("FamilyGroups", fields: [familyId], references: [id], onDelete: Cascade)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -370,6 +394,9 @@ model FamilyHistory {
   addedById     String
   addedBy       User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
   
+  familyId      String?
+  family        Family?  @relation("FamilyHistories", fields: [familyId], references: [id], onDelete: Cascade)
+
   relatedMembers Json?    
 
   createdAt     DateTime @default(now())

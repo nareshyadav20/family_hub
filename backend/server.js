@@ -98,12 +98,12 @@ app.post('/api/v1/auth/signup', async (req, res) => {
     });
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role, familyId: user.familyId },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
     const refreshToken = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role, familyId: user.familyId },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -153,13 +153,13 @@ app.post('/api/v1/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role, familyId: user.familyId },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role, familyId: user.familyId },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -225,9 +225,13 @@ app.post('/api/v1/auth/change-password', async (req, res) => {
 });
 
 // Fetch All Members Endpoint (Admin Legacy)
-app.get('/api/v1/admin/members', async (req, res) => {
+app.get('/api/v1/admin/members', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
      const members = await prisma.user.findMany({
+        where: { familyId },
         include: {
            invitation: true,
            memberProfile: true
@@ -241,29 +245,42 @@ app.get('/api/v1/admin/members', async (req, res) => {
   }
 });
 
+// Authentication Middleware (Universal)
+function authenticateToken(req, res, next) {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+};
+
 // Shared Unified API
 // GET /api/v1/members
-app.get('/api/v1/members', async (req, res) => {
+app.get('/api/v1/members', authenticateToken, async (req, res) => {
   try {
-     const token = req.headers.authorization?.split(' ')[1];
-     let role = 'MEMBER';
-     if (token) {
-        try {
-           const decoded = jwt.verify(token, process.env.JWT_SECRET);
-           role = decoded.role || 'MEMBER';
-        } catch(e) {}
-     }
+     const role = req.user.role;
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
      let users = [];
 
-     if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+     if (role === 'SUPER_ADMIN') {
          users = await prisma.user.findMany({
+            include: { invitation: true, memberProfile: true },
+            orderBy: { createdAt: 'desc' }
+         });
+     } else if (role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+         users = await prisma.user.findMany({
+            where: { familyId },
             include: { invitation: true, memberProfile: true },
             orderBy: { createdAt: 'desc' }
          });
      } else {
          users = await prisma.user.findMany({
-            where: { status: 'ACTIVE' },
+            where: { familyId, status: 'ACTIVE' },
             select: { id: true, memberId: true, firstName: true, lastName: true, email: true, phone: true, role: true, joinedDate: true, avatar: true },
             orderBy: { firstName: 'asc' }
          });
@@ -311,8 +328,11 @@ app.get('/api/v1/profile', async (req, res) => {
 });
 
 // Bulk Delete Members Endpoint (Admin)
-app.delete('/api/v1/admin/members/bulk', async (req, res) => {
+app.delete('/api/v1/admin/members/bulk', authenticateToken, async (req, res) => {
   try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'No member IDs provided' });
@@ -320,7 +340,7 @@ app.delete('/api/v1/admin/members/bulk', async (req, res) => {
     
     // Delete associated relations first if onDelete Cascade isn't setup perfectly or relying on Prisma logic
     await prisma.user.deleteMany({
-      where: { id: { in: ids } }
+      where: { id: { in: ids }, familyId }
     });
 
     res.json({ success: true, message: `Deleted ${ids.length} members` });
@@ -330,7 +350,10 @@ app.delete('/api/v1/admin/members/bulk', async (req, res) => {
   }
 });
 // Manual Add Member Endpoint (No Invite)
-app.post('/api/v1/admin/members/add', async (req, res) => {
+app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
+  const familyId = req.user.familyId;
+  if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
   const { firstName, lastName, email, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId } = req.body;
   if (!firstName?.trim()) {
     console.log("WARN: Add Validation skipped. Payload:", req.body);
@@ -354,6 +377,7 @@ app.post('/api/v1/admin/members/add', async (req, res) => {
            data: {
              memberId, firstName, lastName: lastName?.trim() || '', email, gender, relationship, familyBranch, role: role || 'MEMBER',
              fatherId: fatherId || null, motherId: motherId || null, spouseId: spouseId || null,
+             familyId: familyId,
              status: isDraft ? 'PENDING_INVITE' : status
            }
         });
@@ -378,9 +402,12 @@ app.post('/api/v1/admin/members/add', async (req, res) => {
 });
 
 // Add Member / Invite Endpoint (Admin)
-app.post('/api/v1/admin/members/invite', async (req, res) => {
+app.post('/api/v1/admin/members/invite', authenticateToken, async (req, res) => {
   const { firstName, lastName, phone, email, gender, relationship, familyBranch, role, isDraft } = req.body;
+  const familyId = req.user.familyId;
   
+  if (!familyId) return res.status(401).json({ error: 'Family ID missing from user session' });
+
   if (!firstName?.trim() || !phone?.trim()) {
     console.log("WARN: Validation skipped. Payload:", req.body);
   }
@@ -400,6 +427,7 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
+          familyId,
           memberId, firstName, lastName: lastName?.trim() || '', phone, email: email || null,
           gender, relationship, familyBranch,
           role: role || 'MEMBER',
@@ -497,18 +525,20 @@ app.post('/api/v1/admin/members/invite', async (req, res) => {
 });
 
 // Resend Invitation Endpoint
-app.post('/api/v1/admin/members/invite/resend', async (req, res) => {
+app.post('/api/v1/admin/members/invite/resend', authenticateToken, async (req, res) => {
   const { memberId } = req.body;
+  const familyId = req.user.familyId;
   if (!memberId) return res.status(400).json({ error: 'Member ID is required' });
+  if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: memberId },
+      where: { id: memberId, familyId },
       include: { invitation: true }
     });
 
     if (!user) return res.status(404).json({ error: 'Member not found' });
-    if (user.status !== 'INVITATION_SENT' && user.status !== 'EMAIL_FAILED') {
+    if (user.status !== 'INVITATION_SENT' && user.status !== 'EMAIL_FAILED' && user.status !== 'PENDING_INVITE') {
       return res.status(400).json({ error: 'Cannot resend invitation for this status' });
     }
 
@@ -636,9 +666,12 @@ app.post('/api/v1/auth/invite/accept', async (req, res) => {
 // DOCUMENTS API (Shared)
 // ==========================================
 
-app.get('/api/v1/documents', async (req, res) => {
+app.get('/api/v1/documents', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
      const docs = await prisma.document.findMany({
+        where: { familyId },
         include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
         orderBy: { createdAt: 'desc' }
      });
@@ -646,8 +679,10 @@ app.get('/api/v1/documents', async (req, res) => {
   } catch(err) { res.status(500).json({ error: 'Server error' }); }
 });
 
-app.post('/api/v1/documents', async (req, res) => {
+app.post('/api/v1/documents', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
      const { name, type, size, category, visibility, uploaderId, fileUrl } = req.body;
      const doc = await prisma.document.create({
         data: {
@@ -655,6 +690,7 @@ app.post('/api/v1/documents', async (req, res) => {
            url: fileUrl || `#${Date.now()}`,
            visibility: visibility || 'PRIVATE',
            uploaderId,
+           familyId,
            status: 'PENDING'
         },
         include: { uploader: { select: { firstName: true, lastName: true } } }
@@ -697,7 +733,7 @@ app.put('/api/v1/documents/:id/status', async (req, res) => {
 // EVENTS API (Admin)
 // ==========================================
 
-app.post('/api/v1/admin/events', async (req, res) => {
+app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
   try {
      const {
         name, category, description, bannerImage, eventDate, startTime, endTime, venue,
@@ -706,12 +742,15 @@ app.post('/api/v1/admin/events', async (req, res) => {
         liveStream, streamVisibility, liveChat, recordEvent, allowPhotos, allowComments,
         reminders, status
      } = req.body;
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
      const eventId = 'EVT-' + Math.floor(10000 + Math.random() * 90000);
      const safeEventDate = eventDate ? new Date(eventDate) : new Date();
      
      const event = await prisma.event.create({
         data: {
+           familyId,
            eventId, 
            name: name || 'Untitled Event', 
            category: category || 'Other', 
@@ -759,9 +798,11 @@ app.post('/api/v1/admin/events', async (req, res) => {
   }
 });
 
-app.get('/api/v1/admin/events', async (req, res) => {
+app.get('/api/v1/admin/events', authenticateToken, async (req, res) => {
   try {
-    const events = await prisma.event.findMany({ orderBy: { eventDate: 'asc' } });
+    const familyId = req.user.familyId;
+    if (!familyId) return res.json([]);
+    const events = await prisma.event.findMany({ where: { familyId }, orderBy: { eventDate: 'asc' } });
     res.json(events);
   } catch(err) {
     res.status(500).json({ error: 'Failed' });
@@ -769,18 +810,9 @@ app.get('/api/v1/admin/events', async (req, res) => {
 });
 
 // Get Logged-in Profile Endpoint
-app.get('/api/v1/member/profile', async (req, res) => {
-  const memberId = typeof req.user !== 'undefined' ? req.user.id : null;
+app.get('/api/v1/member/profile', authenticateToken, async (req, res) => {
   try {
-     let user = null;
-     if (memberId) {
-        user = await prisma.user.findUnique({ where: { id: memberId }, include: { memberProfile: true } });
-
-// Triggered reboot
-     } else {
-        user = await prisma.user.findFirst({ include: { memberProfile: true } });
-     }
-     
+     const user = await prisma.user.findUnique({ where: { id: req.user.userId }, include: { memberProfile: true } });
      if (!user) return res.status(404).json({ error: 'User not found' });
      res.json({ user, profile: user.memberProfile || { currentStage: 1, profileCompletion: 0 } });
   } catch(err) {
@@ -789,15 +821,11 @@ app.get('/api/v1/member/profile', async (req, res) => {
 });
 
 // Save Profile Progress Endpoint
-app.put('/api/v1/member/profile', async (req, res) => {
+app.put('/api/v1/member/profile', authenticateToken, async (req, res) => {
   const { currentStage, profileCompletion, ...profileData } = req.body;
   try {
-     // Grab the exact first available user since typical JWT tokens are stubbed
-     let activeUser = req.user;
-     if (!activeUser) {
-        activeUser = await prisma.user.findFirst();
-        if (!activeUser) return res.status(404).json({ error: 'No active user found to update.' });
-     }
+     const activeUser = req.user;
+     if (!activeUser) return res.status(401).json({ error: 'Unauthorized' });
 
      const safeData = {
         currentStage, 

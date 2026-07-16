@@ -100,6 +100,18 @@ export default function Polls() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        {!isLoading && polls.length === 0 && (
+           <div className="col-span-1 xl:col-span-2 py-16 text-center bg-blue-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-blue-200 dark:border-slate-700 w-full mt-4">
+              <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
+                 <BarChart2 size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No polls available</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Gather family opinions and democratize decisions. Create a poll to see what everyone thinks.</p>
+              <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
+                 <Plus size={16} /> Create Your First Poll
+              </button>
+           </div>
+        )}
         {polls.map(poll => {
           const votesMap = poll.votes || {};
           const totalVotes = Object.keys(votesMap).length;

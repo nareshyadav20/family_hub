@@ -20,18 +20,22 @@ router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
     try {
+        const userId = req.user.userId;
+        const familyId = req.user.familyId;
+        if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
         const today = new Date();
         today.setHours(0,0,0,0);
 
         // Stats
-        const totalMembers = await prisma.user.count({ where: { status: 'ACTIVE' } });
-        const myPhotos = await prisma.document.count({ where: { type: { startsWith: 'image/' }, uploaderId: req.user.userId } });
+        const totalMembers = await prisma.user.count({ where: { familyId, status: 'ACTIVE' } });
+        const myPhotos = await prisma.document.count({ where: { familyId, type: { startsWith: 'image/' }, uploaderId: userId } });
         
         // Upcoming Events
         const nextMonth = new Date(today);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         const upcomingEventsRaw = await prisma.event.findMany({
-            where: { eventDate: { gte: today } },
+            where: { familyId, eventDate: { gte: today } },
             orderBy: { eventDate: 'asc' },
             take: 3
         });
@@ -44,12 +48,12 @@ router.get('/', async (req, res) => {
         }));
 
         const eventsThisMonth = await prisma.event.count({
-            where: { eventDate: { gte: today, lt: nextMonth } }
+            where: { familyId, eventDate: { gte: today, lt: nextMonth } }
         });
 
         // Birthdays (Scan profiles)
         const allProfiles = await prisma.memberProfile.findMany({
-            where: { dob: { not: null } },
+            where: { user: { familyId }, dob: { not: null } },
             include: { user: { select: { firstName: true, lastName: true, avatar: true } } }
         });
         
@@ -83,7 +87,7 @@ router.get('/', async (req, res) => {
         let feedPosts = [];
         
         const galleries = await prisma.document.findMany({
-            where: { type: { startsWith: 'image/' }, visibility: 'FAMILY' },
+            where: { familyId, type: { startsWith: 'image/' }, visibility: 'FAMILY' },
             include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
             orderBy: { createdAt: 'desc' },
             take: 5
@@ -104,6 +108,7 @@ router.get('/', async (req, res) => {
         });
 
         const histories = await prisma.familyHistory.findMany({
+            where: { familyId },
             include: { addedBy: { select: { firstName: true, lastName: true, avatar: true } } },
             orderBy: { createdAt: 'desc' },
             take: 5
@@ -134,17 +139,18 @@ router.get('/', async (req, res) => {
             const monthName = d.toLocaleString('en-US', { month: 'short' });
             
             const postsCount = await prisma.document.count({
-                where: { type: { startsWith: 'image/' }, createdAt: { gte: d, lt: nextD } }
+                where: { familyId, type: { startsWith: 'image/' }, createdAt: { gte: d, lt: nextD } }
             });
             const memoriesCount = await prisma.familyHistory.count({
-                where: { createdAt: { gte: d, lt: nextD } }
+                where: { familyId, createdAt: { gte: d, lt: nextD } }
             });
             activityData.push({ month: monthName, posts: postsCount, memories: memoriesCount });
         }
         
         const newMessagesCount = await prisma.message.count({
             where: {
-                receiverId: req.user.userId,
+                receiverId: userId,
+                sender: { familyId },
                 isRead: false
             }
         });

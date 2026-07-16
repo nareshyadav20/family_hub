@@ -238,6 +238,21 @@ export default function Members() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                {isLoading ? (
                   <tr><td colSpan="11" className="text-center py-8 text-slate-500 font-bold">Loading Directory...</td></tr>
+               ) : liveMembers.length === 0 ? (
+                  <tr>
+                     <td colSpan="11" className="text-center py-16">
+                        <div className="flex flex-col items-center justify-center">
+                           <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-blue-500">
+                              <Users size={32} />
+                           </div>
+                           <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">No members found</h3>
+                           <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">Your family directory is empty. Start building your family network by adding or inviting members.</p>
+                           <button onClick={() => navigate('/admin/dashboard/members/invite')} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all">
+                              <Mail size={16} /> Invite Your First Member
+                           </button>
+                        </div>
+                     </td>
+                  </tr>
                ) : liveMembers.map((m) => (
                  <tr key={m.id} className="hover:bg-blue-50/40 dark:hover:bg-slate-800/40 transition-colors group relative">
                     <td className="px-4 py-4 text-center hidden md:table-cell w-12">

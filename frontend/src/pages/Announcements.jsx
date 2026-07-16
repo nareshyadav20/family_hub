@@ -65,7 +65,18 @@ export default function Announcements() {
 
       <div className="space-y-4">
         {isLoading && <div className="p-8 text-center text-slate-500">Loading announcements...</div>}
-        {!isLoading && announcements.length === 0 && <div className="p-8 text-center text-slate-500">No announcements found.</div>}
+        {!isLoading && announcements.length === 0 && (
+           <div className="py-16 text-center bg-blue-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-blue-200 dark:border-slate-700 w-full mt-4">
+              <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
+                 <Megaphone size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No announcements</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Broadcast important updates, rules, or news to all family members across the platform.</p>
+              <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
+                 <Plus size={16} /> Broadcast First Announcement
+              </button>
+           </div>
+        )}
         
         {announcements.map(ann => (
           <div key={ann.id} className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${ann.pinned ? 'border-blue-200 dark:border-blue-800/60' : 'border-slate-100 dark:border-slate-800'}`}>

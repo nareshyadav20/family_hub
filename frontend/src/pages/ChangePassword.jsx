@@ -36,7 +36,8 @@ export default function ChangePassword() {
     try {
       // Typically the token is available if we got here
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/v1/auth/change-password', {
+      const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+      const response = await axios.post(`${API_URL}/auth/change-password`, {
         currentPassword,
         newPassword
       }, {

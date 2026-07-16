@@ -23,9 +23,11 @@ router.use(authMiddleware);
 router.get('/conversations', async (req, res) => {
   try {
     const userId = req.user.userId;
+    const familyId = req.user.familyId;
+    if (!familyId) return res.json([]);
     
     const contacts = await prisma.user.findMany({
-        where: { id: { not: userId } },
+        where: { id: { not: userId }, familyId },
         select: { id: true, firstName: true, lastName: true, avatar: true }
     });
     
@@ -72,8 +74,12 @@ router.get('/conversations', async (req, res) => {
 router.get('/:contactId', async (req, res) => {
   try {
     const userId = req.user.userId;
+    const familyId = req.user.familyId;
     const { contactId } = req.params;
     
+    const contactCheck = await prisma.user.findUnique({ where: { id: contactId, familyId }});
+    if (!contactCheck) return res.status(403).json({ error: 'Not permitted' });
+
     const messages = await prisma.message.findMany({
         where: {
             OR: [
@@ -101,8 +107,12 @@ router.get('/:contactId', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const userId = req.user.userId;
+    const familyId = req.user.familyId;
     const { receiverId, text } = req.body;
     
+    const receiverCheck = await prisma.user.findUnique({ where: { id: receiverId, familyId }});
+    if (!receiverCheck) return res.status(403).json({ error: 'Receiver not in your family' });
+
     const message = await prisma.message.create({
         data: {
             senderId: userId,

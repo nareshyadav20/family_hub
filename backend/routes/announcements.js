@@ -2,23 +2,30 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const jwt = require('jsonwebtoken');
+
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+};
 
 // POST /api/v1/admin/announcements
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
      const { title, message, targetType, pinned } = req.body;
-     const authorId = req.user?.id;
+     const authorId = req.user.userId;
+     const familyId = req.user.familyId;
      
      if (!title || !message) {
         return res.status(400).json({ error: 'Title and message are required' });
      }
-     
-     // Fallback to first user if auth fails setup (development)
-     let author = authorId;
-     if (!author) {
-        const u = await prisma.user.findFirst();
-        author = u.id;
-     }
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
      const announcement = await prisma.announcement.create({
         data: {
@@ -26,7 +33,8 @@ router.post('/', async (req, res) => {
            message,
            targetType: targetType || 'All Members',
            pinned: !!pinned,
-           authorId: author
+           authorId: authorId,
+           familyId: familyId
         },
         include: {
            author: { select: { firstName: true, lastName: true, avatar: true } }
@@ -47,9 +55,13 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/v1/admin/announcements & /api/v1/member/announcements
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.json([]); // Return empty if no family
+
      const announcements = await prisma.announcement.findMany({
+        where: { familyId },
         orderBy: [
            { pinned: 'desc' },
            { createdAt: 'desc' }

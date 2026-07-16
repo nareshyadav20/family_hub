@@ -22,7 +22,11 @@ router.use(authMiddleware);
 // GET /api/v1/family-history
 router.get('/', async (req, res) => {
     try {
+        const familyId = req.user.familyId;
+        if (!familyId) return res.json([]);
+        
         const histories = await prisma.familyHistory.findMany({
+            where: { familyId },
             include: { addedBy: { select: { firstName: true, lastName: true } } },
             orderBy: { eventDate: 'desc' }
         });
@@ -71,10 +75,12 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { title, category, eventDate, description, related, visibility, status, fileUrl } = req.body;
+        const familyId = req.user.familyId;
         
         if (!title || !category || !eventDate || !description) {
             return res.status(400).json({ error: 'Required fields missing' });
         }
+        if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
         let relatedArr = [];
         if (related) {
@@ -91,6 +97,7 @@ router.post('/', async (req, res) => {
                status: status || 'Published',
                thumbnailUrl: fileUrl,
                addedById: req.user.userId,
+               familyId: familyId,
                relatedMembers: relatedArr
             }
         });

@@ -2,22 +2,30 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const jwt = require('jsonwebtoken');
+
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+};
 
 // POST /api/v1/admin/polls (Create)
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
      const { question, options, endDate } = req.body;
-     const authorId = req.user?.id;
+     const authorId = req.user.userId;
+     const familyId = req.user.familyId;
      
      if (!question || !options || options.length < 2) {
         return res.status(400).json({ error: 'Question and at least 2 options are required' });
      }
-
-     let author = authorId;
-     if (!author) {
-        const u = await prisma.user.findFirst();
-        author = u.id;
-     }
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
      // Build options array structure: [{id: 1, text: "Opt"}, {id: 2, text: "Opt"}]
      const formattedOptions = options.map((opt, i) => ({ id: i + 1, text: opt }));
@@ -30,7 +38,8 @@ router.post('/', async (req, res) => {
            options: formattedOptions,
            votes: {},
            endDate: safeEndDate,
-           authorId: author
+           authorId: authorId,
+           familyId: familyId
         },
         include: {
            author: { select: { firstName: true, lastName: true, avatar: true } }
@@ -48,9 +57,13 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/v1/admin/polls & /api/v1/member/polls
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.json([]);
+     
      const polls = await prisma.poll.findMany({
+        where: { familyId },
         orderBy: { createdAt: 'desc' },
         include: {
            author: { select: { firstName: true, lastName: true, avatar: true } }
@@ -64,17 +77,13 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/v1/member/polls/:id/vote
-router.post('/:id/vote', async (req, res) => {
+router.post('/:id/vote', authenticateToken, async (req, res) => {
   try {
      const { optionId } = req.body;
-     let userId = req.user?.id;
+     const userId = req.user.userId;
+     const familyId = req.user.familyId;
      
-     if (!userId) {
-        const u = await prisma.user.findFirst(); // stub auth fallback
-        userId = u.id;
-     }
-     
-     const poll = await prisma.poll.findUnique({ where: { id: req.params.id } });
+     const poll = await prisma.poll.findUnique({ where: { id: req.params.id, familyId } });
      if (!poll) return res.status(404).json({ error: 'Poll not found' });
      
      const existingVotes = typeof poll.votes === 'object' && poll.votes !== null ? poll.votes : {};

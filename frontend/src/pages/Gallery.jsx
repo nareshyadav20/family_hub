@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download } from 'lucide-react';
+import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -162,9 +162,16 @@ export default function Gallery() {
         ))}
       </div>
       {!isLoading && filtered.length === 0 && (
-        <div className="text-center py-20 text-slate-400">
-          <p className="font-medium">No photos found in this category.</p>
-        </div>
+         <div className="py-16 text-center bg-blue-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-blue-200 dark:border-slate-700 w-full mt-4">
+            <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
+               <ImageIcon size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No photos found</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Preserve and share your family's most precious memories. Upload your first photo to start the gallery.</p>
+            <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
+               <Upload size={16} /> Upload Photos
+            </button>
+         </div>
       )}
 
       {showModal && (

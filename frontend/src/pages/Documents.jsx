@@ -169,9 +169,12 @@ export default function Documents() {
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-20 text-slate-400">
-              <FileText className="mx-auto mb-4 opacity-30" size={48} />
-              <p className="font-medium">No documents matching those filters</p>
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
+                <FileText size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No documents found</h3>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto">Manage, organize, and securely store sensitive family documents such as passports, medical records, or legal files here.</p>
             </div>
           )}
         </div>
