@@ -354,13 +354,13 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
   const familyId = req.user.familyId;
   if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
-  const { firstName, lastName, email, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId } = req.body;
+  const { firstName, lastName, email, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId, password } = req.body;
   if (!firstName?.trim()) {
     console.log("WARN: Add Validation skipped. Payload:", req.body);
   }
   
-  if (!email) {
-    return res.status(200).json({ success: false, error: 'Email is required' });
+  if (!email || !password) {
+    return res.status(200).json({ success: false, error: 'Email and Password are required' });
   }
 
   try {
@@ -371,6 +371,7 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
         return res.status(200).json({ success: false, error: 'Email already exists' });
      }
 
+     const hashedPassword = await bcrypt.hash(password, 10);
      const memberId = 'MEM-' + Math.floor(1000 + Math.random() * 9000);
      const user = await prisma.$transaction(async (tx) => {
         const u = await tx.user.create({
@@ -378,7 +379,11 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
              memberId, firstName, lastName: lastName?.trim() || '', email, gender, relationship, familyBranch, role: role || 'MEMBER',
              fatherId: fatherId || null, motherId: motherId || null, spouseId: spouseId || null,
              familyId: familyId,
-             status: isDraft ? 'PENDING_INVITE' : status
+             status: isDraft ? 'PENDING_INVITE' : (status || 'ACTIVE'),
+             password: hashedPassword,
+             mustChangePassword: true,
+             isTemporaryPassword: true,
+             profileCompletion: 25
            }
         });
         
@@ -386,7 +391,7 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
            data: {
               userId: u.id,
               currentStage: 1,
-              profileCompletion: 0
+              profileCompletion: 25
            }
         });
         

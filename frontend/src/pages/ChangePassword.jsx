@@ -10,6 +10,7 @@ export default function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isChanged, setIsChanged] = useState(false);
   const navigate = useNavigate();
 
   const validatePassword = (pwd) => {
@@ -58,8 +59,7 @@ export default function ChangePassword() {
           } catch(e) {}
         }
         
-        // Ensure all other tabs logout or are fine. In our flow, we redirect to dashboard
-        navigate('/admin/dashboard?onboarding=true', { replace: true });
+        setIsChanged(true);
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to change password');
@@ -67,6 +67,37 @@ export default function ChangePassword() {
       setLoading(false);
     }
   };
+
+  const handleContinue = () => {
+    let dashboardRoute = '/login';
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const role = JSON.parse(userStr).role?.toUpperCase();
+        dashboardRoute = role === 'MEMBER' ? '/member/dashboard' : '/admin/dashboard';
+      } catch(e){}
+    }
+    navigate(dashboardRoute, { replace: true });
+  };
+
+  if (isChanged) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-lg border border-gray-100 text-center animate-in fade-in zoom-in duration-300">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 mb-6 shadow-sm">
+            <Check className="h-8 w-8 text-emerald-600 font-bold" strokeWidth={3} />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to FamilyHub OS!</h2>
+          <p className="text-gray-600 leading-relaxed max-w-sm mx-auto mb-8">
+            Your account has been activated successfully. Complete your profile to unlock all features.
+          </p>
+          <button onClick={handleContinue} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-500/30 transition-all">
+            Continue to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">

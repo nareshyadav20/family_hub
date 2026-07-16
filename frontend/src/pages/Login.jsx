@@ -5,10 +5,7 @@ import { Mail, Lock, User, Phone, ArrowLeft, Users, Shield, ArrowRight, Home } f
 
 export default function Login() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const initialMode = params.get('mode') === 'signup' ? 'signup' : 'login';
-  
-  const [view, setView] = useState(initialMode); // login, signup, register_admin, register_member
+  const [view, setView] = useState('login');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -210,35 +207,12 @@ export default function Login() {
             {errorMsg && (
                <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 shadow-sm animate-in fade-in zoom-in-95 duration-200">
                  <p className="text-red-700 dark:text-red-400 text-[14px] font-bold m-0">{errorMsg}</p>
-                 {errorMsg.includes('Account not found') && (
-                   <button type="button" onClick={() => { setErrorMsg(''); setView('signup'); }} className="mt-3 text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">Register Now</button>
-                 )}
                </div>
             )}
             {successMsg && (
                <div className="mb-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 shadow-sm text-emerald-700 dark:text-emerald-400 text-[14px] font-bold text-center animate-in fade-in zoom-in-95 duration-200">
                   {successMsg}
                </div>
-            )}
-
-            {/* --- TOP TABS (Only on Login/Signup) --- */}
-            {(view === 'login' || view === 'signup') && (
-              <div className="flex p-1.5 mb-8 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full mx-auto max-w-sm">
-                <button
-                  type="button"
-                  onClick={() => setView('login')}
-                  className={`flex-1 py-2.5 text-[14.5px] font-bold rounded-xl transition-all ${view === 'login' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView('signup')}
-                  className={`flex-1 py-2.5 text-[14.5px] font-bold rounded-xl transition-all ${view === 'signup' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                >
-                  Sign Up
-                </button>
-              </div>
             )}
 
             {/* --- VIEW: LOGIN --- */}

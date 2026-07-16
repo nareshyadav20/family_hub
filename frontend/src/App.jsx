@@ -154,21 +154,27 @@ function ProtectedMemberRoute({ children }) {
   const userStr = localStorage.getItem('user') || params.get('user');
   let isValid = false;
   let role = null;
+  let mustChangePassword = false;
+  
   if (token && userStr) {
     try {
       const user = JSON.parse(userStr);
       role = user?.role?.toUpperCase();
+      mustChangePassword = user?.mustChangePassword === true;
       if (role === 'MEMBER') {
         isValid = true;
       }
     } catch (e) {}
   }
+  
   if (!isValid && (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN')) return <Navigate to="/admin/dashboard" replace />;
   if (!isValid) return <Navigate to="/login" replace />;
+  if (mustChangePassword) return <Navigate to="/member/change-password" replace />;
+  
   return children;
 }
 
-function ChangePasswordRoute({ children }) {
+function AdminChangePasswordRoute({ children }) {
   const params = new URLSearchParams(window.location.search);
   const token = localStorage.getItem('token') || params.get('token');
   const userStr = localStorage.getItem('user') || params.get('user');
@@ -178,6 +184,24 @@ function ChangePasswordRoute({ children }) {
       const user = JSON.parse(userStr);
       const role = user?.role?.toUpperCase();
       if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+        isValid = true;
+      }
+    } catch (e) {}
+  }
+  if (!isValid) return <Navigate to="/login" replace />;
+  return children;
+}
+
+function MemberChangePasswordRoute({ children }) {
+  const params = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('token') || params.get('token');
+  const userStr = localStorage.getItem('user') || params.get('user');
+  let isValid = false;
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      const role = user?.role?.toUpperCase();
+      if (role === 'MEMBER') {
         isValid = true;
       }
     } catch (e) {}
@@ -261,7 +285,8 @@ function AppLayer() {
           <Route path="/member/login" element={<Navigate to="/login" replace />} />
 
           {/* FIRST LOGIN ROUTE */}
-          <Route path="/admin/change-password" element={<ChangePasswordRoute><ChangePassword /></ChangePasswordRoute>} />
+          <Route path="/admin/change-password" element={<AdminChangePasswordRoute><ChangePassword /></AdminChangePasswordRoute>} />
+          <Route path="/member/change-password" element={<MemberChangePasswordRoute><ChangePassword /></MemberChangePasswordRoute>} />
 
           {/* ADMIN PORTAL */}
           <Route path="/admin/dashboard" element={<ProtectedAdminRoute><AdminMainLayout navItems={adminNavSidebarItems} bottomNav={bottomNavItems} /></ProtectedAdminRoute>}>

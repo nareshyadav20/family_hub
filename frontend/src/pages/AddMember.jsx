@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, X, User } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Lock } from 'lucide-react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -22,7 +22,9 @@ export default function AddMember() {
     motherId: '',
     spouseId: '',
     status: 'ACTIVE',
-    notes: ''
+    notes: '',
+    password: '',
+    confirmPassword: ''
   });
 
   const handleChange = (e) => {
@@ -52,13 +54,22 @@ export default function AddMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role) {
-      toast.error('Please fill all required fields, including Email.');
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
+      toast.error('Please fill all required fields, including password.');
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error('Please enter a valid email address.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!pwdRegex.test(formData.password)) {
+      toast.error('Password must be at least 8 characters long, contain an uppercase letter, lowercase letter, number, and special character.');
       return;
     }
     mutation.mutate({ payload: { ...formData, isDraft } });
@@ -106,6 +117,22 @@ export default function AddMember() {
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth (Optional)</label>
                 <input type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+              <Lock size={18} className="text-blue-500" /> Account Credentials
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password *</label>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Minimum 8 characters" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Confirm Password *</label>
+                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Type password again" />
               </div>
             </div>
           </div>
