@@ -296,4 +296,48 @@ router.delete('/families/:id', async (req, res) => {
   }
 });
 
+// GET superadmin profile
+router.get('/profile/:id', async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: { memberSettings: true }
+    });
+    if (!user) return res.status(404).json({ success: false, message: 'Super admin not found' });
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// PUT superadmin profile
+router.put('/profile/:id', async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, theme, language, timezone, password } = req.body;
+    
+    let updateData = { firstName, lastName, email, phone };
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+    
+    // Upsert member settings
+    await prisma.memberSettings.upsert({
+      where: { userId: req.params.id },
+      update: { theme, language, timezone },
+      create: { userId: req.params.id, theme: theme || 'System', language: language || 'English', timezone: timezone || 'UTC' }
+    });
+    
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: updateData,
+      include: { memberSettings: true }
+    });
+    
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;
