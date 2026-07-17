@@ -43,9 +43,17 @@ router.post('/', authenticateToken, async (req, res) => {
 
      const io = req.app.get('socketio');
      io.emit('announcement.created', announcement);
-     if (pinned) {
-        io.emit('notification.created', { message: `Pinned Announcement: ${title}` });
-     }
+     
+     const newNotif = await prisma.notification.create({
+        data: {
+           familyId,
+           title: pinned ? 'Pinned Announcement' : 'New Announcement',
+           message: title,
+           type: 'announcement',
+           targetType: targetType || 'All Members'
+        }
+     });
+     io.emit('notification.created', newNotif);
      
      res.status(201).json(announcement);
   } catch (error) {

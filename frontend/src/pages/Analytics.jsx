@@ -1,36 +1,37 @@
 import React from 'react';
 import { TrendingUp, Users, CalendarDays, Image as ImageIcon, MessageSquare, Folder, BarChart, PieChart, Activity } from 'lucide-react';
 import { AreaChart, Area, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Legend } from 'recharts';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
-const memberGrowth = [
-  { month: 'Jan', members: 4 }, { month: 'Feb', members: 4 }, { month: 'Mar', members: 5 },
-  { month: 'Apr', members: 7 }, { month: 'May', members: 7 }, { month: 'Jun', members: 8 }, { month: 'Jul', members: 10 },
-];
-
-const activityData = [
-  { month: 'Jan', events: 1, photos: 8, messages: 34 },
-  { month: 'Feb', events: 2, photos: 12, messages: 41 },
-  { month: 'Mar', events: 1, photos: 24, messages: 28 },
-  { month: 'Apr', events: 4, photos: 31, messages: 55 },
-  { month: 'May', events: 2, photos: 18, messages: 48 },
-  { month: 'Jun', events: 5, photos: 42, messages: 63 },
-  { month: 'Jul', events: 3, photos: 27, messages: 52 },
-];
-
-const roleData = [
-  { name: 'Members', value: 7, color: '#3b82f6' },
-  { name: 'Admins', value: 1, color: '#8b5cf6' },
-  { name: 'Super Admin', value: 1, color: '#f59e0b' },
-];
-
-const stats = [
-  { label: 'Total Members', value: '10', change: '+2 this month', up: true, icon: <Users size={20} />, color: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' },
-  { label: 'Events This Year', value: '18', change: '+5 this month', up: true, icon: <CalendarDays size={20} />, color: 'bg-purple-50 text-purple-600 dark:bg-purple-500/10' },
-  { label: 'Gallery Photos', value: '124', change: '+27 this month', up: true, icon: <ImageIcon size={20} />, color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' },
-  { label: 'Messages Sent', value: '321', change: '+52 this month', up: true, icon: <MessageSquare size={20} />, color: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10' },
-];
+const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function Analytics() {
+  const token = localStorage.getItem('token');
+  
+  const { data: analyticsData, isLoading } = useQuery({
+     queryKey: ['admin_analytics'],
+     queryFn: async () => {
+        const res = await axios.get(`${API_URL}/admin/dashboard/analytics`, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        return res.data;
+     }
+  });
+
+  if (isLoading) {
+     return <div className="p-10 font-bold text-slate-500 text-center">Loading analytics data...</div>;
+  }
+
+  const { stats: fetchedStats = {}, memberGrowth = [], activityData = [], roleData = [] } = analyticsData || {};
+
+  const stats = [
+    { label: 'Total Members', value: fetchedStats.totalMembers || 0, change: `${fetchedStats.membersChange >= 0 ? '+' : ''}${fetchedStats.membersChange || 0} this month`, up: fetchedStats.membersChange >= 0, icon: <Users size={20} />, color: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' },
+    { label: 'Events This Year', value: fetchedStats.eventsThisYear || 0, change: `${fetchedStats.eventsChange >= 0 ? '+' : ''}${fetchedStats.eventsChange || 0} this month`, up: fetchedStats.eventsChange >= 0, icon: <CalendarDays size={20} />, color: 'bg-purple-50 text-purple-600 dark:bg-purple-500/10' },
+    { label: 'Gallery Photos', value: fetchedStats.galleryPhotos || 0, change: `${fetchedStats.photosChange >= 0 ? '+' : ''}${fetchedStats.photosChange || 0} this month`, up: fetchedStats.photosChange >= 0, icon: <ImageIcon size={20} />, color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' },
+    { label: 'Messages Sent', value: fetchedStats.messagesSent || 0, change: `${fetchedStats.messagesChange >= 0 ? '+' : ''}${fetchedStats.messagesChange || 0} this month`, up: fetchedStats.messagesChange >= 0, icon: <MessageSquare size={20} />, color: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10' },
+  ];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div>
@@ -46,7 +47,7 @@ export default function Analytics() {
             <div>
               <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
               <p className="text-xs font-semibold text-slate-500 mt-0.5">{s.label}</p>
-              <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">{s.change}</p>
+              <p className={`text-[11px] font-bold mt-1 ${s.up ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>{s.change}</p>
             </div>
           </div>
         ))}

@@ -794,7 +794,17 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
      if (status === 'Publish') {
          const io = req.app.get('socketio');
          io.emit('event.created', { eventId, message: `New Event Scheduled: ${name || 'Untitled Event'}` });
-         io.emit('notification.created', { message: `New ${category || 'Event'} created: ${name || 'Untitled Event'}!` });
+         
+         const newNotif = await prisma.notification.create({
+            data: {
+               familyId,
+               title: 'New Event Scheduled',
+               message: `${name || 'Untitled Event'} has been scheduled.`,
+               type: 'event',
+               targetType: 'All'
+            }
+         });
+         io.emit('notification.created', newNotif);
 
          // Auto-sync to Google Calendar
          try {

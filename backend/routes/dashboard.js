@@ -164,4 +164,88 @@ router.get('/recent-activity', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/v1/admin/dashboard/analytics
+router.get('/analytics', authenticateToken, async (req, res) => {
+  try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+     // 1. Stats
+     const today = new Date();
+     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+     const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+     const firstDayOfThisYear = new Date(today.getFullYear(), 0, 1);
+     
+     // Members
+     const totalMembers = await prisma.user.count({ where: { familyId } });
+     const totalMembersLastMonth = await prisma.user.count({ where: { familyId, createdAt: { lt: firstDayOfMonth } } });
+     const membersChange = totalMembers - totalMembersLastMonth;
+
+     // Events
+     const eventsThisYear = await prisma.event.count({ where: { familyId, createdAt: { gte: firstDayOfThisYear } } });
+     const eventsThisMonth = await prisma.event.count({ where: { familyId, createdAt: { gte: firstDayOfMonth } } });
+     const eventsLastMonthCount = await prisma.event.count({ where: { familyId, createdAt: { gte: firstDayOfLastMonth, lt: firstDayOfMonth } } });
+     const eventsChange = eventsThisMonth - eventsLastMonthCount;
+
+     // Photos
+     const galleryPhotos = await prisma.document.count({ where: { familyId, type: { contains: 'image' } } });
+     const photosThisMonth = await prisma.document.count({ where: { familyId, type: { contains: 'image' }, createdAt: { gte: firstDayOfMonth } } });
+     const photosLastMonthCount = await prisma.document.count({ where: { familyId, type: { contains: 'image' }, createdAt: { gte: firstDayOfLastMonth, lt: firstDayOfMonth } } });
+     const photosChange = photosThisMonth - photosLastMonthCount;
+
+     // Messages / Posts
+     const groups = await prisma.group.findMany({ where: { familyId }, select: { id: true } });
+     const groupIds = groups.map(g => g.id);
+     
+     const messagesSent = await prisma.groupPost.count({ where: { groupId: { in: groupIds } } });
+     const messagesThisMonth = await prisma.groupPost.count({ where: { groupId: { in: groupIds }, createdAt: { gte: firstDayOfMonth } } });
+     const messagesLastMonthCount = await prisma.groupPost.count({ where: { groupId: { in: groupIds }, createdAt: { gte: firstDayOfLastMonth, lt: firstDayOfMonth } } });
+     const messagesChange = messagesThisMonth - messagesLastMonthCount;
+
+     // 2. Member Growth & Activity Data (last 7 months)
+     const memberGrowth = [];
+     const activityData = [];
+     for (let i = 6; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const nextMonth = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
+        const monthName = d.toLocaleString('default', { month: 'short' });
+
+        const mCount = await prisma.user.count({ where: { familyId, createdAt: { lt: nextMonth } } });
+        memberGrowth.push({ month: monthName, members: mCount });
+
+        const eCount = await prisma.event.count({ where: { familyId, createdAt: { gte: d, lt: nextMonth } } });
+        const pCount = await prisma.document.count({ where: { familyId, type: { contains: 'image' }, createdAt: { gte: d, lt: nextMonth } } });
+        const msgCount = await prisma.groupPost.count({ where: { groupId: { in: groupIds }, createdAt: { gte: d, lt: nextMonth } } });
+        
+        activityData.push({ month: monthName, events: eCount, photos: pCount, messages: msgCount });
+     }
+
+     // 3. Role Data
+     const membersRoleCount = await prisma.user.count({ where: { familyId, role: 'MEMBER' } });
+     const adminsRoleCount = await prisma.user.count({ where: { familyId, role: 'ADMIN' } });
+     const superAdminsRoleCount = await prisma.user.count({ where: { familyId, role: 'SUPER_ADMIN' } });
+
+     const roleData = [
+       { name: 'Members', value: membersRoleCount, color: '#3b82f6' },
+       { name: 'Admins', value: adminsRoleCount, color: '#8b5cf6' },
+       { name: 'Super Admin', value: superAdminsRoleCount, color: '#f59e0b' },
+     ];
+
+     res.json({
+        stats: {
+           totalMembers, membersChange,
+           eventsThisYear, eventsChange,
+           galleryPhotos, photosChange,
+           messagesSent, messagesChange
+        },
+        memberGrowth,
+        activityData,
+        roleData
+     });
+  } catch (error) {
+     console.error('API Error analytics:', error);
+     res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
 module.exports = router;
