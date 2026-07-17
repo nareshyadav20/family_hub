@@ -239,7 +239,11 @@ function GroupDetails({ groupId, onBack, token, socket }) {
          </div>
 
          <div className="flex-1 p-6 flex flex-col min-h-0 bg-slate-50/20">
-            {tab === 'chat' && <GroupChat groupId={groupId} token={token} socket={socket} />}
+            {tab === 'chat' && (
+               <div className="bg-slate-100 rounded-2xl flex-1 flex flex-col rounded-3xl h-full shadow-inner">
+                  <DiscussionBoard groupId={groupId} token={token} socket={socket} />
+               </div>
+            )}
             {tab === 'overview' && (
                <div className="space-y-4 max-w-xl">
                   <h3 className="font-bold text-lg">Group Description</h3>
@@ -274,106 +278,131 @@ function GroupDetails({ groupId, onBack, token, socket }) {
    );
 }
 
-function GroupChat({ groupId, token, socket }) {
+function DiscussionBoard({ groupId, token, socket }) {
    const queryClient = useQueryClient();
-   const bottomRef = useRef();
    const [text, setText] = useState('');
-   const [uploading, setUploading] = useState(false);
+   const [editingPost, setEditingPost] = useState(null);
+   const currentUserId = localStorage.getItem('userId');
 
-   const { data: messages = [], isLoading } = useQuery({
-      queryKey: ['groupMessages', groupId],
+   const { data: posts = [], isLoading } = useQuery({
+      queryKey: ['groupPosts', groupId],
       queryFn: async () => {
-         const res = await axios.get(`${API_URL}/groups/${groupId}/messages`, { headers: { Authorization: `Bearer ${token}` } });
-         return res.data.reverse(); // backend sorted desc to get newest 100, reverse for UI
+         const res = await axios.get(`${API_URL}/groups/${groupId}/posts`, { headers: { Authorization: `Bearer ${token}` } });
+         return res.data;
       }
    });
 
    useEffect(() => {
       if (!socket) return;
-      const handler = (msg) => {
-         queryClient.setQueryData(['groupMessages', groupId], old => {
-            const arr = Array.isArray(old) ? old : [];
-            if (arr.some(m => m.id === msg.id)) return arr;
-            return [...arr, msg];
-         });
-         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      const events = ['post_created', 'post_updated', 'post_changed'];
+      const handler = () => queryClient.invalidateQueries(['groupPosts', groupId]);
+      events.forEach(e => socket.on(`group.${groupId}.${e}`, handler));
+      
+      socket.on(`group.${groupId}.post_deleted`, (data) => {
+         queryClient.setQueryData(['groupPosts', groupId], old => Array.isArray(old) ? old.filter(p => p.id !== data.postId) : []);
+      });
+
+      return () => {
+         events.forEach(e => socket.off(`group.${groupId}.${e}`, handler));
+         socket.off(`group.${groupId}.post_deleted`);
       };
-      socket.on(`group.${groupId}.message`, handler);
-      return () => socket.off(`group.${groupId}.message`, handler);
    }, [socket, groupId, queryClient]);
 
-   useEffect(() => {
-      bottomRef.current?.scrollIntoView();
-   }, [messages.length]);
-
-   const sendMutate = useMutation({
+   const createMutate = useMutation({
       mutationFn: async (payload) => {
-         await axios.post(`${API_URL}/groups/${groupId}/messages`, payload, {
-            headers: { Authorization: `Bearer ${token}` }
-         });
+         if (editingPost) {
+            await axios.put(`${API_URL}/groups/posts/${editingPost.id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+         } else {
+            await axios.post(`${API_URL}/groups/${groupId}/posts`, payload, { headers: { Authorization: `Bearer ${token}` } });
+         }
+      },
+      onSuccess: () => {
+         setText('');
+         setEditingPost(null);
+      }
+   });
+
+   const deleteMutate = useMutation({
+      mutationFn: async (postId) => {
+         await axios.delete(`${API_URL}/groups/posts/${postId}`, { headers: { Authorization: `Bearer ${token}` } });
+      }
+   });
+   
+   const likeMutate = useMutation({
+      mutationFn: async (postId) => {
+         await axios.post(`${API_URL}/groups/posts/${postId}/like`, {}, { headers: { Authorization: `Bearer ${token}` } });
       }
    });
 
    const handleSend = (e) => {
       e.preventDefault();
       if (!text.trim()) return;
-      sendMutate.mutate({ content: text, type: 'Text' });
-      setText('');
-   };
-   
-   // Handle file selection (mock flow for now, you typically upload to cloud then send URL)
-   const handleFile = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      setUploading(true);
-      // Simulate fake fast upload
-      setTimeout(() => {
-         sendMutate.mutate({ content: `Uploaded ${file.name}`, type: file.type.includes('image') ? 'Image' : 'File', fileName: file.name, fileUrl: 'https://placehold.co/400x300' });
-         setUploading(false);
-      }, 1000);
+      createMutate.mutate({ content: text });
    };
 
    return (
-      <div className="flex flex-col h-[500px] w-full max-w-4xl pt-4">
-         <div className="flex-1 overflow-y-auto pr-4 space-y-4 min-h-0 bg-white/50 rounded-2xl p-4 border border-slate-100 shadow-inner">
-            {isLoading && <div className="text-center font-bold text-slate-400 pt-8">Loading history...</div>}
-            {messages.length === 0 && !isLoading && <div className="text-center text-slate-400 font-bold mt-10">Start the conversation!</div>}
-            
-            {messages.map(msg => {
-               // Assuming activeUser mapping by ID isn't immediately strictly known here in context, styling left-aligned standard
-               return (
-                  <div key={msg.id} className="flex items-end gap-3 max-w-[80%]">
-                     <img src={msg.sender?.avatar || `https://ui-avatars.com/api/?name=${msg.sender?.firstName}+${msg.sender?.lastName}`} className="w-8 h-8 rounded-full mb-1 shadow-sm shrink-0" alt=""/>
-                     <div className="flex flex-col bg-white border border-slate-200 p-3.5 rounded-2xl rounded-bl-sm shadow-sm">
-                        <span className="text-[11px] font-bold text-slate-500 mb-1">{msg.sender?.firstName} {msg.sender?.lastName}</span>
-                        {msg.type === 'Image' ? (
-                           <img src={msg.fileUrl} className="rounded-xl w-64 object-cover my-1" alt="" />
-                        ) : null}
-                        <span className="text-sm font-medium text-slate-900 leading-snug break-words">{msg.content}</span>
-                        <span className="text-[10px] text-slate-400 mt-1.5 self-end">{new Date(msg.createdAt).toLocaleTimeString([],{hour: '2-digit', minute:'2-digit'})}</span>
-                     </div>
-                  </div>
-               )
-            })}
-            <div ref={bottomRef} />
-         </div>
-
-         <form onSubmit={handleSend} className="h-16 mt-4 flex gap-3 shrink-0 items-center">
-            <label className={`w-14 h-14 bg-white border rounded-2xl flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer ${uploading ? 'opacity-50' : ''}`}>
-               <Image size={24} />
-               <input type="file" accept="image/*, application/pdf" className="hidden" onChange={handleFile} disabled={uploading} />
-            </label>
-            <input 
-               type="text" 
+      <div className="flex flex-col h-[600px] w-full max-w-4xl mx-auto overflow-y-auto scrollbar-none py-6 px-4">
+         <form onSubmit={handleSend} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-200 mb-8 shrink-0">
+            <textarea 
                value={text} 
                onChange={e => setText(e.target.value)} 
-               placeholder="Type a message..." 
-               className="flex-1 h-14 bg-white border rounded-2xl px-5 text-sm font-medium focus:ring-2 focus:ring-blue-500 shadow-sm outline-none"
+               placeholder="Share an update or start a discussion..." 
+               className="w-full min-h-[80px] bg-slate-50 border-none rounded-2xl px-5 py-4 text-[15px] font-medium focus:ring-2 focus:ring-blue-500 resize-none outline-none mb-3"
             />
-            <button type="submit" disabled={!text.trim() || sendMutate.isPending} className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white disabled:opacity-50 hover:bg-blue-700 transition-colors shadow-md shadow-blue-600/30">
-               <Send size={24} />
-            </button>
+            <div className="flex justify-between items-center">
+               <div className="flex gap-2">
+                  <button type="button" className="p-2.5 text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 rounded-xl transition-colors"><Image size={18} /></button>
+                  <button type="button" className="p-2.5 text-slate-400 hover:text-blue-500 bg-slate-50 hover:bg-blue-50 rounded-xl transition-colors"><File size={18} /></button>
+               </div>
+               <div className="flex items-center gap-3">
+                  {editingPost && <button type="button" onClick={() => {setEditingPost(null); setText('');}} className="text-sm font-bold text-slate-500 hover:text-slate-800">Cancel</button>}
+                  <button type="submit" disabled={!text.trim() || createMutate.isPending} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl disabled:opacity-50 hover:bg-blue-700 shadow-md flex gap-2 items-center">
+                     <Send size={16} /> {editingPost ? 'Update' : 'Post'}
+                  </button>
+               </div>
+            </div>
          </form>
+
+         {isLoading && <div className="text-center font-bold text-slate-400 py-10">Loading discussions...</div>}
+         
+         <div className="space-y-6">
+            {posts.map(post => {
+               // Admin portal allows admin to edit their own, delete ANY (enforced by backend / UI can just show it)
+               // For simplicity, showing edit/delete if user is author OR user is Admin
+               const isAuthor = post.authorId === currentUserId;
+               const hasLiked = post.likes?.length > 0;
+               return (
+                  <div key={post.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+                     <div className="flex justify-between items-start mb-4">
+                        <div className="flex gap-3 items-center">
+                           <img src={post.author?.avatar || `https://ui-avatars.com/api/?name=${post.author?.firstName}+${post.author?.lastName}`} className="w-10 h-10 rounded-full bg-slate-100" alt=""/>
+                           <div>
+                              <div className="flex items-center gap-2">
+                                 <h4 className="font-bold text-slate-900 leading-none">{post.author?.firstName} {post.author?.lastName}</h4>
+                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">{post.author?.role}</span>
+                              </div>
+                              <p className="text-xs font-semibold text-slate-500 mt-1">{new Date(post.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                           </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                           {isAuthor && <button onClick={() => { setEditingPost(post); setText(post.content); window.scrollTo(0, 0); }} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"><MoreVertical size={14}/></button>}
+                           <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg" onClick={() => deleteMutate.mutate(post.id)}><Trash2 size={14}/></button>
+                        </div>
+                     </div>
+                     <p className="text-[15px] font-medium text-slate-800 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                     
+                     <div className="flex items-center gap-6 mt-6 pt-4 border-t border-slate-100">
+                        <button onClick={() => likeMutate.mutate(post.id)} className={`flex items-center gap-1.5 font-bold text-sm ${hasLiked ? 'text-blue-600' : 'text-slate-500 hover:text-blue-600'}`}>
+                           <div className={`p-1.5 rounded-lg ${hasLiked ? 'bg-blue-50' : 'bg-slate-50 group-hover:bg-blue-50'}`}>❤️</div> {post._count?.likes || 0} Likes
+                        </button>
+                        <button className="flex items-center gap-1.5 font-bold text-sm text-slate-500 hover:text-indigo-600">
+                           <div className="p-1.5 rounded-lg bg-slate-50 group-hover:bg-indigo-50"><MessageSquare size={16} /></div> {post._count?.comments || 0} Comments
+                        </button>
+                     </div>
+                  </div>
+               );
+            })}
+         </div>
       </div>
    );
 }

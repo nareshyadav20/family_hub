@@ -78,6 +78,10 @@ model User {
   familyHistories FamilyHistory[]
   googleCalendar  GoogleCalendarConnection?
 
+  groupPosts      GroupPost[]
+  groupComments   GroupPostComment[]
+  groupLikes      GroupPostLike[]
+
   @@map("users")
 }
 
@@ -332,6 +336,8 @@ model Group {
   members         GroupMember[]
   messages        GroupMessage[]
   
+  posts           GroupPost[]
+  
   @@map("groups")
 }
 
@@ -421,4 +427,51 @@ model GoogleCalendarConnection {
   updatedAt    DateTime @updatedAt
 
   @@map("google_calendar_connections")
+}
+
+model GroupPost {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  content     String   @db.Text
+  attachments Json?    // URLs for images, documents, etc.
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  comments    GroupPostComment[]
+  likes       GroupPostLike[]
+
+  @@map("group_posts")
+}
+
+model GroupPostComment {
+  id          String   @id @default(cuid())
+  postId      String
+  post        GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  content     String    @db.Text
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("group_post_comments")
+}
+
+model GroupPostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+
+  @@unique([postId, userId])
+  @@map("group_post_likes")
 }
