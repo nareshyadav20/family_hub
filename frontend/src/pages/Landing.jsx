@@ -5,7 +5,7 @@ import axios from 'axios';
 import Navbar from '../components/landing/Navbar';
 import Footer from '../components/landing/Footer';
 import '../landing.css';
-const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
+const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/website`;
 
 const features = [
   { icon: Shield, title: 'Bank-Level Security', desc: 'Your family\'s data is protected with AES-256 encryption and zero-knowledge architecture.', color: '#4F46E5' },

@@ -38,7 +38,7 @@ export default function Onboarding() {
       setLoading(false);
       return;
     }
-    axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/verify-token?token=${token}`)
+    axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/verify-token?token=${token}`)
       .then((res) => {
         if (res.data.valid) {
            setInviteData(res.data.user);
@@ -62,7 +62,7 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setSubmitting(true);
     try {
-       await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/accept`, {
+       await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/accept`, {
           token,
           ...formData
        });

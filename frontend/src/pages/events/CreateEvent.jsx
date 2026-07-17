@@ -30,7 +30,7 @@ export default function CreateEvent() {
   const mutation = useMutation({
     mutationFn: async (payload) => {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, payload, {
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;

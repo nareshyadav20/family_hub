@@ -17,7 +17,7 @@ export default function Gallery() {
 
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
-  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
   const { data: photos = [], isLoading } = useQuery({
       queryKey: ['gallery'],

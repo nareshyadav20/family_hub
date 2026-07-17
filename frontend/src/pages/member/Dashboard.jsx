@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [liked, setLiked] = useState(new Set());
   const [showBanner, setShowBanner] = useState(true);
 
-  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
   const token = localStorage.getItem('token');
 
   const { data: dashboardData, isLoading } = useQuery({

@@ -382,7 +382,7 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname);
     }
 
-    const socketURL = (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com');
+    const socketURL = (window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com');
     const socket = io(socketURL);
     window.__activeSocket = socket;
     socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));

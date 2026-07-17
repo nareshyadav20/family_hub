@@ -18,7 +18,7 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['memberDocuments'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       // Filter out Private/Admin documents not owned by this user
@@ -51,7 +51,7 @@ export default function Documents() {
       const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'pdf';
       const fileSize = (selectedFile.size / (1024*1024)).toFixed(2) + ' MB';
 
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
+      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
          name: uploadData.name,
          category: uploadData.category,
          visibility: uploadData.visibility,

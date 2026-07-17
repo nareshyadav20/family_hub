@@ -19,7 +19,7 @@ export default function Login() {
   // Member Registration Form State
   const [memberForm, setMemberForm] = useState({ inviteCode: '', name: '', email: '', phone: '', password: '', confirmPassword: '', relationship: '', branch: '' });
 
-  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
   const handleLogin = async (e) => {
     e.preventDefault();

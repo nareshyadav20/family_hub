@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const API_URL =  `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 const getIconData = (type) => {
   switch(type) {
@@ -33,7 +33,7 @@ export default function Notifications() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const socket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
+    const socket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
     socket.on('notification.created', () => {
        queryClient.invalidateQueries(['notifications']);
     });

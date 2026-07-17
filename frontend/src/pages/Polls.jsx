@@ -5,7 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const API_URL =  `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function Polls() {
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ export default function Polls() {
   });
 
   useEffect(() => {
-    const socket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
+    const socket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
     const refresh = () => queryClient.invalidateQueries(['polls']);
     socket.on('poll.created', refresh);
     socket.on('poll.updated', refresh);

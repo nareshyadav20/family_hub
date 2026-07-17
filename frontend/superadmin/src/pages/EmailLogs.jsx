@@ -15,7 +15,7 @@ export default function EmailLogs() {
     try {
       setLoading(true);
       const token = localStorage.getItem('superadmin_token');
-      const res = await fetch(`http://localhost:5000/api/v1/superadmin/email-logs?status=${status}&timeframe=${timeframe}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/email-logs?status=${status}&timeframe=${timeframe}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/v1/superadmin/families';
-const API_URL_RESEND = 'http://localhost:5000/api/v1/superadmin/families/resend-email';
+const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/families';
+const API_URL_RESEND = import.meta.env.VITE_API_URL + '/api/v1/superadmin/families/resend-email';
 
 export default function Families() {
   const [families, setFamilies] = useState([]);

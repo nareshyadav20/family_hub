@@ -28,7 +28,7 @@ export default function MainLayout({ navItems, bottomNav }) {
 
   const queryClient = useQueryClient();
   useEffect(() => {
-    const socket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
+    const socket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
     socket.on('notification.created', (notif) => {
        queryClient.invalidateQueries(['header_notifications']);
     });
@@ -38,7 +38,7 @@ export default function MainLayout({ navItems, bottomNav }) {
   const { data: notifications = [] } = useQuery({
      queryKey: ['header_notifications'],
      queryFn: async () => {
-        const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/notifications`, {
+        const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/notifications`, {
            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         return res.data;
@@ -49,7 +49,7 @@ export default function MainLayout({ navItems, bottomNav }) {
   const { data: memberData } = useQuery({
     queryKey: ['memberProfile'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

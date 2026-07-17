@@ -34,7 +34,7 @@ export default function ProfileSetup() {
     }
 
     try {
-      await axios.put(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
+      await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
         currentStage: nextStage,
         profileCompletion: completion,
         ...formData

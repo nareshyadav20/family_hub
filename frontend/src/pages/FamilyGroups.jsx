@@ -5,7 +5,7 @@ import { Plus, Search, Filter, Users, Lock, Globe, MessageSquare, Image, MoreVer
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const API_URL =  `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
 
 export default function FamilyGroups() {
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ export default function FamilyGroups() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`);
+    const newSocket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
     setSocket(newSocket);
     return () => newSocket.disconnect();
   }, []);

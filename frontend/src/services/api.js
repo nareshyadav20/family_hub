@@ -6,7 +6,7 @@ if (rawEnv) {
   if (rawEnv.endsWith('/api')) rawEnv += '/v1';
   else if (!rawEnv.endsWith('/v1')) rawEnv += '/api/v1';
 }
-const baseURL = rawEnv || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
+const baseURL = rawEnv || (window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
 
 const api = axios.create({
   baseURL: baseURL,

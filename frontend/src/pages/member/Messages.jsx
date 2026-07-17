@@ -18,8 +18,8 @@ export default function Messages() {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const activeUser = userStr ? JSON.parse(userStr) : null;
-  const API_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
-  const SOCKET_URL = `${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}`;
+  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const SOCKET_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`;
 
   const msgsEndRef = useRef(null);
 

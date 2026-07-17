@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com';
+const API_URL = window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com';
 
 const getCategoryColor = (cat) => {
    if (!cat) return '#14B8A6'; 

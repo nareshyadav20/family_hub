@@ -14,7 +14,7 @@ export default function Events() {
     queryKey: ['events'],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;
