@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw, Calendar as CalendarIcon, LogOut } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com';
 
 const getCategoryColor = (cat) => {
    if (!cat) return '#14B8A6'; 
@@ -25,6 +26,7 @@ function getFirstDay(year, month) {
 
 export default function Calendar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
   
@@ -43,20 +45,91 @@ export default function Calendar() {
      startTime: ''
   });
 
+  const [googleStatus, setGoogleStatus] = useState({ connected: false, loading: true });
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    // Check URL parameters for oauth success/error
+    const params = new URLSearchParams(location.search);
+    const success = params.get('success');
+    const error = params.get('error');
+    if (success) {
+      toast.success('Successfully connected Google Calendar!');
+      navigate(location.pathname, { replace: true });
+    }
+    if (error) {
+      toast.error('Failed to connect Google Calendar.');
+      navigate(location.pathname, { replace: true });
+    }
+
+    // Fetch Google Calendar connection status
+    fetchGoogleStatus();
+  }, [location, navigate]);
+
+  const fetchGoogleStatus = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/google/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setGoogleStatus({ connected: res.data.connected, email: res.data.email, loading: false });
+    } catch (err) {
+      setGoogleStatus({ connected: false, loading: false });
+    }
+  };
+
+  const handleConnectGoogle = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/google/connect`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      toast.error('Failed to initiate Google connection');
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    try {
+      await axios.delete(`${API_URL}/api/google/disconnect`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Disconnected Google Calendar');
+      fetchGoogleStatus();
+    } catch (err) {
+      toast.error('Failed to disconnect Google Calendar');
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      await axios.post(`${API_URL}/api/google/sync`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Events synchronized to Google Calendar');
+      fetchGoogleStatus();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to sync events');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); };
   const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); };
 
   const { data: serverEvents = [], isLoading } = useQuery({
      queryKey: ['events'],
      queryFn: async () => {
-        const res = await axios.get(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+        const res = await axios.get(`${API_URL}/api/v1/admin/events`, {
            headers: { Authorization: `Bearer ${token}` }
         });
         return res.data;
      }
   });
   
-  // Transform DB events to internal UI format
   const events = serverEvents.map(e => ({
      date: new Date(e.eventDate).toISOString().split('T')[0],
      title: e.name,
@@ -71,7 +144,7 @@ export default function Calendar() {
 
   const createEventMutation = useMutation({
      mutationFn: async (payload) => {
-       const res = await axios.post(`${window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, payload, {
+       const res = await axios.post(`${API_URL}/api/v1/admin/events`, payload, {
           headers: { Authorization: `Bearer ${token}` }
        });
        return res.data;
@@ -81,6 +154,9 @@ export default function Calendar() {
         setShowEventModal(false);
         setNewEvent({ name: '', category: 'Birthday', eventDate: '', startTime: ''});
         queryClient.invalidateQueries(['events']);
+        
+        // Auto-sync if connected
+        if (googleStatus.connected) handleSync();
      },
      onError: () => toast.error("Failed to add event")
   });
@@ -98,14 +174,40 @@ export default function Calendar() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 relative">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Calendar</h1>
           <p className="text-sm text-slate-500 mt-1">Track birthdays, anniversaries, and family events.</p>
         </div>
-        <button onClick={() => setShowEventModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30">
-          <Plus size={18} /> Add Event
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* Google Calendar Controls */}
+          {!googleStatus.loading && (
+            <div className="flex items-center gap-2 mr-2">
+              {googleStatus.connected ? (
+                <>
+                  <div className="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-bold rounded-xl border border-green-100 flex items-center">
+                    <CalendarIcon size={14} className="mr-1.5" /> {googleStatus.email}
+                  </div>
+                  <button onClick={handleSync} disabled={syncing} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Sync Events">
+                    <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+                  </button>
+                  <button onClick={handleDisconnectGoogle} className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all" title="Disconnect">
+                    <LogOut size={18} />
+                  </button>
+                </>
+              ) : (
+                <button onClick={handleConnectGoogle} className="flex items-center gap-2 bg-white border-2 border-slate-200 hover:border-slate-300 px-4 py-2 rounded-xl text-sm font-bold text-slate-700 transition-all shadow-sm">
+                  <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" /> Connect Google Calendar
+                </button>
+              )}
+            </div>
+          )}
+
+          <button onClick={() => setShowEventModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30">
+            <Plus size={18} /> Add Event
+          </button>
+        </div>
       </div>
 
       {/* Legend */}

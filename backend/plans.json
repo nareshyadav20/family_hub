@@ -1,0 +1,25 @@
+[
+  {
+    "id": "basic",
+    "name": "Basic",
+    "dbName": "Free",
+    "price": "Free",
+    "storage": "5 GB",
+    "status": "Active"
+  },
+  {
+    "id": "premium",
+    "name": "Premium",
+    "dbName": "Premium",
+    "price": "$49/mo",
+    "storage": "50 GB",
+    "status": "Active"
+  },
+  {
+    "id": "enterprise",
+    "name": "Enterprise",
+    "dbName": "Enterprise",
+    "price": "$109/mo",
+    "storage": "Unlimited"
+  }
+]

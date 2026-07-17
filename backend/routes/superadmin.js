@@ -4,6 +4,9 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const { sendFamilyAdminEmail } = require('../services/emailService');
+const fs = require('fs');
+const path = require('path');
+const PLANS_FILE = path.join(__dirname, '../plans.json');
 
 // Create a new family & admin
 router.post('/families', async (req, res) => {
@@ -162,6 +165,116 @@ router.get('/families', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get Dashboard Stats for Super Admin
+router.get('/dashboard/stats', async (req, res) => {
+  try {
+    const totalFamilies = await prisma.family.count();
+    const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
+    const totalMembers = await prisma.user.count({ where: { role: 'MEMBER' } });
+
+    // Mock other values for now
+    const kpis = {
+      totalFamilies,
+      totalAdmins,
+      totalMembers,
+      monthlyRevenue: '$42,500',
+      activeSubscriptions: 984,
+      storageUsage: '842 GB',
+      apiRequests: '1.2M',
+      platformHealth: '99.9%'
+    };
+
+    const growthData = [
+      { name: 'Jan', families: Math.floor(totalFamilies * 0.4), members: Math.floor(totalMembers * 0.4) },
+      { name: 'Feb', families: Math.floor(totalFamilies * 0.5), members: Math.floor(totalMembers * 0.5) },
+      { name: 'Mar', families: Math.floor(totalFamilies * 0.6), members: Math.floor(totalMembers * 0.6) },
+      { name: 'Apr', families: Math.floor(totalFamilies * 0.7), members: Math.floor(totalMembers * 0.7) },
+      { name: 'May', families: Math.floor(totalFamilies * 0.8), members: Math.floor(totalMembers * 0.8) },
+      { name: 'Jun', families: Math.floor(totalFamilies * 0.9), members: Math.floor(totalMembers * 0.9) },
+      { name: 'Jul', families: Math.max(totalFamilies, 1), members: Math.max(totalMembers, 1) },
+    ];
+
+    const revenueData = [
+      { name: 'Mon', revenue: 4000 },
+      { name: 'Tue', revenue: 3000 },
+      { name: 'Wed', revenue: 2000 },
+      { name: 'Thu', revenue: 2780 },
+      { name: 'Fri', revenue: 1890 },
+      { name: 'Sat', revenue: 2390 },
+      { name: 'Sun', revenue: 3490 },
+    ];
+
+    const recentActivity = [
+      { id: 1, type: 'registration', title: 'System Data Sync', desc: 'Loaded real backend stats', time: 'Just now', user: 'SYS' },
+      { id: 2, type: 'alert', title: 'Admin Sync', desc: `Found ${totalAdmins} admins`, time: '1 min ago', user: 'SYS' }
+    ];
+
+    res.json({ success: true, data: { kpis, growthData, revenueData, recentActivity } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get Plans and calculate active families per plan
+router.get('/subscriptions/plans', async (req, res) => {
+  try {
+    let plansData = [];
+    if (fs.existsSync(PLANS_FILE)) {
+      plansData = JSON.parse(fs.readFileSync(PLANS_FILE, 'utf-8'));
+    }
+
+    // Determine counts from database
+    const familyCounts = await prisma.family.groupBy({
+      by: ['plan'],
+      _count: { id: true }
+    });
+
+    const countsMap = {};
+    for (const row of familyCounts) {
+      if (row.plan) {
+        countsMap[row.plan.toLowerCase()] = row._count.id;
+      }
+    }
+
+    // Merge counts into plans API response
+    const enrichedPlans = plansData.map(plan => {
+      const activeFamilies = countsMap[(plan.dbName || plan.name).toLowerCase()] || 0;
+      return { ...plan, families: activeFamilies };
+    });
+
+    res.json({ success: true, data: enrichedPlans });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error fetching plans' });
+  }
+});
+
+// Update Plan details
+router.put('/subscriptions/plans/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, storage, status } = req.body;
+
+    let plansData = [];
+    if (fs.existsSync(PLANS_FILE)) {
+      plansData = JSON.parse(fs.readFileSync(PLANS_FILE, 'utf-8'));
+    }
+
+    const planIndex = plansData.findIndex(p => p.id === id);
+    if (planIndex >= 0) {
+      plansData[planIndex] = { ...plansData[planIndex], name, price, storage, status };
+      fs.writeFileSync(PLANS_FILE, JSON.stringify(plansData, null, 2));
+      res.json({ success: true, data: plansData[planIndex] });
+    } else {
+      res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error updating plan' });
   }
 });
 

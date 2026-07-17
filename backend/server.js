@@ -39,6 +39,7 @@ const familyHistoryRouter = require('./routes/familyHistory');
 const memberDashboardRouter = require('./routes/memberDashboard');
 const websiteRouter = require('./routes/website');
 const superadminRouter = require('./routes/superadmin');
+const googleCalendarRouter = require('./routes/googleCalendar');
 
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
@@ -55,7 +56,7 @@ app.use('/api/v1/family-history', familyHistoryRouter);
 app.use('/api/v1/member/dashboard', memberDashboardRouter);
 app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
-
+app.use('/api/google', googleCalendarRouter);
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
@@ -794,6 +795,29 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
          const io = req.app.get('socketio');
          io.emit('event.created', { eventId, message: `New Event Scheduled: ${name || 'Untitled Event'}` });
          io.emit('notification.created', { message: `New ${category || 'Event'} created: ${name || 'Untitled Event'}!` });
+
+         // Auto-sync to Google Calendar
+         try {
+           const connection = await prisma.googleCalendarConnection.findUnique({ where: { userId: req.user.userId } });
+           if (connection) {
+             const gService = require('./services/googleCalendarService');
+             
+             // Format times for Google Calendar. Use arbitrary defaults if missing.
+             let startDateTime = safeEventDate.toISOString().split('T')[0] + 'T' + (startTime || '12:00') + ':00Z';
+             let endDateTime = safeEventDate.toISOString().split('T')[0] + 'T' + (endTime || '13:00') + ':00Z';
+             
+             await gService.createGoogleEvent(connection, {
+               title: name || 'Untitled Event',
+               description: description || '',
+               location: address || venue || '',
+               startTime: startDateTime,
+               endTime: endDateTime
+             });
+             console.log(`Successfully auto-synced event to Google Calendar for user ${req.user.userId}`);
+           }
+         } catch (syncErr) {
+           console.error('Warning: Auto-sync to Google Calendar failed', syncErr);
+         }
      }
 
      res.status(201).json({ success: true, event });

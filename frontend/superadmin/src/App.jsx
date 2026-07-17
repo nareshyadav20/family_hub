@@ -7,8 +7,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Families from './pages/Families';
 import FamilyDetails from './pages/FamilyDetails';
-import Members from './pages/Members';
-import FamilyAdmins from './pages/FamilyAdmins';
+
 import Subscriptions from './pages/Subscriptions';
 import Plans from './pages/Plans';
 import Revenue from './pages/Revenue';
@@ -57,8 +56,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/families" element={<Families />} />
             <Route path="/families/:id" element={<FamilyDetails />} />
-            <Route path="/admins" element={<FamilyAdmins />} />
-            <Route path="/members" element={<Members />} />
+
             <Route path="/subscriptions" element={<Subscriptions />} />
             <Route path="/plans" element={<Plans />} />
             <Route path="/revenue" element={<Revenue />} />

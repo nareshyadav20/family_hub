@@ -20,8 +20,7 @@ import { motion } from 'framer-motion';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Families', href: '/families', icon: Users },
-  { name: 'Family Admins', href: '/admins', icon: ShieldCheck },
-  { name: 'Members', href: '/members', icon: UserCircle },
+
   { name: 'Subscriptions', href: '/subscriptions', icon: CreditCard },
   { name: 'Plans', href: '/plans', icon: WalletCards },
   { name: 'Revenue', href: '/revenue', icon: CircleDollarSign },

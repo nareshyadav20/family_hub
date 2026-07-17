@@ -76,6 +76,7 @@ model User {
   sentMessages    Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
   familyHistories FamilyHistory[]
+  googleCalendar  GoogleCalendarConnection?
 
   @@map("users")
 }
@@ -104,6 +105,7 @@ model Family {
   notifications   Notification[]  @relation("FamilyNotifications")
   groups          Group[]         @relation("FamilyGroups")
   familyHistories FamilyHistory[] @relation("FamilyHistories")
+  googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
 
   @@map("families")
 }
@@ -403,4 +405,20 @@ model FamilyHistory {
   updatedAt     DateTime @updatedAt
 
   @@map("family_history")
+}
+
+model GoogleCalendarConnection {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId     String?
+  family       Family?  @relation("FamilyGoogleCalendar", fields: [familyId], references: [id], onDelete: Cascade)
+  googleEmail  String
+  accessToken  String
+  refreshToken String?
+  expiryDate   BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("google_calendar_connections")
 }
