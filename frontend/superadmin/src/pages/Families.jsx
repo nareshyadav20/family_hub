@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, LogIn, Plus, X, Loader2, Mail } from 'lucide-react';
+import { Search, Eye, LogIn, Plus, X, Loader2, Mail, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -207,6 +207,26 @@ export default function Families() {
                         </button>
                         <button onClick={() => resendWelcomeEmail(family.id)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Resend Credentials">
                           <Mail className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={async () => {
+                            if (window.confirm("Are you SURE you want to delete this family? This will permanently wipe all members, events, photos, and messages associated with them. This action cannot be undone.")) {
+                               const loadingToast = toast.loading('Deleting family...');
+                               try {
+                                 const res = await axios.delete(`${API_URL}/${family.id}`);
+                                 if (res.data.success) {
+                                   toast.success('Family deleted successfully', { id: loadingToast });
+                                   fetchFamilies();
+                                 }
+                               } catch (err) {
+                                 toast.error(err.response?.data?.message || 'Failed to delete family', { id: loadingToast });
+                               }
+                            }
+                          }} 
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                          title="Delete Family"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

@@ -278,4 +278,22 @@ router.put('/subscriptions/plans/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/v1/superadmin/families/:id
+router.delete('/families/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Relying on Postgres onDelete: Cascade for all models attached to Family/User
+    // The only model missing Cascade against Family is User. 
+    await prisma.$transaction([
+      prisma.user.deleteMany({ where: { familyId: id } }),
+      prisma.family.delete({ where: { id: id } })
+    ]);
+
+    res.json({ success: true, message: 'Family deleted successfully' });
+  } catch (err) {
+    console.error('Delete Family Error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete family' });
+  }
+});
+
 module.exports = router;
