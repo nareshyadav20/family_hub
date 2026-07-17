@@ -62,18 +62,18 @@ const sendInvitationEmail = async (member, adminName, familyName, token) => {
     if (!response.ok) {
       const errorData = await response.text();
       let parsedError = {};
-      try { parsedError = JSON.parse(errorData); } catch (e) {}
-      
+      try { parsedError = JSON.parse(errorData); } catch (e) { }
+
       console.error("BREVO ERROR");
       console.error("HTTP Status Code:", response.status);
       console.error("Error Code:", parsedError.code || 'UNKNOWN');
       console.error("Error Message:", parsedError.message || errorData);
       console.error("Response Body:", errorData);
       console.error("Request Body:", JSON.stringify(payload));
-      
+
       const errMsg = parsedError.message || errorData || 'Invalid response from email provider';
       const code = parsedError.code || 'BREVO_API_ERROR';
-      
+
       return { success: false, error: errMsg, errorCode: code, token: null };
     }
 

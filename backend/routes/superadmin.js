@@ -64,7 +64,7 @@ router.post('/families', async (req, res) => {
     // Send Brevo Email
     let emailSent = false;
     try {
-      const emailResult = await sendFamilyAdminEmail(adminName, adminEmail, familyName, result.family.id, adminPassword);
+      const emailResult = await sendFamilyAdminEmail(adminName, adminEmail, familyName, result.family.familyCode, adminPassword);
       if (emailResult.success) {
         emailSent = true;
       }
@@ -112,7 +112,7 @@ router.post('/families/resend-email', async (req, res) => {
       admin.firstName + ' ' + (admin.lastName || ''),
       admin.email,
       family.name,
-      family.id,
+      family.familyCode,
       newTempPassword
     );
 
