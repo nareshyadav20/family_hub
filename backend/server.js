@@ -57,6 +57,28 @@ app.use('/api/v1/member/dashboard', memberDashboardRouter);
 app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/google', googleCalendarRouter);
+
+app.get('/api/test-email', async (req, res) => {
+  try {
+    const { transporter } = require('./services/emailService');
+    const info = await transporter.sendMail({
+      from: `"${process.env.MAIL_FROM_NAME || 'FamilyHub'}" <${process.env.MAIL_FROM_EMAIL || 'support@familyhub.com'}>`,
+      to: req.query.email || process.env.MAIL_FROM_EMAIL || 'support@familyhub.com',
+      subject: 'Test Email from FamilyHub SMTP',
+      text: 'SMTP Connected and Email Sent Successfully!'
+    });
+    res.json({
+      success: true,
+      status: 'SMTP Connected',
+      message: 'Email Sent',
+      messageId: info.messageId,
+      brevoResponse: info.response
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message, stack: err.stack });
+  }
+});
+
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));

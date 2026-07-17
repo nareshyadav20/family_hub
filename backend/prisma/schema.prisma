@@ -475,3 +475,19 @@ model GroupPostLike {
   @@unique([postId, userId])
   @@map("group_post_likes")
 }
+
+model EmailQueue {
+  id           String   @id @default(cuid())
+  recipient    String
+  subject      String
+  template     String?
+  payload      Json?
+  status       String   @default("PENDING")
+  attempts     Int      @default(0)
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@map("email_queue")
+}
+
