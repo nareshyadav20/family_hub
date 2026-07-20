@@ -26,14 +26,21 @@ const queryClient = new QueryClient();
 // Protected Route Wrapper
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('superadmin_token');
-  const user = localStorage.getItem('superadmin_user');
+  const userString = localStorage.getItem('superadmin_user');
   
-  if (!token || !user) {
+  if (!token || !userString) {
     return <Navigate to="/login" replace />;
   }
   
-  const role = JSON.parse(user).role?.toUpperCase();
-  if (role !== 'SUPER_ADMIN') {
+  try {
+    const user = JSON.parse(userString);
+    if (user?.role?.toUpperCase() !== 'SUPER_ADMIN') {
+      return <Navigate to="/login" replace />;
+    }
+  } catch (error) {
+    // If JSON parsing fails (corrupted data), redirect to login
+    localStorage.removeItem('superadmin_token');
+    localStorage.removeItem('superadmin_user');
     return <Navigate to="/login" replace />;
   }
   
@@ -49,7 +56,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           
           {/* Protected Routes */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
