@@ -491,3 +491,36 @@ model EmailQueue {
   @@map("email_queue")
 }
 
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      String
+  action    String
+  module    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  family    String
+  subject   String
+  priority  String   @default("Medium")
+  status    String   @default("Open")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("support_tickets")
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  family    String
+  plan      String
+  amount    Float
+  status    String   @default("Paid")
+  createdAt DateTime @default(now())
+
+  @@map("transactions")
+}

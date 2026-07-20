@@ -1,8 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings2, Mail, Database, Globe, ShieldAlert, Activity } from 'lucide-react';
+import { Settings2, Mail, Database, Globe, ShieldAlert, Activity, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/settings';
 
 export default function Settings() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(API_URL);
+        if (res.data.success) {
+          setData(res.data.data);
+        }
+      } catch (err) {
+        toast.error('Failed to load settings data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  if (loading || !data) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
   const sections = [
     {
       title: 'General',
@@ -10,11 +41,10 @@ export default function Settings() {
       color: 'text-indigo-600',
       bg: 'bg-indigo-50',
       items: [
-        { label: 'Platform Name', value: 'FamilyHub OS' },
-        { label: 'Platform Version', value: 'v1.0.0' },
-        { label: 'Timezone', value: 'Asia/Kolkata' },
-        { label: 'Language', value: 'English' },
-        { label: 'Maintenance Mode', value: 'OFF', highlight: 'text-slate-500 bg-slate-100' },
+        { label: 'Platform Name', value: data.config.platformName },
+        { label: 'Platform Version', value: data.config.version },
+        { label: 'Timezone', value: data.config.timezone },
+        { label: 'Maintenance Mode', value: data.config.maintenance, highlight: 'text-slate-500 bg-slate-100' },
       ]
     },
     {
@@ -23,10 +53,10 @@ export default function Settings() {
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
       items: [
-        { label: 'Provider', value: 'Brevo' },
-        { label: 'Sender Name', value: 'FamilyHub' },
-        { label: 'Sender Email', value: 'support@familyhub.com' },
-        { label: 'SMTP Status', value: 'Connected', highlight: 'text-emerald-600 bg-emerald-50' },
+        { label: 'Provider', value: data.config.emailProvider },
+        { label: 'Sender Name', value: data.config.senderName },
+        { label: 'Sender Email', value: data.config.senderEmail },
+        { label: 'SMTP Status', value: data.config.emailProvider !== 'Not Configured' ? 'Connected' : 'Warning', highlight: data.config.emailProvider !== 'Not Configured' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50' },
       ]
     },
     {
@@ -36,7 +66,7 @@ export default function Settings() {
       bg: 'bg-blue-50',
       items: [
         { label: 'Provider', value: 'Cloudinary' },
-        { label: 'Usage', value: '42 GB / 200 GB' },
+        { label: 'Usage', value: `${data.stats.storageUsed} / 200 GB` },
         { label: 'Status', value: 'Connected', highlight: 'text-emerald-600 bg-emerald-50' },
       ]
     },
@@ -46,9 +76,7 @@ export default function Settings() {
       color: 'text-amber-600',
       bg: 'bg-amber-50',
       items: [
-        { label: 'Google Calendar', value: 'Connected', highlight: 'text-emerald-600 bg-emerald-50' },
-        { label: 'Google OAuth', value: 'Enabled', highlight: 'text-emerald-600 bg-emerald-50' },
-        { label: 'Client ID', value: '*************' },
+        { label: 'Google OAuth', value: data.config.googleOAuth, highlight: data.config.googleOAuth === 'Enabled' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100' },
         { label: 'Redirect URI', value: 'Configured' },
       ]
     },
@@ -58,10 +86,9 @@ export default function Settings() {
       color: 'text-rose-600',
       bg: 'bg-rose-50',
       items: [
-        { label: 'JWT Expiry', value: '7 Days' },
+        { label: 'JWT Expiry', value: data.config.jwtExpiry },
         { label: 'Password Policy', value: 'Strong' },
         { label: '2FA', value: 'Disabled', highlight: 'text-slate-500 bg-slate-100' },
-        { label: 'Session Timeout', value: '30 Minutes' },
       ]
     },
     {
@@ -70,14 +97,11 @@ export default function Settings() {
       color: 'text-purple-600',
       bg: 'bg-purple-50',
       items: [
-        { label: 'Total Families', value: '40' },
-        { label: 'Total Admins', value: '52' },
-        { label: 'Total Members', value: '1,280' },
-        { label: 'Storage Used', value: '42 GB' },
-        { label: 'Active Users', value: '864' },
-        { label: 'Total Events', value: '327' },
-        { label: 'Gallery Photos', value: '5,420' },
-        { label: 'Documents', value: '1,150' },
+        { label: 'Total Families', value: data.stats.totalFamilies.toString() },
+        { label: 'Total Admins', value: data.stats.totalAdmins.toString() },
+        { label: 'Total Members', value: data.stats.totalMembers.toString() },
+        { label: 'Total Events', value: data.stats.totalEvents.toString() },
+        { label: 'Documents', value: data.stats.totalDocuments.toString() },
       ]
     }
   ];
@@ -86,7 +110,7 @@ export default function Settings() {
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Platform Settings</h2>
-        <p className="text-sm text-gray-500 mt-1">Global configurations including APIs, Email, Storage and Security.</p>
+        <p className="text-sm text-gray-500 mt-1">Global configurations including APIs, Email, Storage and Live Database Statistics.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

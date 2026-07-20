@@ -253,6 +253,34 @@ router.get('/subscriptions/plans', async (req, res) => {
   }
 });
 
+// Add new Plan
+router.post('/subscriptions/plans', async (req, res) => {
+  try {
+    let plansData = [];
+    if (fs.existsSync(PLANS_FILE)) {
+      plansData = JSON.parse(fs.readFileSync(PLANS_FILE, 'utf-8'));
+    }
+    
+    const newPlan = {
+      id: req.body.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      name: req.body.name,
+      dbName: req.body.dbName || req.body.name,
+      price: req.body.price || 'Free',
+      storage: req.body.storage || '0 GB',
+      features: req.body.features || 'Basic features',
+      status: req.body.status || 'Active'
+    };
+    
+    plansData.push(newPlan);
+    fs.writeFileSync(PLANS_FILE, JSON.stringify(plansData, null, 2));
+    
+    res.json({ success: true, data: newPlan });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error creating plan' });
+  }
+});
+
 // Update Plan details
 router.put('/subscriptions/plans/:id', async (req, res) => {
   try {
@@ -286,7 +314,10 @@ router.delete('/families/:id', async (req, res) => {
     // The only model missing Cascade against Family is User. 
     await prisma.$transaction([
       prisma.user.deleteMany({ where: { familyId: id } }),
-      prisma.family.delete({ where: { id: id } })
+      prisma.family.delete({ where: { id: id } }),
+      prisma.auditLog.create({ 
+        data: { user: 'Super Admin', action: 'Deleted Family', module: 'Families', details: `Deleted Family ID: ${id}` }
+      })
     ]);
 
     res.json({ success: true, message: 'Family deleted successfully' });
@@ -337,6 +368,142 @@ router.put('/profile/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get Audit Logs
+router.get('/audit-logs', async (req, res) => {
+  try {
+    const logs = await prisma.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100
+    });
+    if (logs.length === 0) {
+      const initLog = await prisma.auditLog.create({
+        data: { user: 'System', action: 'Audit Log Initialized', module: 'System', details: 'No previous records' }
+      });
+      return res.json({ success: true, data: [initLog] });
+    }
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching logs' });
+  }
+});
+
+// GET /revenue
+router.get('/revenue', async (req, res) => {
+  try {
+    const transactions = await prisma.transaction.findMany({ 
+      orderBy: { createdAt: 'desc' },
+      take: 50 
+    });
+    
+    let todaysRevenue = 0, monthlyRevenue = 0, yearlyRevenue = 0, pendingRevenue = 0;
+    
+    // Quick mock calc if no transactions
+    if (transactions.length === 0) {
+       todaysRevenue = 0; monthlyRevenue = 0; yearlyRevenue = 0; pendingRevenue = 0;
+    } else {
+       const today = new Date(); today.setHours(0,0,0,0);
+       const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+       const thisYear = new Date(today.getFullYear(), 0, 1);
+       
+       transactions.forEach(t => {
+         const tDate = new Date(t.createdAt);
+         if (t.status === 'Paid') {
+           if (tDate >= today) todaysRevenue += t.amount;
+           if (tDate >= thisMonth) monthlyRevenue += t.amount;
+           if (tDate >= thisYear) yearlyRevenue += t.amount;
+         } else {
+           pendingRevenue += t.amount;
+         }
+       });
+    }
+
+    const summary = { today: todaysRevenue, thisMonth: monthlyRevenue, thisYear: yearlyRevenue, pending: pendingRevenue };
+    const chartData = [
+      { name: 'May', revenue: 0 }, { name: 'Jun', revenue: 0 }, { name: 'Jul', revenue: 0 }, { name: 'Aug', revenue: monthlyRevenue }
+    ];
+
+    res.json({ success: true, data: { transactions, summary, chartData } });
+  } catch(error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching revenue' });
+  }
+});
+
+// GET /support
+router.get('/support', async (req, res) => {
+  try {
+    const tickets = await prisma.supportTicket.findMany({ orderBy: { createdAt: 'desc' } });
+    const stats = {
+      open: tickets.filter(t => t.status === 'Open').length,
+      resolved: tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length,
+      pending: tickets.filter(t => t.status === 'Pending').length,
+      closed: tickets.filter(t => t.status === 'Closed').length
+    };
+    res.json({ success: true, data: { tickets, stats } });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching support' });
+  }
+});
+
+// GET /settings
+router.get('/settings', async (req, res) => {
+  try {
+    const totalFamilies = await prisma.family.count();
+    const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
+    const totalMembers = await prisma.user.count({ where: { role: 'MEMBER' } });
+    const totalEvents = await prisma.event.count();
+    const totalDocuments = await prisma.document.count();
+    
+    // Check SMTP config safely
+    const hasSmtp = !!process.env.SMTP_HOST;
+    const hasGoogle = !!process.env.GOOGLE_CLIENT_ID;
+
+    const data = {
+      config: {
+        platformName: 'FamilyHub OS',
+        version: 'v1.0.0',
+        timezone: 'Asia/Kolkata',
+        maintenance: 'OFF',
+        emailProvider: hasSmtp ? (process.env.SMTP_HOST.includes('brevo') ? 'Brevo' : 'SMTP') : 'Not Configured',
+        senderName: process.env.MAIL_FROM_NAME || 'FamilyHub',
+        senderEmail: process.env.MAIL_FROM_EMAIL || 'Not Configured',
+        jwtExpiry: process.env.JWT_EXPIRES_IN || '7d',
+        googleOAuth: hasGoogle ? 'Enabled' : 'Disabled'
+      },
+      stats: {
+        totalFamilies,
+        totalAdmins,
+        totalMembers,
+        totalEvents,
+        totalDocuments,
+        storageUsed: '0 GB', // Mocked as storage integration isn't tracked in DB size
+        galleryPhotos: 0 // Mocked for now
+      }
+    };
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching settings data' });
+  }
+});
+
+// GET /notifications
+router.get('/notifications', async (req, res) => {
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { familyId: null }, // System level notifications
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+    res.json({ success: true, data: notifications });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching notifications' });
   }
 });
 
