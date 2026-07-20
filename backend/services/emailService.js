@@ -24,9 +24,13 @@ const transporter = nodemailer.createTransport({
   maxMessages: 100
 });
 
+let isSmtpValid = true;
+
 transporter.verify((error, success) => {
   if (error) {
-    console.error('✗ [EmailService]: SMTP Connection Failed:', error);
+    isSmtpValid = false;
+    console.error(`✗ [EmailService]: SMTP Connection Failed: ${error.message}`);
+    console.log(`ℹ [EmailService]: Falling back to Console Mock for Local Development emails.`);
   } else {
     console.log('✓ [EmailService]: SMTP Connected Successfully');
   }
@@ -88,15 +92,23 @@ const processAllPendingQueue = async () => {
       });
 
       try {
-        console.log(`[EmailQueue]: Sending Email to SMTP...`);
-        const info = await transporter.sendMail({
-          from: `"${senderName}" <${senderEmail}>`,
-          to: email.recipient,
-          subject: email.subject,
-          html: email.payload.html
-        });
+        console.log(`[EmailQueue]: Sending Email...`);
+        let info;
+
+        if (!isSmtpValid && process.env.NODE_ENV !== 'production') {
+          console.log(`[EmailQueue-MOCK]: 📧 Simulating email to ${email.recipient}`);
+          console.log(`[EmailQueue-MOCK]: Subject: ${email.subject}`);
+          info = { messageId: `mock-id-${Date.now()}` };
+        } else {
+          info = await transporter.sendMail({
+            from: `"${senderName}" <${senderEmail}>`,
+            to: email.recipient,
+            subject: email.subject,
+            html: email.payload.html
+          });
+        }
         
-        console.log(`[EmailQueue]: Email accepted by SMTP! Message ID: ${info.messageId}`);
+        console.log(`[EmailQueue]: Email accepted! Message ID: ${info.messageId}`);
 
         await prisma.emailQueue.update({
           where: { id: email.id },
