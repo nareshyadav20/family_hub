@@ -123,11 +123,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                   strokeWidth: 2 
                 })}
                 <span className="mt-0.5">{item.title}</span>
-                {item.title === 'Join Requests' && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 w-[22px] h-[22px] bg-[#EF4444] text-white text-[11px] font-bold rounded-full flex items-center justify-center">
-                    8
-                  </span>
-                )}
+                {/* Number badge removed */}
               </Link>
             )
           })}

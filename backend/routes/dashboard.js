@@ -248,4 +248,49 @@ router.get('/analytics', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/v1/admin/dashboard/requests
+router.get('/requests', authenticateToken, async (req, res) => {
+  try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+    const requests = await prisma.user.findMany({
+      where: { 
+        familyId, 
+        // In the absence of an explicit join request map, PENDING_INVITE or INVITATION_SENT indicates they are waiting
+        status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } 
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+         id: true, firstName: true, lastName: true, email: true, phone: true, 
+         relationship: true, avatar: true, createdAt: true, status: true, city: true
+      }
+    });
+
+    res.json({ success: true, data: requests });
+  } catch (error) {
+    console.error('Requests error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch requests' });
+  }
+});
+
+// PUT /api/v1/admin/dashboard/requests/:id
+router.put('/requests/:id', authenticateToken, async (req, res) => {
+  try {
+    const { action } = req.body; // 'approve' or 'reject'
+    if (action === 'reject') {
+       await prisma.user.delete({ where: { id: req.params.id }});
+       return res.json({ success: true, message: 'Request rejected' });
+    }
+    const user = await prisma.user.update({
+       where: { id: req.params.id },
+       data: { status: 'ACTIVE' }
+    });
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error('Update request error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update request' });
+  }
+});
+
 module.exports = router;
