@@ -19,15 +19,20 @@ export default function CreateEvent() {
     organizerId: 'ADM-001', familyBranch: '', visibility: 'Public',
     inviteType: 'All Members', invitedMembers: [],
     rsvpEnabled: false, maxGuests: '', rsvpDeadline: '',
-    liveStream: false, streamVisibility: 'Public', streamingPlatform: 'YouTube Live', streamUrl: '', liveChat: false, recordEvent: false,
+    liveStream: false, streamId: '', streamLink: '', streamVisibility: 'Public', streamingPlatform: 'Jitsi Meet', liveChat: false, recordEvent: false,
     allowPhotos: true, allowComments: true, reminders: [], status: 'Publish'
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev, [name]: type === 'checkbox' ? checked : value
-    }));
+    setFormData(prev => {
+      const nextState = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      if (name === 'liveStream' && checked && !prev.streamId) {
+         nextState.streamId = 'FH-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+         nextState.streamLink = `https://family-hub-seven-ecru.vercel.app/live/${nextState.streamId}`;
+      }
+      return nextState;
+    });
   };
 
   const mutation = useMutation({
@@ -69,8 +74,8 @@ export default function CreateEvent() {
              <button onClick={() => onSubmit('Draft')} className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-slate-50 text-[#2563EB] font-bold border-2 border-[#2563EB] rounded-xl transition-colors text-sm">
                <Save size={16} /> Save Draft
              </button>
-             <button onClick={() => onSubmit('Publish')} disabled={mutation.isLoading} className="flex items-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold bg-[#2563EB] hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5">
-               <Check size={18} /> {mutation.isLoading ? 'Publishing...' : 'Publish Event'}
+             <button onClick={() => onSubmit('Publish')} disabled={mutation.isPending} className="flex items-center gap-2 px-7 py-2.5 rounded-xl text-sm font-bold bg-[#2563EB] hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5">
+               <Check size={18} /> {mutation.isPending ? 'Publishing...' : 'Publish Event'}
              </button>
           </div>
         </div>
@@ -243,23 +248,25 @@ export default function CreateEvent() {
                    {formData.liveStream && (
                       <div className="pt-4 border-t border-slate-100 space-y-4 animate-in fade-in slide-in-from-top-2 p-1">
                          <div>
-                             <label className="block text-xs font-bold text-slate-500 mb-1 tracking-wide uppercase">Streaming Platform</label>
-                             <select name="streamingPlatform" value={formData.streamingPlatform} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm">
-                               <option>YouTube Live</option>
-                               <option>Jitsi Meet</option>
-                               <option>Zoom</option>
-                             </select>
-                         </div>
-                         <div>
-                             <label className="block text-xs font-bold text-slate-500 mb-1 tracking-wide uppercase">YouTube Live URL</label>
-                             <input type="url" name="streamUrl" value={formData.streamUrl} onChange={handleChange} placeholder="https://youtu.be/..." className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+                             <label className="block text-xs font-bold text-slate-500 mb-1 tracking-wide uppercase">Secure Virtual Stream Link</label>
+                             <div className="flex items-center gap-2">
+                               <input type="text" readOnly value={formData.streamLink} className="flex-1 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-500 font-mono" />
+                               <button 
+                                 type="button" 
+                                 onClick={() => { navigator.clipboard.writeText(formData.streamLink); alert('Link Copied!'); }}
+                                 className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-lg transition-colors shadow"
+                               >
+                                 Copy Link
+                               </button>
+                             </div>
+                             <p className="text-[11px] font-medium text-slate-500 mt-1.5">This secure session will automatically host via Jitsi Meet under your Family ID.</p>
                          </div>
                          
                          <label className="flex items-center gap-3 cursor-pointer mt-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
                             <input type="checkbox" name="liveChat" checked={formData.liveChat} onChange={handleChange} className="w-4 h-4 rounded text-[#2563EB] focus:ring-[#2563EB]" />
                             <div>
                                <span className="text-sm font-bold text-slate-700 block leading-tight">Allow Live Chat</span>
-                               <span className="text-[11px] font-medium text-slate-500">Enable YouTube live chat</span>
+                               <span className="text-[11px] font-medium text-slate-500">Enable meeting chat panel</span>
                             </div>
                          </label>
                          <label className="flex items-center gap-3 cursor-pointer bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -269,11 +276,6 @@ export default function CreateEvent() {
                                <span className="text-[11px] font-medium text-slate-500">Save recording after stream ends</span>
                             </div>
                          </label>
-
-                         <div className="bg-slate-900 rounded-xl h-28 flex items-center justify-center mt-2 relative overflow-hidden shadow-inner flex-col gap-2 group">
-                             <PlayCircle className="text-white/50 group-hover:text-white/80 transition-colors" size={32} />
-                             <span className="text-xs font-bold text-white/50">Live Stream Preview</span>
-                         </div>
                       </div>
                    )}
                 </div>

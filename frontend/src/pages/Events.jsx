@@ -125,8 +125,8 @@ export default function Events() {
                        </div>
                     </div>
                     <div className="mt-3 flex items-center gap-2 w-full">
-                       {e.liveStream && (
-                         <Button onClick={(ev) => { ev.stopPropagation(); navigate(`/admin/dashboard/events/${e.id}`); }} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg h-9 text-xs font-bold shadow-none border-none">
+                       {e.liveStream && e.streamId && (
+                         <Button onClick={(ev) => { ev.stopPropagation(); navigate(`/live/${e.streamId}`); }} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg h-9 text-xs font-bold shadow-none border-none">
                            <Video className="w-3.5 h-3.5 mr-1.5" /> Watch Live
                          </Button>
                        )}

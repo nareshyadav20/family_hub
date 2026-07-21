@@ -794,7 +794,7 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
         address, city, state, country, googleMapsUrl, organizerId, familyBranch,
         visibility, inviteType, invitedMembers, rsvpEnabled, maxGuests, rsvpDeadline,
         liveStream, streamVisibility, liveChat, recordEvent, allowPhotos, allowComments,
-        reminders, status, streamingPlatform, streamUrl
+        reminders, status, streamingPlatform, streamId, streamLink
      } = req.body;
      const familyId = req.user.familyId;
      if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
@@ -829,8 +829,9 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
            rsvpDeadline: rsvpDeadline ? new Date(rsvpDeadline) : null,
            liveStream: !!liveStream, 
            streamVisibility: streamVisibility || null, 
-           streamingPlatform: streamingPlatform || null,
-           streamUrl: streamUrl || null,
+           streamingPlatform: streamingPlatform || 'Jitsi Meet',
+           streamId: streamId || null,
+           streamLink: streamLink || null,
            liveChat: !!liveChat, 
            recordEvent: !!recordEvent, 
            allowPhotos: !!allowPhotos, 
@@ -883,7 +884,7 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
      res.status(201).json({ success: true, event });
   } catch(err) {
      console.error('Event Creation Error:', err);
-     res.status(500).json({ error: 'Failed to create event. Please ensure dates are valid.' });
+     res.status(500).json({ error: 'Failed to create event. ' + err.message });
   }
 });
 
@@ -905,6 +906,40 @@ app.get('/api/v1/admin/events/:id', authenticateToken, async (req, res) => {
     res.json(event);
   } catch(err) {
     res.status(500).json({ error: 'Failed to fetch event details' });
+  }
+});
+
+// Dynamic Role-Based Live Stream Resolver
+app.get('/api/v1/events/live/:streamId', async (req, res) => {
+  try {
+    const streamId = req.params.streamId;
+    const event = await prisma.event.findUnique({ where: { streamId } });
+    
+    if (!event || !event.liveStream) {
+       return res.status(404).json({ error: 'Stream disconnected or invalid.' });
+    }
+
+    if (event.visibility === 'Public') {
+       return res.json(event);
+    }
+
+    // Otherwise requires Family access
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+       return res.status(401).json({ error: 'Unauthorized. Please log in to view this stream.' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, user) => {
+       if (err) return res.status(403).json({ error: 'Invalid permissions.' });
+       if (user.familyId !== event.familyId) {
+          return res.status(403).json({ error: 'Forbidden. Stream isolated to a different family ring.' });
+       }
+       res.json(event);
+    });
+  } catch(err) {
+    res.status(500).json({ error: 'Failed to resolve stream.' });
   }
 });
 

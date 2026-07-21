@@ -51,6 +51,7 @@ import MemberProfileSetup from './pages/member/ProfileSetup';
 import MemberSettings from './pages/member/Settings';
 import MemberCalendarPage from './pages/member/Calendar';
 import MemberFamilyGroups from './pages/member/FamilyGroups';
+import LiveStreamPage from './pages/events/LiveStreamPage';
 
 /* --- SHARED IMPORTS --- */
 import Login from './pages/Login';
@@ -281,6 +282,7 @@ function AppLayer() {
         <SessionWatcher />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/live/:streamId" element={<LiveStreamPage />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
