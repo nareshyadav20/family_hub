@@ -168,6 +168,59 @@ router.get('/families', async (req, res) => {
   }
 });
 
+// Get specific family details
+router.get('/families/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const family = await prisma.family.findUnique({
+      where: { id },
+      include: {
+        members: {
+          select: { id: true, firstName: true, lastName: true, email: true, phone: true, role: true, status: true, createdAt: true, lastEmailAttempt: true }
+        },
+        events: {
+          select: { id: true, name: true, eventDate: true, visibility: true, status: true, createdBy: true }
+        },
+        documents: {
+          select: { id: true, name: true, type: true, size: true, visibility: true, createdAt: true }
+        },
+        familyHistories: {
+          select: { id: true, title: true, category: true, eventDate: true, visibility: true }
+        }
+      }
+    });
+
+    if (!family) {
+      return res.status(404).json({ success: false, message: 'Family not found' });
+    }
+
+    const totalMembers = family.members.length;
+    const totalAdmins = family.members.filter(m => m.role === 'ADMIN').length;
+
+    res.json({
+      success: true,
+      data: {
+        id: family.id,
+        name: family.name,
+        code: family.familyCode || 'N/A',
+        status: family.status,
+        plan: family.plan || 'Free Plan',
+        createdAt: family.createdAt,
+        totalMembers,
+        totalAdmins,
+        storageUsed: '0 GB / 100 GB',
+        members: family.members,
+        events: family.events,
+        documents: family.documents,
+        familyHistories: family.familyHistories
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching family details:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // Get Dashboard Stats for Super Admin
 router.get('/dashboard/stats', async (req, res) => {
   try {
