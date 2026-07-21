@@ -254,7 +254,7 @@ const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCod
 
 const sendInvitationEmail = async (member, adminName, familyName, token, isResend = false) => {
   const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
-  const inviteUrl = `${baseUrl}/invite/${token}`;
+  const inviteUrl = `${baseUrl}/login`;
   const memberName = member.firstName + (member.lastName ? ` ${member.lastName}` : '');
   const subject = isResend ? "Reminder: You're Invited to Join FamilyHub" : "You're Invited to Join FamilyHub";
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder invitation sent on ${new Date().toLocaleString()}.</p>` : '';
