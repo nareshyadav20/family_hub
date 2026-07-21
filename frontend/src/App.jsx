@@ -17,6 +17,7 @@ import FamilyHistory from './pages/FamilyHistory';
 import JoinRequests from './pages/JoinRequests';
 import Gallery from './pages/Gallery';
 import CreateEvent from './pages/events/CreateEvent';
+import EventDetails from './pages/events/EventDetails';
 import Announcements from './pages/Announcements';
 import Polls from './pages/Polls';
 import Notifications from './pages/Notifications';
@@ -38,6 +39,7 @@ import MemberDashboard from './pages/member/Dashboard';
 import MemberFamily from './pages/member/Family';
 import MemberGallery from './pages/member/Gallery';
 import MemberEvents from './pages/member/Events';
+import MemberEventDetails from './pages/member/EventDetails';
 import MemberFamilyTree from './pages/member/FamilyTree';
 import MemberMessages from './pages/member/Messages';
 import MemberAnnouncements from './pages/member/Announcements';
@@ -302,6 +304,7 @@ function AppLayer() {
             <Route path="history" element={<FamilyHistory />} />
             <Route path="events" element={<Events />} />
             <Route path="events/create" element={<CreateEvent />} />
+            <Route path="events/:id" element={<EventDetails />} />
             <Route path="calendar" element={<Calendar />} />
             <Route path="gallery" element={<Gallery />} />
             <Route path="finance" element={<Finance />} />
@@ -323,6 +326,7 @@ function AppLayer() {
             <Route path="family" element={<MemberFamily />} />
             <Route path="gallery" element={<MemberGallery />} />
             <Route path="events" element={<MemberEvents />} />
+            <Route path="events/:id" element={<MemberEventDetails />} />
             <Route path="tree" element={<MemberFamilyTree />} />
             <Route path="messages" element={<MemberMessages />} />
             <Route path="groups" element={<MemberFamilyGroups />} />

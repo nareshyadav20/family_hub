@@ -173,6 +173,8 @@ model Event {
   rsvpDeadline    DateTime?
   liveStream      Boolean  @default(false)
   streamVisibility String?
+  streamingPlatform String?
+  streamUrl       String?
   liveChat        Boolean  @default(false)
   recordEvent     Boolean  @default(false)
   allowPhotos     Boolean  @default(true)

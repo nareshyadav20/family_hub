@@ -794,7 +794,7 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
         address, city, state, country, googleMapsUrl, organizerId, familyBranch,
         visibility, inviteType, invitedMembers, rsvpEnabled, maxGuests, rsvpDeadline,
         liveStream, streamVisibility, liveChat, recordEvent, allowPhotos, allowComments,
-        reminders, status
+        reminders, status, streamingPlatform, streamUrl
      } = req.body;
      const familyId = req.user.familyId;
      if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
@@ -829,6 +829,8 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
            rsvpDeadline: rsvpDeadline ? new Date(rsvpDeadline) : null,
            liveStream: !!liveStream, 
            streamVisibility: streamVisibility || null, 
+           streamingPlatform: streamingPlatform || null,
+           streamUrl: streamUrl || null,
            liveChat: !!liveChat, 
            recordEvent: !!recordEvent, 
            allowPhotos: !!allowPhotos, 
@@ -893,6 +895,28 @@ app.get('/api/v1/admin/events', authenticateToken, async (req, res) => {
     res.json(events);
   } catch(err) {
     res.status(500).json({ error: 'Failed' });
+  }
+});
+
+app.get('/api/v1/admin/events/:id', authenticateToken, async (req, res) => {
+  try {
+    const event = await prisma.event.findFirst({ where: { id: req.params.id, familyId: req.user.familyId } });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    res.json(event);
+  } catch(err) {
+    res.status(500).json({ error: 'Failed to fetch event details' });
+  }
+});
+
+app.delete('/api/v1/admin/events/:id', authenticateToken, async (req, res) => {
+  try {
+    const event = await prisma.event.findFirst({ where: { id: req.params.id, familyId: req.user.familyId } });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    
+    await prisma.event.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Event deleted' });
+  } catch(err) {
+    res.status(500).json({ error: 'Failed to delete event' });
   }
 });
 

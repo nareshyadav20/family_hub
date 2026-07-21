@@ -2,13 +2,33 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Calendar as CalendarIcon, MapPin, Users, Plus, Clock, ChevronRight, Image as ImageIcon } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Calendar as CalendarIcon, MapPin, Users, Plus, Clock, ChevronRight, Image as ImageIcon, Trash2, Video } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
 export default function Events() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('upcoming');
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['events']);
+    }
+  });
+
+  const handleDelete = (ev, id) => {
+    ev.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events'],
@@ -103,8 +123,15 @@ export default function Events() {
                        <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{e.familyBranch} Branch</span>
                        </div>
-                       <Button variant="ghost" size="icon" className="group-hover:bg-indigo-50 text-indigo-600 rounded-full h-8 w-8">
-                          <ChevronRight className="h-4 w-4" />
+                    </div>
+                    <div className="mt-3 flex items-center gap-2 w-full">
+                       {e.liveStream && (
+                         <Button onClick={(ev) => { ev.stopPropagation(); navigate(`/admin/dashboard/events/${e.id}`); }} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg h-9 text-xs font-bold shadow-none border-none">
+                           <Video className="w-3.5 h-3.5 mr-1.5" /> Watch Live
+                         </Button>
+                       )}
+                       <Button onClick={(ev) => handleDelete(ev, e.id)} variant="ghost" className="flex-1 bg-slate-50 dark:bg-slate-800 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 text-slate-500 rounded-lg h-9 text-xs font-bold shadow-none">
+                         <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
                        </Button>
                     </div>
                  </CardContent>
