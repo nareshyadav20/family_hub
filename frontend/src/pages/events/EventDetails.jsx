@@ -40,6 +40,19 @@ export default function EventDetails() {
   const dateObj = new Date(event.eventDate);
   const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+  // Stream Closure Logic
+  let isStreamEnded = false;
+  if (event.endTime) {
+     const [hours, minutes] = event.endTime.split(':');
+     const endDateTime = new Date(dateObj);
+     if (!isNaN(parseInt(hours)) && !isNaN(parseInt(minutes))) {
+        endDateTime.setHours(parseInt(hours), parseInt(minutes), 0);
+        if (new Date() > endDateTime) {
+           isStreamEnded = true;
+        }
+     }
+  }
+
   return (
     <div className="max-w-6xl mx-auto pb-32 animate-in fade-in duration-500 pt-6 px-4 md:px-0">
       <button onClick={() => navigate('/admin/dashboard/events')} className="flex items-center gap-2 text-slate-500 hover:text-[#2563EB] font-bold text-sm mb-6 transition-colors group">
@@ -59,9 +72,14 @@ export default function EventDetails() {
             <span className="px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-sm border border-white/20">
               {event.category}
             </span>
-            {event.liveStream && (
+            {event.liveStream && !event.recordedUrl && !isStreamEnded && (
                <span className="px-4 py-1.5 bg-red-600/90 backdrop-blur-md animate-pulse rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-sm border border-red-500 flex items-center gap-2">
                  <Radio size={14} /> LIVE NOW
+               </span>
+            )}
+            {event.recordedUrl && (
+               <span className="px-4 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-sm border border-slate-500 flex items-center gap-2">
+                 RECORDED
                </span>
             )}
           </div>
@@ -120,28 +138,75 @@ export default function EventDetails() {
                  </p>
                </section>
 
-               {/* Live Stream Section */}
-               {(event.liveStream && event.streamUrl) && (
+               {/* Recording / Live Stream Section */}
+               {event.recordedUrl ? (
                  <section className="bg-slate-900 rounded-[24px] overflow-hidden shadow-xl border border-slate-800">
                    <div className="p-4 bg-black border-b border-white/10 flex items-center justify-between">
                      <h3 className="text-white font-bold flex items-center gap-2">
-                       <Video size={18} className="text-red-500" /> Official Live Stream: {event.streamingPlatform || 'YouTube Live'}
+                       <Video size={18} className="text-slate-400" /> Official Recording
                      </h3>
-                     <span className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-500/10 px-3 py-1 pb-1.5 rounded-full animate-pulse tracking-wide">
-                        <div className="w-2 h-2 rounded-full bg-red-500 mt-0.5"></div> LIVE
+                     <span className="flex items-center gap-2 text-xs font-bold text-slate-300 bg-slate-800 px-3 py-1 pb-1.5 rounded-full tracking-wide">
+                        RECORDED
                      </span>
                    </div>
-                   <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                   <div className="relative w-full aspect-video">
                      <iframe 
-                       src={event.streamUrl.includes('watch?v=') ? event.streamUrl.replace('watch?v=', 'embed/') + '?autoplay=1' : event.streamUrl + '?autoplay=1'} 
+                       src={event.recordedUrl.includes('watch?v=') ? event.recordedUrl.replace('watch?v=', 'embed/') : event.recordedUrl} 
                        className="absolute top-0 left-0 w-full h-full"
-                       title="Live Stream" 
+                       title="Recorded Stream" 
                        frameBorder="0" 
                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                        allowFullScreen>
                      </iframe>
                    </div>
                  </section>
+               ) : (
+                 event.liveStream && event.streamUrl ? (
+                    isStreamEnded ? (
+                     <div className="mt-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-10 text-center flex flex-col items-center justify-center shadow-sm">
+                        <Video size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
+                        <h2 className="text-xl font-bold text-slate-700 dark:text-white mb-2">Live Stream Ended</h2>
+                        <p className="text-sm text-slate-500 font-medium max-w-md">The stream originally scheduled until {event.endTime} has automatically closed.</p>
+                     </div>
+                    ) : (
+                     <section className="bg-slate-900 rounded-[24px] overflow-hidden shadow-xl border border-slate-800">
+                       <div className="p-4 bg-black border-b border-white/10 flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <h3 className="text-white font-bold flex items-center gap-2">
+                              <Video size={18} className="text-red-500" /> Official Live Stream: {event.streamingPlatform || 'YouTube Live'}
+                            </h3>
+                            {event.liveChat && <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">CHAT ENABLED</span>}
+                         </div>
+                         <span className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-500/10 px-3 py-1 pb-1.5 rounded-full animate-pulse tracking-wide">
+                            <div className="w-2 h-2 rounded-full bg-red-500 mt-0.5"></div> LIVE
+                         </span>
+                       </div>
+                       
+                       <div className={`grid ${event.liveChat ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                          <div className={`relative w-full aspect-video ${event.liveChat ? 'lg:col-span-2' : ''}`}>
+                            <iframe 
+                              src={event.streamUrl.includes('watch?v=') ? event.streamUrl.replace('watch?v=', 'embed/') + '?autoplay=1' : event.streamUrl + '?autoplay=1'} 
+                              className="absolute top-0 left-0 w-full h-full"
+                              title="Live Stream" 
+                              frameBorder="0" 
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                              allowFullScreen>
+                            </iframe>
+                          </div>
+                          
+                          {event.liveChat && (
+                           <div className="w-full h-[400px] lg:h-auto overflow-hidden bg-white dark:bg-slate-950 border-l border-slate-800">
+                             <iframe
+                               width="100%" height="100%"
+                               src={`https://www.youtube.com/live_chat?v=${event.streamUrl.split('v=')[1]?.split('&')[0] || ''}&embed_domain=${window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname}`}
+                               frameBorder="0">
+                             </iframe>
+                           </div>
+                         )}
+                       </div>
+                     </section>
+                    )
+                 ) : null
                )}
             </div>
 

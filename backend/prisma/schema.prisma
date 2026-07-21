@@ -177,6 +177,7 @@ model Event {
   streamUrl       String?
   liveChat        Boolean  @default(false)
   recordEvent     Boolean  @default(false)
+  recordedUrl     String?
   allowPhotos     Boolean  @default(true)
   allowComments   Boolean  @default(true)
   reminders       Json?    
