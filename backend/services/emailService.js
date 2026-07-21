@@ -229,7 +229,8 @@ const processAllPendingQueue = async () => {
 setInterval(processAllPendingQueue, 15000); // 15 seconds
 
 const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCode, tempPassword, isResend = false) => {
-  const loginUrl = `${process.env.APP_URL}/login`;
+  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const loginUrl = `${baseUrl}/login`;
   const subject = isResend ? 'Reminder: Welcome to FamilyHub OS' : 'Welcome to FamilyHub OS';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';
   const content = `
@@ -252,7 +253,8 @@ const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCod
 };
 
 const sendInvitationEmail = async (member, adminName, familyName, token, isResend = false) => {
-  const inviteUrl = `${process.env.APP_URL}/invite/${token}`;
+  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const inviteUrl = `${baseUrl}/invite/${token}`;
   const memberName = member.firstName + (member.lastName ? ` ${member.lastName}` : '');
   const subject = isResend ? "Reminder: You're Invited to Join FamilyHub" : "You're Invited to Join FamilyHub";
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder invitation sent on ${new Date().toLocaleString()}.</p>` : '';
@@ -274,7 +276,8 @@ const sendInvitationEmail = async (member, adminName, familyName, token, isResen
 };
 
 const sendMemberCredentialsEmail = async (memberName, memberEmail, tempPassword, isResend = false) => {
-  const loginUrl = `${process.env.APP_URL}/login`;
+  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const loginUrl = `${baseUrl}/login`;
   const subject = isResend ? 'Reminder: Welcome to FamilyHub' : 'Welcome to FamilyHub';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';
   const content = `
@@ -295,7 +298,8 @@ const sendMemberCredentialsEmail = async (memberName, memberEmail, tempPassword,
 };
 
 const sendPasswordResetEmail = async (memberName, memberEmail, resetToken, isResend = false) => {
-  const resetUrl = `${process.env.APP_URL}/reset-password/${resetToken}`;
+  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
   const subject = isResend ? 'Reminder: Password Reset Request' : 'Password Reset Request';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';
   const content = `
