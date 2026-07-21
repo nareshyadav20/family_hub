@@ -433,19 +433,14 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
            if (!emailResult.success) {
                await prisma.user.update({
                  where: { id: user.id },
-                 data: { status: 'EMAIL_FAILED', brevoErrorMessage: 'Failed to send credentials manually', lastEmailAttempt: new Date() }
-               });
-           } else {
-               await prisma.user.update({
-                 where: { id: user.id },
-                 data: { lastEmailAttempt: new Date() }
+                 data: { status: 'EMAIL_FAILED' }
                });
            }
         } catch (emailErr) {
            console.error('Failed to send add member credentials:', emailErr);
            await prisma.user.update({
              where: { id: user.id },
-             data: { status: 'EMAIL_FAILED', brevoErrorMessage: emailErr.message, lastEmailAttempt: new Date() }
+             data: { status: 'EMAIL_FAILED' }
            });
         }
      }

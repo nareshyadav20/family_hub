@@ -263,7 +263,7 @@ router.get('/requests', authenticateToken, async (req, res) => {
       orderBy: { createdAt: 'desc' },
       select: {
          id: true, firstName: true, lastName: true, email: true, phone: true, 
-         relationship: true, avatar: true, createdAt: true, status: true, city: true
+         relationship: true, avatar: true, createdAt: true, status: true
       }
     });
 
