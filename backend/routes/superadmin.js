@@ -113,7 +113,8 @@ router.post('/families/resend-email', async (req, res) => {
       admin.email,
       family.name,
       family.familyCode,
-      newTempPassword
+      newTempPassword,
+      true
     );
 
     if (emailResult.success) {

@@ -58,21 +58,22 @@ app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/google', googleCalendarRouter);
 
-app.get('/api/test-email', async (req, res) => {
+app.get('/api/test-instant-email', async (req, res) => {
   try {
-    const { transporter } = require('./services/emailService');
-    const info = await transporter.sendMail({
-      from: `"${process.env.MAIL_FROM_NAME || 'FamilyHub'}" <${process.env.MAIL_FROM_EMAIL || 'support@familyhub.com'}>`,
-      to: req.query.email || process.env.MAIL_FROM_EMAIL || 'support@familyhub.com',
-      subject: 'Test Email from FamilyHub SMTP',
-      text: 'SMTP Connected and Email Sent Successfully!'
-    });
+    const { sendInstantEmail } = require('./services/emailService');
+    const to = req.query.email || process.env.MAIL_FROM_EMAIL || 'support@familyhub.com';
+    const messageId = await sendInstantEmail(
+      to,
+      'Test Instant Email from FamilyHub',
+      '<p>This email was dispatched instantly by the backend successfully!</p>'
+    );
     res.json({
       success: true,
       status: 'SMTP Connected',
       message: 'Email Sent',
-      messageId: info.messageId,
-      brevoResponse: info.response
+      messageId: messageId,
+      recipient: to,
+      subject: 'Test Instant Email from FamilyHub'
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message, stack: err.stack });
@@ -590,7 +591,8 @@ app.post('/api/v1/admin/members/invite/resend', authenticateToken, async (req, r
            { email: user.email, firstName: user.firstName, lastName: user.lastName },
            'Admin',
            'FamilyHub',
-           token
+           token,
+           true
        );
        if (!emailResult.success) {
            emailStatus = 'EMAIL_FAILED';
