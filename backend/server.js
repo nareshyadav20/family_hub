@@ -421,6 +421,35 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
         
         return u;
      });
+     
+     // Send Real-Time Credentials Email
+     const { sendMemberCredentialsEmail } = require('./services/emailService');
+     
+     if (!isDraft && email) {
+        try {
+           const memberName = firstName + (lastName?.trim() ? ' ' + lastName.trim() : '');
+           const emailResult = await sendMemberCredentialsEmail(memberName, email, password);
+           
+           if (!emailResult.success) {
+               await prisma.user.update({
+                 where: { id: user.id },
+                 data: { status: 'EMAIL_FAILED', brevoErrorMessage: 'Failed to send credentials manually', lastEmailAttempt: new Date() }
+               });
+           } else {
+               await prisma.user.update({
+                 where: { id: user.id },
+                 data: { lastEmailAttempt: new Date() }
+               });
+           }
+        } catch (emailErr) {
+           console.error('Failed to send add member credentials:', emailErr);
+           await prisma.user.update({
+             where: { id: user.id },
+             data: { status: 'EMAIL_FAILED', brevoErrorMessage: emailErr.message, lastEmailAttempt: new Date() }
+           });
+        }
+     }
+
      const io = req.app.get('socketio');
      io.emit('member.created', { memberId: user.id });
      res.status(201).json({ message: 'Member added successfully', user });
