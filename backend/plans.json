@@ -21,14 +21,5 @@
     "dbName": "Enterprise",
     "price": "$109/mo",
     "storage": "Unlimited"
-  },
-  {
-    "id": "naresh",
-    "name": "naresh",
-    "dbName": "naresh",
-    "price": "9999",
-    "storage": "9",
-    "features": "basicss",
-    "status": "Active"
   }
 ]

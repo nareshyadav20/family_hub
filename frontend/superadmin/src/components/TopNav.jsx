@@ -2,11 +2,21 @@ import { Bell as BellIcon, Search as SearchIcon, UserCircle as UserIcon, Setting
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
+// Helper: read superadmin user from localStorage
+function getSuperAdmin() {
+  try {
+    return JSON.parse(localStorage.getItem('superadmin_user') || '{}');
+  } catch {
+    return {};
+  }
+}
+
 export default function TopNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [superAdmin, setSuperAdmin] = useState(getSuperAdmin);
   
   // Format path for title
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -30,6 +40,26 @@ export default function TopNav() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
 
+  // Re-sync superAdmin data whenever localStorage is updated (e.g. after profile save)
+  useEffect(() => {
+    const onStorage = () => setSuperAdmin(getSuperAdmin());
+    window.addEventListener('storage', onStorage);
+    // Also poll every 2s to catch same-tab localStorage updates
+    const interval = setInterval(() => setSuperAdmin(getSuperAdmin()), 2000);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const displayName = superAdmin.firstName
+    ? `${superAdmin.firstName} ${superAdmin.lastName || ''}`.trim()
+    : 'Super Admin';
+
+  const initials = superAdmin.firstName
+    ? (superAdmin.firstName[0] + (superAdmin.lastName?.[0] || '')).toUpperCase()
+    : 'SA';
+
   return (
     <header className="fixed top-0 right-0 left-64 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E2E8F0]/80 z-10 hidden md:flex items-center justify-between px-8 shadow-sm">
       <div className="flex items-center">
@@ -49,7 +79,11 @@ export default function TopNav() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <button className="relative p-2 text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
+          <button 
+            onClick={() => navigate('/notifications')}
+            className="relative p-2 text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+            title="Notifications"
+          >
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
           </button>
@@ -61,10 +95,18 @@ export default function TopNav() {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors focus:outline-none"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-sm border-2 border-white">
-                SA
-              </div>
-              <span className="hidden lg:block">Super Admin</span>
+              {superAdmin.avatar ? (
+                <img
+                  src={superAdmin.avatar}
+                  alt="Avatar"
+                  className="h-8 w-8 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white ring-1 ring-purple-200"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-sm border-2 border-white">
+                  {initials}
+                </div>
+              )}
+              <span className="hidden lg:block">{displayName}</span>
             </button>
 
             {isProfileOpen && (

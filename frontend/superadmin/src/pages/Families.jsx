@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, LogIn, Plus, X, Loader2, Mail, Trash2 } from 'lucide-react';
+import { Search, Eye, Plus, X, Loader2, Mail, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -201,9 +201,6 @@ export default function Families() {
                       <div className="flex justify-end gap-2">
                         <button onClick={() => navigate(`/families/${family.id}`)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
                           <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Login as Admin">
-                          <LogIn className="w-4 h-4" />
                         </button>
                         <button onClick={() => resendWelcomeEmail(family.id)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Resend Credentials">
                           <Mail className="w-4 h-4" />

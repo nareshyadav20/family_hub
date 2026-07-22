@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { User, Shield, Mail, Smartphone, Lock, Globe, Image as ImageIcon, Save, Loader2 } from 'lucide-react';
+import { User, Shield, Mail, Smartphone, Lock, Globe, Camera, Save, Loader2, X, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -13,6 +13,10 @@ export default function Profile() {
   const userId = superAdmin.id;
 
   const [formData, setFormData] = useState({});
+  const [avatarPreview, setAvatarPreview] = useState(null); // local preview (base64)
+  const [avatarBase64, setAvatarBase64] = useState(null);   // base64 to save
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['superadmin_profile', userId],
@@ -21,19 +25,6 @@ export default function Profile() {
       return res.data.data;
     },
     enabled: !!userId,
-    onSuccess: (data) => {
-      setFormData({
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        theme: data.memberSettings?.theme || 'System Default',
-        language: data.memberSettings?.language || 'English (US)',
-        timezone: data.memberSettings?.timezone || 'UTC',
-        password: '',
-        confirmPassword: ''
-      });
-    }
   });
 
   const updateMutation = useMutation({
@@ -43,17 +34,20 @@ export default function Profile() {
     },
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(['superadmin_profile', userId], updatedUser);
-      // Update local storage user just in case name changed
+      // Update local storage user in case name/avatar changed
       localStorage.setItem('superadmin_user', JSON.stringify(updatedUser));
       toast.success('Profile updated successfully!');
       setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+      // Clear pending avatar state after save
+      setAvatarPreview(null);
+      setAvatarBase64(null);
     },
     onError: () => {
       toast.error('Failed to update profile');
     }
   });
 
-  // Handle first load state initialization gracefully when query loads outside onSuccess
+  // Handle first load state initialization
   React.useEffect(() => {
     if (profile) {
       setFormData({
@@ -74,14 +68,75 @@ export default function Profile() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be under 2MB');
+      return;
+    }
+
+    setIsAvatarUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      setAvatarPreview(base64);
+      setAvatarBase64(base64);
+      setIsAvatarUploading(false);
+      toast.success('Avatar ready — click Save Changes to apply');
+    };
+    reader.onerror = () => {
+      setIsAvatarUploading(false);
+      toast.error('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input so same file can be picked again
+    e.target.value = '';
+  };
+
+  const handleClearAvatar = (e) => {
+    e.stopPropagation();
+    setAvatarPreview(null);
+    setAvatarBase64(''); // empty string = clear avatar in DB
+    toast('Avatar cleared — click Save Changes to apply', { icon: '🗑️' });
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     if (formData.password && formData.password !== formData.confirmPassword) {
        toast.error('Passwords do not match');
        return;
     }
-    updateMutation.mutate(formData);
+
+    const payload = { ...formData };
+    // Only include avatar in payload if user changed it
+    if (avatarBase64 !== null) {
+      payload.avatar = avatarBase64;
+    }
+    // Remove confirmPassword from payload
+    delete payload.confirmPassword;
+    if (!payload.password) delete payload.password;
+
+    updateMutation.mutate(payload);
   };
+
+  // Determine avatar src: pending preview > saved avatar > fallback initials
+  const displayAvatar = avatarPreview 
+    || (profile?.avatar || null)
+    || `https://ui-avatars.com/api/?name=${profile?.firstName}+${profile?.lastName}&background=4f46e5&color=fff&size=150`;
 
   if (isLoading || !profile) {
      return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600" /></div>;
@@ -99,12 +154,70 @@ export default function Profile() {
         <div className="space-y-8">
           {/* Profile Card */}
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center text-center">
-             <div className="relative mb-5 mt-2">
-                <img src={profile.avatar || `https://ui-avatars.com/api/?name=${profile.firstName}+${profile.lastName}&background=4f46e5&color=fff&size=150`} alt="Avatar" className="w-28 h-28 rounded-full shadow-md object-cover" />
-                <button className="absolute bottom-0 right-0 bg-white text-indigo-600 p-2 rounded-full shadow border border-slate-100 hover:bg-slate-50 transition-colors">
-                  <ImageIcon size={16} />
-                </button>
+             <div className="relative mb-5 mt-2 group" onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
+               {/* Hidden file input */}
+               <input
+                 ref={fileInputRef}
+                 type="file"
+                 accept="image/*"
+                 className="hidden"
+                 onChange={handleAvatarFileChange}
+               />
+
+               {/* Avatar image */}
+               <div className="relative w-28 h-28">
+                 <img
+                   src={displayAvatar}
+                   alt="Avatar"
+                   className="w-28 h-28 rounded-full shadow-md object-cover ring-4 ring-indigo-50 transition-all group-hover:ring-indigo-200 group-hover:brightness-90"
+                 />
+
+                 {/* Loading overlay */}
+                 {isAvatarUploading && (
+                   <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                     <Loader2 className="text-white animate-spin" size={28} />
+                   </div>
+                 )}
+
+                 {/* Hover overlay */}
+                 {!isAvatarUploading && (
+                   <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-black/0 group-hover:bg-black/40 transition-all">
+                     <Camera className="text-white opacity-0 group-hover:opacity-100 transition-all" size={22} />
+                     <span className="text-white text-xs font-semibold mt-1 opacity-0 group-hover:opacity-100 transition-all">Change</span>
+                   </div>
+                 )}
+               </div>
+
+               {/* Pending badge */}
+               {avatarPreview && (
+                 <button
+                   type="button"
+                   onClick={handleClearAvatar}
+                   className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full shadow hover:bg-red-600 transition-colors z-10"
+                   title="Remove new avatar"
+                 >
+                   <X size={12} />
+                 </button>
+               )}
+
+               {/* Camera button */}
+               <button
+                 type="button"
+                 onClick={handleAvatarClick}
+                 className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg border-2 border-white hover:bg-indigo-700 transition-colors"
+                 title="Upload avatar"
+               >
+                 <Upload size={14} />
+               </button>
              </div>
+
+             {/* Avatar pending indicator */}
+             {avatarPreview && (
+               <p className="text-xs text-indigo-600 font-semibold mb-2 animate-pulse">
+                 ✨ New avatar ready — save to apply
+               </p>
+             )}
+
              <h3 className="text-2xl font-bold text-slate-900">{profile.firstName} {profile.lastName}</h3>
              <span className="mt-2 flex items-center gap-1.5 text-[11px] font-bold bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full uppercase tracking-wider">
                <Shield size={14} /> Super Admin
@@ -214,10 +327,10 @@ export default function Profile() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-slate-200">
-              <button type="button" onClick={() => setFormData(profile)} className="w-full sm:w-auto px-6 py-3 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+              <button type="button" onClick={() => { setFormData(profile); setAvatarPreview(null); setAvatarBase64(null); }} className="w-full sm:w-auto px-6 py-3 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
                 Revert Changes
               </button>
-              <button type="submit" disabled={updateMutation.isPending} className="w-full sm:w-auto px-6 py-3 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex justify-center items-center gap-2">
+              <button type="submit" disabled={updateMutation.isPending} className="w-full sm:w-auto px-6 py-3 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-60">
                 {updateMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save Changes
               </button>
             </div>

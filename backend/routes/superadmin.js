@@ -339,7 +339,7 @@ router.post('/subscriptions/plans', async (req, res) => {
 router.put('/subscriptions/plans/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, storage, status } = req.body;
+    const { name, dbName, price, storage, features, status } = req.body;
 
     let plansData = [];
     if (fs.existsSync(PLANS_FILE)) {
@@ -348,7 +348,15 @@ router.put('/subscriptions/plans/:id', async (req, res) => {
 
     const planIndex = plansData.findIndex(p => p.id === id);
     if (planIndex >= 0) {
-      plansData[planIndex] = { ...plansData[planIndex], name, price, storage, status };
+      plansData[planIndex] = { 
+        ...plansData[planIndex], 
+        name: name || plansData[planIndex].name, 
+        dbName: dbName !== undefined ? dbName : plansData[planIndex].dbName,
+        price: price !== undefined ? price : plansData[planIndex].price, 
+        storage: storage !== undefined ? storage : plansData[planIndex].storage, 
+        features: features !== undefined ? features : plansData[planIndex].features,
+        status: status !== undefined ? status : plansData[planIndex].status 
+      };
       fs.writeFileSync(PLANS_FILE, JSON.stringify(plansData, null, 2));
       res.json({ success: true, data: plansData[planIndex] });
     } else {
@@ -357,6 +365,31 @@ router.put('/subscriptions/plans/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error updating plan' });
+  }
+});
+
+// Delete a Plan
+router.delete('/subscriptions/plans/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let plansData = [];
+    if (fs.existsSync(PLANS_FILE)) {
+      plansData = JSON.parse(fs.readFileSync(PLANS_FILE, 'utf-8'));
+    }
+
+    const initialLength = plansData.length;
+    plansData = plansData.filter(p => p.id !== id);
+
+    if (plansData.length < initialLength) {
+      fs.writeFileSync(PLANS_FILE, JSON.stringify(plansData, null, 2));
+      res.json({ success: true, message: 'Plan deleted successfully' });
+    } else {
+      res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error deleting plan' });
   }
 });
 
@@ -398,9 +431,15 @@ router.get('/profile/:id', async (req, res) => {
 // PUT superadmin profile
 router.put('/profile/:id', async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, theme, language, timezone, password } = req.body;
+    const { firstName, lastName, email, phone, theme, language, timezone, password, avatar } = req.body;
     
     let updateData = { firstName, lastName, email, phone };
+    
+    // Save avatar (base64 string) if provided
+    if (avatar !== undefined) {
+      updateData.avatar = avatar;
+    }
+
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
@@ -424,6 +463,7 @@ router.put('/profile/:id', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 
 // Get Audit Logs
 router.get('/audit-logs', async (req, res) => {
