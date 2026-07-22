@@ -1,8 +1,28 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const router = express.Router();
+
+const uploadDir = path.join(__dirname, '../uploads/messages');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 const prisma = new PrismaClient();
 
 const authMiddleware = (req, res, next) => {
@@ -70,6 +90,15 @@ router.get('/conversations', async (req, res) => {
   }
 });
 
+// Upload attachment endpoint
+router.post('/upload', upload.single('attachment'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/messages/${req.file.filename}`;
+  res.json({ fileUrl, fileName: req.file.originalname });
+});
+
 // Get messages for a specific user
 router.get('/:contactId', async (req, res) => {
   try {
@@ -94,6 +123,8 @@ router.get('/:contactId', async (req, res) => {
         id: m.id,
         sender: m.senderId === userId ? 'me' : 'them',
         text: m.text,
+        fileUrl: m.fileUrl,
+        fileName: m.fileName,
         time: m.createdAt,
         mine: m.senderId === userId
     })));
@@ -108,7 +139,7 @@ router.post('/', async (req, res) => {
   try {
     const userId = req.user.userId;
     const familyId = req.user.familyId;
-    const { receiverId, text } = req.body;
+    const { receiverId, text, fileUrl, fileName } = req.body;
     
     const receiverCheck = await prisma.user.findUnique({ where: { id: receiverId, familyId }});
     if (!receiverCheck) return res.status(403).json({ error: 'Receiver not in your family' });
@@ -117,7 +148,9 @@ router.post('/', async (req, res) => {
         data: {
             senderId: userId,
             receiverId,
-            text
+            text: text || '',
+            fileUrl,
+            fileName
         }
     });
 
@@ -126,7 +159,9 @@ router.post('/', async (req, res) => {
         id: message.id,
         sender: 'them',
         senderId: userId,
-        text,
+        text: message.text,
+        fileUrl: message.fileUrl,
+        fileName: message.fileName,
         time: message.createdAt,
         mine: false
     });
@@ -135,6 +170,8 @@ router.post('/', async (req, res) => {
         id: message.id,
         sender: 'me',
         text: message.text,
+        fileUrl: message.fileUrl,
+        fileName: message.fileName,
         time: message.createdAt,
         mine: true
     });

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Search, Paperclip, Smile, Phone, Video, MoreHorizontal, CheckCheck } from 'lucide-react';
+import { Send, Search, Paperclip, Smile, Phone, Video, MoreHorizontal, CheckCheck, FileText, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import EmojiPicker from 'emoji-picker-react';
 
 const formatTime = (isoString) => {
   if (!isoString) return '';
@@ -13,6 +14,8 @@ export default function Messages() {
   const [selected, setSelected] = useState(null);
   const [msg, setMsg] = useState('');
   const [search, setSearch] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const fileInputRef = useRef(null);
   
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -77,11 +80,13 @@ export default function Messages() {
   }, [activeUser, queryClient, SOCKET_URL]);
 
   const mutation = useMutation({
-      mutationFn: async (text) => {
+      mutationFn: async (payload) => {
           if (!selected) return;
           const res = await axios.post(`${API_URL}/messages`, {
               receiverId: selected.id,
-              text
+              text: payload.text,
+              fileUrl: payload.fileUrl,
+              fileName: payload.fileName
           }, {
               headers: { Authorization: `Bearer ${token}` }
           });
@@ -98,8 +103,36 @@ export default function Messages() {
 
   const handleSend = () => {
     if (!msg.trim()) return;
-    mutation.mutate(msg);
+    mutation.mutate({ text: msg, fileUrl: null, fileName: null });
     setMsg('');
+    setShowEmojiPicker(false);
+  };
+
+  const handleEmojiClick = (emojiObject) => {
+    setMsg(prev => prev + emojiObject.emoji);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('attachment', file);
+
+    try {
+      const res = await axios.post(`${API_URL}/messages/upload`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}` 
+        }
+      });
+      mutation.mutate({ text: '', fileUrl: res.data.fileUrl, fileName: res.data.fileName });
+    } catch (err) {
+      console.error('File upload failed', err);
+      alert('Failed to upload file.');
+    }
+    
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const filtered = contacts.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
@@ -179,7 +212,19 @@ export default function Messages() {
                 {msgs.map(m => (
                   <div key={m.id} className={`flex ${m.mine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[72%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed ${m.mine ? 'bg-indigo-600 text-white rounded-br-md shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-md shadow-sm'}`}>
-                      <p>{m.text}</p>
+                      {m.fileUrl && (
+                        <div className="mb-2">
+                          {m.fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                            <img src={m.fileUrl} alt={m.fileName} className="rounded-lg max-w-full h-auto cursor-pointer" onClick={() => window.open(m.fileUrl, '_blank')} />
+                          ) : (
+                            <a href={m.fileUrl} target="_blank" rel="noreferrer" className={`flex items-center gap-2 p-2 rounded-lg ${m.mine ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600'} transition-colors`}>
+                              <FileText size={16} />
+                              <span className="truncate max-w-[150px] font-medium">{m.fileName}</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      {m.text && <p>{m.text}</p>}
                       <p className={`text-[10px] mt-1.5 flex items-center gap-1 justify-end ${m.mine ? 'text-indigo-200' : 'text-slate-400'}`}>
                         {formatTime(m.time)} {m.mine && <CheckCheck size={11} />}
                       </p>
@@ -189,9 +234,15 @@ export default function Messages() {
                 <div ref={msgsEndRef} />
               </div>
 
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800 relative">
+                {showEmojiPicker && (
+                  <div className="absolute bottom-20 right-4 z-50 shadow-xl rounded-xl">
+                    <EmojiPicker onEmojiClick={handleEmojiClick} theme="auto" />
+                  </div>
+                )}
                 <div className="flex items-center gap-3">
-                  <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400"><Paperclip size={18} /></button>
+                  <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+                  <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400"><Paperclip size={18} /></button>
                   <input
                     value={msg}
                     onChange={e => setMsg(e.target.value)}
@@ -199,8 +250,8 @@ export default function Messages() {
                     placeholder="Type a message..."
                     className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm border-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-200"
                   />
-                  <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400"><Smile size={18} /></button>
-                  <button onClick={handleSend} disabled={mutation.isPending} className="p-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl transition-colors shadow-lg shadow-indigo-500/25">
+                  <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-2 rounded-xl transition-colors ${showEmojiPicker ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400'}`}><Smile size={18} /></button>
+                  <button onClick={handleSend} disabled={mutation.isPending || (!msg.trim() && !mutation.variables?.fileUrl)} className="p-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl transition-colors shadow-lg shadow-indigo-500/25">
                     <Send size={18} className="text-white" />
                   </button>
                 </div>

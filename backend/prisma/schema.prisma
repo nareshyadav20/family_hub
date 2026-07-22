@@ -388,6 +388,8 @@ model Message {
   receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
   
   text        String
+  fileUrl     String?
+  fileName    String?
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
 
