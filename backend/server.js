@@ -958,11 +958,14 @@ app.delete('/api/v1/admin/events/:id', authenticateToken, async (req, res) => {
 // Get Logged-in Profile Endpoint
 app.get('/api/v1/member/profile', authenticateToken, async (req, res) => {
   try {
-     const user = await prisma.user.findUnique({ where: { id: req.user.userId }, include: { memberProfile: true } });
+     const userId = req.user.userId || req.user.id;
+     if (!userId) return res.status(401).json({ error: 'User ID missing in token' });
+     const user = await prisma.user.findUnique({ where: { id: userId }, include: { memberProfile: true } });
      if (!user) return res.status(404).json({ error: 'User not found' });
      res.json({ user, profile: user.memberProfile || { currentStage: 1, profileCompletion: 0 } });
   } catch(err) {
-     res.status(500).json({ error: 'Server error fetching profile' });
+     console.error("GET /api/v1/member/profile error:", err);
+     res.status(500).json({ error: 'Server error fetching profile', details: err.message });
   }
 });
 
@@ -973,40 +976,56 @@ app.put('/api/v1/member/profile', authenticateToken, async (req, res) => {
      const activeUser = req.user;
      if (!activeUser) return res.status(401).json({ error: 'Unauthorized' });
 
+     const userId = activeUser.userId || activeUser.id;
+     if (!userId) return res.status(401).json({ error: 'User ID missing in token' });
+
      const safeData = {
         currentStage, 
         profileCompletion,
         address: profileData.address || '',
         dob: profileData.dob ? new Date(profileData.dob) : null,
         bloodGroup: profileData.bloodGroup || null,
-        education: profileData.education || '',
+        education: profileData.college ? `${profileData.education || ''} at ${profileData.college}` : (profileData.education || ''),
         occupation: profileData.occupation || '',
         company: profileData.company || '',
-        biography: profileData.biography || ''
+        biography: profileData.skills ? `${profileData.biography || ''}\n\nSkills: ${profileData.skills}` : (profileData.biography || '')
      };
 
      const profile = await prisma.memberProfile.upsert({
-        where: { userId: activeUser.id },
+        where: { userId: userId },
         update: safeData,
         create: {
-           userId: activeUser.id,
+           userId: userId,
            ...safeData
         },
         include: { user: true }
      });
      
+     // Update the User model fields as well so the frontend knows it's complete
+     await prisma.user.update({
+        where: { id: profile.userId },
+        data: { 
+           ...(profileData.phone && profileData.phone.trim() !== '' ? { phone: profileData.phone.trim() } : {}),
+           profileCompletion: profileCompletion,
+           currentProfileStep: profileCompletion === 100 ? 'Completed' : `Stage ${currentStage}`,
+           isProfileCompleted: profileCompletion === 100,
+           ...(profileCompletion === 100 && { status: 'ACTIVE' })
+        }
+     });
+
      if (profileCompletion === 100) {
-        await prisma.user.update({
-           where: { id: profile.userId },
-           data: { status: 'WAITING_APPROVAL' }
-        });
         const io = req.app.get('socketio');
-        io.emit('member.updated', { memberId: profile.userId });
+        if (io) io.emit('member.updated', { memberId: profile.userId });
      }
      
      res.json({ success: true, profile });
   } catch(err) {
+     if (err.code === 'P2002' && err.meta && err.meta.target && err.meta.target.includes('phone')) {
+        return res.status(400).json({ error: 'Phone number is already in use by another account.' });
+     }
      console.error("Profile Save Error: ", err);
+     const fs = require('fs');
+     fs.writeFileSync('profile_save_error.log', err.toString() + '\n' + (err.stack || ''));
      res.status(500).json({ error: 'Server error updating profile' });
   }
 });

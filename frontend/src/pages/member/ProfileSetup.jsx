@@ -14,6 +14,7 @@ export default function ProfileSetup() {
     education: '', school: '', college: '', degree: '', occupation: '', company: '', designation: '', skills: '', linkedin: '',
     // Stage 3: Personal & Documents
     biography: '', languages: '', hobbies: '', interests: '', emergencyContact: '', emergencyPhone: '', aadhaar: '', pan: '', passport: '',
+    address: '', dob: '', phone: '',
     // Stage 4: Finance, Privacy
     bank: '', account: '', ifsc: '', bloodGroup: '', medicalNotes: '', visibilityProfile: true, visibilityPhone: false
   });
@@ -34,13 +35,24 @@ export default function ProfileSetup() {
     }
 
     try {
-      await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
+      const res = await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
         currentStage: nextStage,
         profileCompletion: completion,
         ...formData
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+      
+      // Update local storage so the dashboard knows it's completed
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const updatedUser = { 
+        ...storedUser, 
+        profileCompletion: completion, 
+        currentProfileStep: submitFinal ? 'Completed' : `Stage ${nextStage}`,
+        isProfileCompleted: submitFinal || completion === 100
+      };
+      if (submitFinal || completion === 100) updatedUser.status = 'ACTIVE';
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       
       toast.success(submitFinal ? 'Profile fully completed and submitted for review!' : `Stage ${stage} Saved!`);
       
@@ -50,7 +62,8 @@ export default function ProfileSetup() {
         setStage(nextStage);
       }
     } catch (err) {
-      toast.error('Failed to save profile progress.');
+      const errMsg = err.response?.data?.error || 'Failed to save profile progress.';
+      toast.error(errMsg);
     } finally {
       setSaving(false);
     }
@@ -105,7 +118,7 @@ export default function ProfileSetup() {
             </div>
 
             <div className="flex justify-between pt-8 border-t border-slate-100 mt-6">
-               <button onClick={() => navigate('/member/dashboard')} className="font-semibold text-slate-500">Skip for now</button>
+               <button onClick={() => { handleSave(false).then(() => navigate('/member/dashboard')); }} className="font-semibold text-slate-500">Save & Skip for now</button>
                <button onClick={() => handleSave(false)} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg flex items-center gap-2">
                  {saving ? 'Saving...' : 'Save & Continue'} <ChevronRight size={18} />
                </button>
@@ -134,10 +147,22 @@ export default function ProfileSetup() {
                 <label className="block text-sm font-semibold mb-2">Aadhaar (ID)</label>
                 <input type="text" name="aadhaar" value={formData.aadhaar} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 rounded-xl px-4 py-3" />
               </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Address</label>
+                <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 rounded-xl px-4 py-3" placeholder="Full Address" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Date of Birth</label>
+                <input type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 rounded-xl px-4 py-3" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Phone Number</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 rounded-xl px-4 py-3" placeholder="Mobile Number" />
+              </div>
             </div>
 
             <div className="flex justify-between pt-8 border-t border-slate-100 mt-6">
-               <button onClick={() => navigate('/member/dashboard')} className="font-semibold text-slate-500">Skip for now</button>
+               <button onClick={() => { handleSave(false).then(() => navigate('/member/dashboard')); }} className="font-semibold text-slate-500">Save & Skip for now</button>
                <button onClick={() => handleSave(false)} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg flex items-center gap-2">
                  {saving ? 'Saving...' : 'Save & Continue'} <ChevronRight size={18} />
                </button>
@@ -153,7 +178,7 @@ export default function ProfileSetup() {
                <div className="md:col-span-2 bg-slate-50 p-6 rounded-xl border border-slate-200">
                   <h3 className="font-bold text-lg mb-4">Privacy Options</h3>
                   
-                  <div className="space-y-4">
+                   <div className="space-y-4">
                      <label className="flex items-center gap-3 font-medium cursor-pointer">
                         <input type="checkbox" name="visibilityProfile" checked={formData.visibilityProfile} onChange={handleChange} className="w-5 h-5 rounded text-blue-600" />
                         Allow Extended Family to View Full Profile
@@ -162,6 +187,22 @@ export default function ProfileSetup() {
                         <input type="checkbox" name="visibilityPhone" checked={formData.visibilityPhone} onChange={handleChange} className="w-5 h-5 rounded text-blue-600" />
                         Make Mobile Number Visible in Directory
                      </label>
+                  </div>
+               </div>
+               
+               <div className="md:col-span-2 bg-slate-50 p-6 rounded-xl border border-slate-200 mt-4">
+                  <h3 className="font-bold text-lg mb-4">Medical & Blood Group</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                       <label className="block text-sm font-semibold mb-2">Blood Group</label>
+                       <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3">
+                         <option value="">Select Blood Group</option>
+                         <option value="A+">A+</option><option value="A-">A-</option>
+                         <option value="B+">B+</option><option value="B-">B-</option>
+                         <option value="O+">O+</option><option value="O-">O-</option>
+                         <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                       </select>
+                     </div>
                   </div>
                </div>
             </div>

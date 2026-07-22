@@ -37,8 +37,8 @@ const ensureSettings = async (userId) => {
 // GET /api/member/settings
 router.get('/settings', authenticate, async (req, res) => {
   try {
-    const settings = await ensureSettings(req.user.userId);
-    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    const settings = await ensureSettings((req.user.userId || req.user.id));
+    const user = await prisma.user.findUnique({ where: { id: (req.user.userId || req.user.id) } });
     res.json({ success: true, settings, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -52,7 +52,7 @@ router.put('/settings', authenticate, async (req, res) => {
     let updateData = {};
     if (display_name !== undefined) updateData.display_name = display_name;
     if (username !== undefined) updateData.username = username;
-    const settings = await prisma.memberSettings.update({ where: { userId: req.user.userId }, data: updateData });
+    const settings = await prisma.memberSettings.update({ where: { userId: (req.user.userId || req.user.id) }, data: updateData });
     res.json({ success: true, settings });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -64,9 +64,9 @@ router.put('/security', authenticate, async (req, res) => {
   try {
     const { two_factor_enabled } = req.body;
     const settings = await prisma.memberSettings.upsert({
-      where: { userId: req.user.userId },
+      where: { userId: (req.user.userId || req.user.id) },
       update: { two_factor_enabled },
-      create: { userId: req.user.userId, two_factor_enabled },
+      create: { userId: (req.user.userId || req.user.id), two_factor_enabled },
     });
     res.json({ success: true, settings });
   } catch (err) {
@@ -79,7 +79,7 @@ router.put('/privacy', authenticate, async (req, res) => {
   try {
     const { show_mobile, show_email, show_dob, show_address, show_public_profile, allow_direct_messages } = req.body;
     const settings = await prisma.memberSettings.update({
-      where: { userId: req.user.userId },
+      where: { userId: (req.user.userId || req.user.id) },
       data: { show_mobile, show_email, show_dob, show_address, show_public_profile, allow_direct_messages }
     });
     res.json({ success: true, settings });
@@ -93,7 +93,7 @@ router.put('/notifications', authenticate, async (req, res) => {
   try {
     const { email_notifications, whatsapp_notifications, push_notifications, birthday_notifications, event_notifications, announcement_notifications } = req.body;
     const settings = await prisma.memberSettings.update({
-      where: { userId: req.user.userId },
+      where: { userId: (req.user.userId || req.user.id) },
       data: { email_notifications, whatsapp_notifications, push_notifications, birthday_notifications, event_notifications, announcement_notifications }
     });
     res.json({ success: true, settings });
@@ -106,7 +106,7 @@ router.put('/notifications', authenticate, async (req, res) => {
 router.put('/appearance', authenticate, async (req, res) => {
   try {
     const { theme, language, timezone } = req.body;
-    const settings = await prisma.memberSettings.update({ where: { userId: req.user.userId }, data: { theme, language, timezone } });
+    const settings = await prisma.memberSettings.update({ where: { userId: (req.user.userId || req.user.id) }, data: { theme, language, timezone } });
     res.json({ success: true, settings });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -120,7 +120,7 @@ router.put('/change-password', authenticate, async (req, res) => {
     if (!newPassword || newPassword.length < 6) {
       return res.status(400).json({ error: 'New password must be at least 6 characters' });
     }
-    const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+    const user = await prisma.user.findUnique({ where: { id: (req.user.userId || req.user.id) } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     if (user.password) {
@@ -142,7 +142,7 @@ router.put('/avatar', authenticate, async (req, res) => {
   try {
     const { avatar } = req.body;
     if (!avatar) return res.status(400).json({ error: 'Avatar data required' });
-    const user = await prisma.user.update({ where: { id: req.user.userId }, data: { avatar } });
+    const user = await prisma.user.update({ where: { id: (req.user.userId || req.user.id) }, data: { avatar } });
     res.json({ success: true, avatar: user.avatar });
   } catch (err) {
     console.error('Avatar update error:', err);
@@ -162,7 +162,7 @@ router.put('/profile-info', authenticate, async (req, res) => {
     if (gender       !== undefined) userUpdate.gender       = gender;
     if (familyBranch !== undefined) userUpdate.familyBranch = familyBranch;
 
-    await prisma.user.update({ where: { id: req.user.userId }, data: userUpdate });
+    await prisma.user.update({ where: { id: (req.user.userId || req.user.id) }, data: userUpdate });
 
     const profileUpdate = {};
     if (dob        !== undefined) profileUpdate.dob        = dob ? new Date(dob) : null;
@@ -172,14 +172,14 @@ router.put('/profile-info', authenticate, async (req, res) => {
 
     if (Object.keys(profileUpdate).length > 0) {
       await prisma.memberProfile.upsert({
-        where: { userId: req.user.userId },
+        where: { userId: (req.user.userId || req.user.id) },
         update: profileUpdate,
-        create: { userId: req.user.userId, ...profileUpdate },
+        create: { userId: (req.user.userId || req.user.id), ...profileUpdate },
       });
     }
 
     const updated = await prisma.user.findUnique({
-      where: { id: req.user.userId },
+      where: { id: (req.user.userId || req.user.id) },
       include: { memberProfile: true, memberSettings: true },
     });
     res.json({ success: true, data: updated });
@@ -212,7 +212,7 @@ router.post('/verify-email-otp', authenticate, async (req, res) => {
   try {
     const { otp, newEmail } = req.body;
     if (otp !== '123456') return res.status(400).json({ error: 'Invalid OTP' });
-    const settings = await prisma.memberSettings.update({ where: { userId: req.user.userId }, data: { email: newEmail } });
+    const settings = await prisma.memberSettings.update({ where: { userId: (req.user.userId || req.user.id) }, data: { email: newEmail } });
     res.json({ success: true, settings, message: 'Email updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -233,7 +233,7 @@ router.post('/verify-mobile-otp', authenticate, async (req, res) => {
   try {
     const { otp, newMobile } = req.body;
     if (otp !== '123456') return res.status(400).json({ error: 'Invalid OTP' });
-    const settings = await prisma.memberSettings.update({ where: { userId: req.user.userId }, data: { mobile: newMobile } });
+    const settings = await prisma.memberSettings.update({ where: { userId: (req.user.userId || req.user.id) }, data: { mobile: newMobile } });
     res.json({ success: true, settings, message: 'Mobile updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
