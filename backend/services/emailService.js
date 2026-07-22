@@ -314,12 +314,31 @@ const sendPasswordResetEmail = async (memberName, memberEmail, resetToken, isRes
   const html = createEmailTemplate(subject, 'Reset Password', content);
   return await dispatchEmail(memberEmail, subject, 'password_reset', html);
 };
+const sendForgotPasswordEmail = async (memberName, memberEmail, tempPassword) => {
+  const baseUrl = process.env.APP_URL || 'http://localhost:5173';
+  const loginUrl = `${baseUrl}/login`;
+  const subject = 'Temporary Password for FamilyHub';
+  const content = `
+    <p style="font-size: 16px; margin-bottom: 20px;">Hello <strong>${memberName}</strong>,</p>
+    <p style="font-size: 16px; line-height: 1.6;">You requested a password reset for your FamilyHub account. Please use the temporary password below to log in:</p>
+    <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 25px 0;">
+        <span style="font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #334155;">${tempPassword}</span>
+    </div>
+    <div style="text-align: center; margin: 35px 0;">
+        <a href="${loginUrl}" style="background-color: #3b82f6; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); font-size: 16px;">Login to FamilyHub</a>
+    </div>
+    <p style="font-size: 14px; color: #64748b; text-align: center;">You will be prompted to create a new password immediately upon logging in.</p>
+  `;
+  const html = createEmailTemplate(subject, 'Temporary Password', content);
+  return await dispatchEmail(memberEmail, subject, 'forgot_password', html);
+};
 
 module.exports = { 
   sendInvitationEmail, 
   sendFamilyAdminEmail, 
   sendMemberCredentialsEmail, 
   sendPasswordResetEmail,
+  sendForgotPasswordEmail,
   sendInstantEmail,
   processAllPendingQueue,
   transporter

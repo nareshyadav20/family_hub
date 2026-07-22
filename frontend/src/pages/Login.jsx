@@ -12,6 +12,12 @@ export default function Login() {
 
   // Login Form State
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  
+  // Forgot Password State
+  const [forgotEmail, setForgotEmail] = useState('');
+
+  // Force Reset State
+  const [forceResetForm, setForceResetForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
 
   // Admin Registration Form State
   const [adminForm, setAdminForm] = useState({ familyName: '', name: '', email: '', phone: '', password: '', confirmPassword: '' });
@@ -33,6 +39,13 @@ export default function Login() {
       if (payload.refreshToken) localStorage.setItem('refreshToken', payload.refreshToken);
       localStorage.setItem('user', JSON.stringify(payload.user));
       
+      if (payload.user.mustChangePassword) {
+         setForceResetForm(prev => ({ ...prev, oldPassword: loginForm.password }));
+         setView('force_reset');
+         setSuccessMsg('Please set a new secure password to continue.');
+         return;
+      }
+
       const role = payload.user.role?.toUpperCase();
       if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
          navigate('/admin/dashboard');
@@ -45,6 +58,60 @@ export default function Login() {
       } else {
           setErrorMsg(err.response?.data?.error || 'Invalid credentials.');
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/auth/forgot-password`, { email: forgotEmail });
+      setSuccessMsg('Temporary password sent to your email.');
+      setForgotEmail('');
+      setView('login');
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error || 'Failed to request password reset.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForceReset = async (e) => {
+    e.preventDefault();
+    if (forceResetForm.newPassword !== forceResetForm.confirmPassword) {
+      return setErrorMsg('New passwords do not match.');
+    }
+    setErrorMsg('');
+    setLoading(true);
+    try {
+      await axios.post(`${API_URL}/auth/change-password`, {
+        currentPassword: forceResetForm.oldPassword,
+        newPassword: forceResetForm.newPassword
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      const user = JSON.parse(localStorage.getItem('user'));
+      user.mustChangePassword = false;
+      user.isTemporaryPassword = false;
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setSuccessMsg('Password updated successfully!');
+      
+      setTimeout(() => {
+        const role = user.role?.toUpperCase();
+        if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'FAMILY_ADMIN') {
+           navigate('/admin/dashboard');
+        } else {
+           navigate('/member/dashboard');
+        }
+      }, 1500);
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error || 'Failed to update password.');
     } finally {
       setLoading(false);
     }
@@ -181,10 +248,11 @@ export default function Login() {
             <button 
               onClick={() => {
                 if (view === 'register_admin' || view === 'register_member') setView('signup');
+                else if (view === 'forgot') setView('login');
                 else navigate('/');
               }} 
               className="lg:hidden absolute top-6 left-6 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800/80 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md z-10"
-              title={view === 'register_admin' || view === 'register_member' ? "Back to Options" : "Back to Home"}
+              title={view === 'register_admin' || view === 'register_member' || view === 'forgot' ? "Back to Options" : "Back to Home"}
             >
               <ArrowLeft size={18} />
             </button>
@@ -196,10 +264,10 @@ export default function Login() {
                   </div>
                )}
                <h2 className="text-2xl lg:text-[30px] font-black text-slate-900 dark:text-white tracking-tight mb-2 leading-tight mt-4">
-                 {view === 'login' ? 'Welcome back' : view === 'signup' ? 'Join FamilyHub' : view === 'register_admin' ? 'Create a Family Hub' : 'Request Access'}
+                 {view === 'login' ? 'Welcome back' : view === 'signup' ? 'Join FamilyHub' : view === 'register_admin' ? 'Create a Family Hub' : view === 'forgot' ? 'Forgot Password' : view === 'force_reset' ? 'Update Password' : 'Request Access'}
                </h2>
                <p className="text-slate-500 dark:text-slate-400 text-[15px] font-medium">
-                 {view === 'login' ? 'Enter your details to sign in.' : view === 'signup' ? 'Choose your registration path below.' : 'Please fill in your details to continue.'}
+                 {view === 'login' ? 'Enter your details to sign in.' : view === 'signup' ? 'Choose your registration path below.' : view === 'forgot' ? 'We will send a temporary password to your email.' : view === 'force_reset' ? 'You must create a new password to secure your account.' : 'Please fill in your details to continue.'}
                </p>
             </div>
 
@@ -217,26 +285,70 @@ export default function Login() {
 
             {/* --- VIEW: LOGIN --- */}
             {view === 'login' && (
-              <form onSubmit={handleLogin} className="space-y-5 animate-in slide-in-from-left-4 duration-300">
+              <form onSubmit={handleLogin} autoComplete="off" className="space-y-5 animate-in slide-in-from-left-4 duration-300">
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
                   <div className="relative">
                     <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="email" required value={loginForm.email} onChange={e => setLoginForm({...loginForm, email: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="Enter your email" />
+                    <input type="email" autoComplete="off" required value={loginForm.email} onChange={e => setLoginForm({...loginForm, email: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="Enter your email" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1 flex justify-between">
                      Password
-                     <a href="#" tabIndex="-1" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors outline-none cursor-pointer">Forgot?</a>
+                     <a onClick={() => setView('forgot')} tabIndex="-1" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors outline-none cursor-pointer">Forgot?</a>
                   </label>
                   <div className="relative">
                     <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="••••••••" />
+                    <input type="password" autoComplete="new-password" required value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="••••••••" />
                   </div>
                 </div>
                 <button type="submit" disabled={loading} className="w-full mt-2 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-[15px] rounded-xl shadow-lg shadow-blue-500/25 transition-all outline-none disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]">
                   {loading ? 'Authenticating...' : 'Sign In'}
+                </button>
+              </form>
+            )}
+
+            {/* --- VIEW: FORGOT PASSWORD --- */}
+            {view === 'forgot' && (
+              <form onSubmit={handleForgotPassword} autoComplete="off" className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1">Registered Email</label>
+                  <div className="relative">
+                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input type="email" autoComplete="off" required value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="Enter your email" />
+                  </div>
+                </div>
+                <button type="submit" disabled={loading || !forgotEmail} className="w-full mt-2 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-[15px] rounded-xl shadow-lg shadow-blue-500/25 transition-all outline-none disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]">
+                  {loading ? 'Sending...' : 'Send Temporary Password'}
+                </button>
+                <div className="text-center mt-6">
+                   <button type="button" onClick={() => setView('login')} className="text-sm font-semibold text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">
+                      Back to Sign In
+                   </button>
+                </div>
+              </form>
+            )}
+
+            {/* --- VIEW: FORCE RESET PASSWORD --- */}
+            {view === 'force_reset' && (
+              <form onSubmit={handleForceReset} autoComplete="off" className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1">New Password</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input type="password" required autoComplete="new-password" value={forceResetForm.newPassword} onChange={e => setForceResetForm({...forceResetForm, newPassword: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="••••••••" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-slate-700 dark:text-slate-300 ml-1">Confirm New Password</label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input type="password" required autoComplete="new-password" value={forceResetForm.confirmPassword} onChange={e => setForceResetForm({...forceResetForm, confirmPassword: e.target.value})} className="w-full pl-11 pr-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-sm font-semibold dark:text-white" placeholder="••••••••" />
+                  </div>
+                </div>
+                <button type="submit" disabled={loading} className="w-full mt-2 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-[15px] rounded-xl shadow-lg shadow-emerald-500/25 transition-all outline-none disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98]">
+                  {loading ? 'Updating...' : 'Set New Password & Login'}
                 </button>
               </form>
             )}

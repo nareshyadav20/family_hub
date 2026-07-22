@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
-const { sendInvitationEmail } = require('./services/emailService');
+const { sendInvitationEmail, sendForgotPasswordEmail } = require('./services/emailService');
 const crypto = require('crypto');
 
 const prisma = new PrismaClient();
@@ -211,6 +211,41 @@ app.post('/api/v1/auth/login', async (req, res) => {
 
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Forgot Password Endpoint
+app.post('/api/v1/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // Return 200 to prevent email enumeration, or return 404. We'll return 404 for clarity in testing.
+      return res.status(404).json({ error: 'Account with this email does not exist.' });
+    }
+
+    // Generate a temporary 8 character alphanumeric password
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        isTemporaryPassword: true,
+        mustChangePassword: true
+      }
+    });
+
+    const fullName = `${user.firstName} ${user.lastName}`.trim();
+    await sendForgotPasswordEmail(fullName, user.email, tempPassword);
+
+    res.json({ success: true, message: 'Temporary password sent to your email.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
