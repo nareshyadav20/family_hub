@@ -18,12 +18,12 @@ export default function Profile() {
     }
   });
 
+  const fileInputRef = useRef(null);
+
   if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold">Loading Profile Data...</div>;
 
   const { user, profile } = data || {};
   const completion = profile?.profileCompletion || 25;
-
-  const fileInputRef = useRef(null);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
