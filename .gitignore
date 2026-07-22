@@ -22,6 +22,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
+crashlog.txt
+out.txt
+out*.txt
+out.json
+*output.json
+test*.js
+tmp_*.js
+check_*.js
+fix.js
 
 # IDEs/Editors
 .idea/
