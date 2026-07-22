@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { User, Mail, Phone, MapPin, Edit2, Camera, Calendar, Shield, BookOpen, Briefcase, Heart, Activity, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
@@ -21,6 +22,42 @@ export default function Profile() {
 
   const { user, profile } = data || {};
   const completion = profile?.profileCompletion || 25;
+
+  const fileInputRef = useRef(null);
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+       toast.error('Please upload a valid image file');
+       return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+       const base64String = event.target.result;
+       try {
+          await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/avatar`, {
+             avatar: base64String
+          }, {
+             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+          
+          // Update local storage so other components refresh
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          storedUser.avatar = base64String;
+          localStorage.setItem('user', JSON.stringify(storedUser));
+          
+          toast.success('Avatar updated successfully!');
+          window.location.reload(); // Quickest way to refresh all query data and layout
+       } catch (error) {
+          toast.error('Failed to update avatar');
+          console.error(error);
+       }
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 pb-10">
@@ -55,15 +92,16 @@ export default function Profile() {
         {/* Cover */}
         <div className="h-40 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 relative"></div>
         <div className="px-8 pb-8">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-6 -mt-16 mb-6">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-lg bg-blue-900 flex items-center justify-center text-4xl text-white font-bold overflow-hidden">
-                 {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.firstName?.charAt(0)}
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6 mb-6">
+              <div className="relative shrink-0 -mt-16 sm:-mt-20">
+                <div className="w-32 h-32 rounded-3xl object-cover border-4 border-white dark:border-slate-900 shadow-lg bg-blue-900 flex items-center justify-center text-4xl text-white font-bold overflow-hidden">
+                   {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.firstName?.charAt(0)}
+                </div>
+                <input type="file" hidden ref={fileInputRef} onChange={handleAvatarUpload} accept="image/*" />
+                <button onClick={() => fileInputRef.current.click()} className="absolute bottom-2 right-2 w-8 h-8 md:w-10 md:h-10 bg-slate-900 dark:bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-md hover:bg-slate-800 transition-colors border-2 border-white dark:border-slate-950 block">
+                  <Camera size={16} />
+                </button>
               </div>
-              <button className="absolute bottom-2 right-2 w-8 h-8 md:w-10 md:h-10 bg-slate-900 dark:bg-slate-800 rounded-xl flex items-center justify-center text-white shadow-md hover:bg-slate-800 transition-colors border-2 border-white dark:border-slate-950 block">
-                <Camera size={16} />
-              </button>
-            </div>
             <div className="pb-2 flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="text-3xl font-black text-slate-900 dark:text-white capitalize truncate">{user?.firstName} {user?.lastName}</h2>
