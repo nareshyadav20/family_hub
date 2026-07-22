@@ -17,11 +17,11 @@ export default function TopNav() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [superAdmin, setSuperAdmin] = useState(getSuperAdmin);
-  
+
   // Format path for title
   const pathParts = location.pathname.split('/').filter(Boolean);
-  const currentTitle = pathParts.length > 0 
-    ? pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1) 
+  const currentTitle = pathParts.length > 0
+    ? pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1)
     : 'Dashboard';
 
   const handleLogout = () => {
@@ -65,7 +65,7 @@ export default function TopNav() {
       <div className="flex items-center">
         <h1 className="text-xl font-semibold text-gray-800 tracking-tight">{currentTitle}</h1>
       </div>
-      
+
       <div className="flex items-center space-x-6">
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -79,7 +79,7 @@ export default function TopNav() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <button 
+          <button
             onClick={() => navigate('/notifications')}
             className="relative p-2 text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
             title="Notifications"
@@ -87,11 +87,11 @@ export default function TopNav() {
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
           </button>
-          
+
           <div className="h-6 w-px bg-gray-200 mx-2"></div>
-          
+
           <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors focus:outline-none"
             >
