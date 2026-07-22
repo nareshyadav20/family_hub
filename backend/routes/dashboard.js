@@ -308,4 +308,107 @@ router.put('/requests/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ─── SETTINGS ROUTES ────────────────────────────────────────────────────────
+
+// GET /api/v1/admin/dashboard/settings/family
+router.get('/settings/family', authenticateToken, async (req, res) => {
+  try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+    const family = await prisma.family.findUnique({ where: { id: familyId } });
+    if (!family) return res.status(404).json({ error: 'Family not found' });
+    res.json({ success: true, data: family });
+  } catch (err) {
+    console.error('Settings family GET error:', err);
+    res.status(500).json({ error: 'Failed to fetch family info' });
+  }
+});
+
+// PUT /api/v1/admin/dashboard/settings/family
+router.put('/settings/family', authenticateToken, async (req, res) => {
+  try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+    const { name, address, city, state, country } = req.body;
+    const updated = await prisma.family.update({
+      where: { id: familyId },
+      data: { name, address, city, state, country },
+    });
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    console.error('Settings family PUT error:', err);
+    res.status(500).json({ error: 'Failed to update family info' });
+  }
+});
+
+// GET /api/v1/admin/dashboard/settings/me
+router.get('/settings/me', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { memberSettings: true, memberProfile: true },
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ success: true, data: user });
+  } catch (err) {
+    console.error('Settings me GET error:', err);
+    res.status(500).json({ error: 'Failed to fetch user settings' });
+  }
+});
+
+// PUT /api/v1/admin/dashboard/settings/notifications
+router.put('/settings/notifications', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {
+      email_notifications, push_notifications, birthday_notifications,
+      event_notifications, announcement_notifications, whatsapp_notifications,
+    } = req.body;
+    const settings = await prisma.memberSettings.upsert({
+      where: { userId },
+      update: { email_notifications, push_notifications, birthday_notifications, event_notifications, announcement_notifications, whatsapp_notifications },
+      create: { userId, email_notifications, push_notifications, birthday_notifications, event_notifications, announcement_notifications, whatsapp_notifications },
+    });
+    res.json({ success: true, data: settings });
+  } catch (err) {
+    console.error('Settings notifications PUT error:', err);
+    res.status(500).json({ error: 'Failed to update notification settings' });
+  }
+});
+
+// PUT /api/v1/admin/dashboard/settings/appearance
+router.put('/settings/appearance', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { theme, language, timezone } = req.body;
+    const settings = await prisma.memberSettings.upsert({
+      where: { userId },
+      update: { theme, language, timezone },
+      create: { userId, theme, language, timezone },
+    });
+    res.json({ success: true, data: settings });
+  } catch (err) {
+    console.error('Settings appearance PUT error:', err);
+    res.status(500).json({ error: 'Failed to update appearance settings' });
+  }
+});
+
+// PUT /api/v1/admin/dashboard/settings/profile
+router.put('/settings/profile', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { firstName, lastName, phone } = req.body;
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { firstName, lastName, phone },
+      include: { memberSettings: true, memberProfile: true },
+    });
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    console.error('Settings profile PUT error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 module.exports = router;

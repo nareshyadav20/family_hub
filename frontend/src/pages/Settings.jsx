@@ -1,188 +1,362 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Shield, Palette, Globe, ChevronRight, Moon, Sun, Check, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Settings as SettingsIcon, Bell, Shield, Palette, Globe,
+  ChevronRight, Moon, Sun, Check, User, Loader2, Save, Lock
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
-const settingsSections = [
-  { id: 'general', label: 'General', icon: Globe },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'security', label: 'Security', icon: Shield },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'profile', label: 'My Profile', icon: User },
+const API = `${import.meta.env.VITE_API_URL}/api/v1/admin/dashboard`;
+
+function authHeaders() {
+  return { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+}
+
+const sections = [
+  { id: 'general',       label: 'Family Info',       icon: Globe },
+  { id: 'notifications', label: 'Notifications',     icon: Bell },
+  { id: 'appearance',    label: 'Appearance',         icon: Palette },
+  { id: 'security',      label: 'Security',           icon: Shield },
 ];
 
-export default function Settings() {
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Admin User';
-  const roleName = user ? (user.role === 'ADMIN' ? 'Family Admin' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member') : 'Family Admin';
-  const displayEmail = user?.email || 'admin@familyhub.com';
+// ──────────────── Reusable Toggle ────────────────
+function Toggle({ checked, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`w-12 h-6 rounded-full transition-all duration-300 relative flex-shrink-0 ${checked ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'}`}
+    >
+      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${checked ? 'left-6' : 'left-0.5'}`} />
+    </button>
+  );
+}
 
+// ──────────────── Skeleton ────────────────
+function Skeleton({ className = '' }) {
+  return <div className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-xl ${className}`} />;
+}
+
+export default function Settings() {
+  const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState('general');
-  const [theme, setTheme] = useState('light');
-  const [notifications, setNotifications] = useState({
-    emailEvents: true, emailBirthdays: true, pushAlerts: true, smsOtp: false, weeklyDigest: true
+
+  // ── Fetch family info ──
+  const { data: familyData, isLoading: loadingFamily } = useQuery({
+    queryKey: ['settings_family'],
+    queryFn: async () => (await axios.get(`${API}/settings/family`, authHeaders())).data.data,
   });
-  const [familyInfo, setFamilyInfo] = useState({
-    name: 'The Smith Family', motto: 'Together We Stand, Together We Thrive', established: '1952', location: 'Springfield, IL'
+
+  // ── Fetch current user + settings ──
+  const { data: meData, isLoading: loadingMe } = useQuery({
+    queryKey: ['settings_me'],
+    queryFn: async () => (await axios.get(`${API}/settings/me`, authHeaders())).data.data,
   });
-  const [saved, setSaved] = useState(false);
+
+  // ── Local form states (initialised from fetched data) ──
+  const [familyForm, setFamilyForm] = useState({ name: '', address: '', city: '', state: '', country: '' });
+  const [notifForm, setNotifForm]   = useState({
+    email_notifications: true, push_notifications: true, birthday_notifications: true,
+    event_notifications: true, announcement_notifications: true, whatsapp_notifications: false,
+  });
+  const [appearForm, setAppearForm] = useState({ theme: 'System', language: 'English', timezone: 'UTC' });
+  const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', phone: '' });
+  const [pwForm, setPwForm]         = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+  useEffect(() => {
+    if (familyData) {
+      setFamilyForm({
+        name:    familyData.name    || '',
+        address: familyData.address || '',
+        city:    familyData.city    || '',
+        state:   familyData.state   || '',
+        country: familyData.country || '',
+      });
+    }
+  }, [familyData]);
+
+  useEffect(() => {
+    if (meData) {
+      const s = meData.memberSettings || {};
+      setNotifForm({
+        email_notifications:        s.email_notifications        ?? true,
+        push_notifications:         s.push_notifications         ?? true,
+        birthday_notifications:     s.birthday_notifications     ?? true,
+        event_notifications:        s.event_notifications        ?? true,
+        announcement_notifications: s.announcement_notifications ?? true,
+        whatsapp_notifications:     s.whatsapp_notifications     ?? false,
+      });
+      setAppearForm({
+        theme:    s.theme    || 'System',
+        language: s.language || 'English',
+        timezone: s.timezone || 'UTC',
+      });
+      setProfileForm({
+        firstName: meData.firstName || '',
+        lastName:  meData.lastName  || '',
+        phone:     meData.phone     || '',
+      });
+    }
+  }, [meData]);
+
+  // ── Mutations ──
+  const familyMutation = useMutation({
+    mutationFn: (data) => axios.put(`${API}/settings/family`, data, authHeaders()),
+    onSuccess:  () => { queryClient.invalidateQueries(['settings_family']); toast.success('Family info saved!'); },
+    onError:    () => toast.error('Failed to save family info'),
+  });
+
+  const notifMutation = useMutation({
+    mutationFn: (data) => axios.put(`${API}/settings/notifications`, data, authHeaders()),
+    onSuccess:  () => { queryClient.invalidateQueries(['settings_me']); toast.success('Notification preferences saved!'); },
+    onError:    () => toast.error('Failed to save notification settings'),
+  });
+
+  const appearMutation = useMutation({
+    mutationFn: (data) => axios.put(`${API}/settings/appearance`, data, authHeaders()),
+    onSuccess:  () => { queryClient.invalidateQueries(['settings_me']); toast.success('Appearance settings saved!'); },
+    onError:    () => toast.error('Failed to save appearance settings'),
+  });
+
+  const profileMutation = useMutation({
+    mutationFn: (data) => axios.put(`${API}/settings/profile`, data, authHeaders()),
+    onSuccess:  (res) => {
+      queryClient.invalidateQueries(['settings_me']);
+      // update localStorage user so TopNav reflects new name
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({ ...stored, ...res.data.data }));
+      toast.success('Profile updated!');
+    },
+    onError: () => toast.error('Failed to update profile'),
+  });
+
+  const pwMutation = useMutation({
+    mutationFn: (data) => axios.put(`${import.meta.env.VITE_API_URL}/api/v1/auth/change-password`, data, authHeaders()),
+    onSuccess:  () => { setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); toast.success('Password changed!'); },
+    onError:    (err) => toast.error(err?.response?.data?.message || 'Failed to change password'),
+  });
 
   const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (activeSection === 'general')       familyMutation.mutate(familyForm);
+    if (activeSection === 'notifications') notifMutation.mutate(notifForm);
+    if (activeSection === 'appearance')    appearMutation.mutate(appearForm);
+    if (activeSection === 'profile')       profileMutation.mutate(profileForm);
+    if (activeSection === 'security') {
+      if (!pwForm.newPassword) return toast.error('Enter a new password');
+      if (pwForm.newPassword !== pwForm.confirmPassword) return toast.error('Passwords do not match');
+      pwMutation.mutate({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
+    }
   };
 
+  const isLoading = loadingFamily || loadingMe;
+  const isSaving  = familyMutation.isPending || notifMutation.isPending || appearMutation.isPending || profileMutation.isPending || pwMutation.isPending;
+
+  const fullName    = meData ? `${meData.firstName || ''} ${meData.lastName || ''}`.trim() : '';
+  const roleName    = meData?.role === 'ADMIN' ? 'Family Admin' : meData?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Member';
+  const displayEmail = meData?.email || '';
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h1>
-        <p className="text-sm text-slate-500 mt-1">Manage family preferences, security, and account settings.</p>
+        <p className="text-sm text-slate-500 mt-1">Manage family preferences, notifications, security and profile.</p>
       </div>
 
-      <div className="grid grid-cols-[240px_1fr] gap-6">
-        {/* Sidebar nav */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 shadow-sm h-fit">
-          {settingsSections.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActiveSection(id)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all mb-1 last:mb-0 ${activeSection === id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+      <div className="grid grid-cols-[220px_1fr] gap-6 items-start">
+        {/* ── Sidebar nav ── */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 shadow-sm">
+          {sections.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveSection(id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all mb-1 last:mb-0 ${
+                activeSection === id
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
               <Icon size={18} />
-              <span>{label}</span>
-              {activeSection !== id && <ChevronRight size={14} className="ml-auto opacity-50" />}
+              <span className="flex-1 text-left">{label}</span>
+              {activeSection !== id && <ChevronRight size={14} className="opacity-40" />}
             </button>
           ))}
         </div>
 
-        {/* Content panel */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-100 dark:border-slate-800 shadow-sm">
-          {activeSection === 'general' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Information</h2>
-              <div className="grid grid-cols-2 gap-6">
-                {[['Family Name', 'name', 'text'], ['Family Motto', 'motto', 'text'], ['Established Year', 'established', 'text'], ['Home Location', 'location', 'text']].map(([label, key, type]) => (
-                  <div key={key}>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
-                    <input type={type} value={familyInfo[key]} onChange={e => setFamilyInfo(f => ({ ...f, [key]: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all" />
+        {/* ── Content panel ── */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="p-8">
+            {/* ───── General / Family Info ───── */}
+            {activeSection === 'general' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Information</h2>
+                {isLoading ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}
                   </div>
-                ))}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Privacy Level</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[['Public', 'Anyone can view basic info'], ['Members Only', 'Only verified members'], ['Private', 'Invite-only access']].map(([level, desc], i) => (
-                    <div key={level} className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${i === 1 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'}`}>
-                      <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        {i === 1 && <Check size={14} className="text-indigo-600" />}
-                        {level}
+                ) : (
+                  <div className="grid grid-cols-2 gap-5">
+                    {[
+                      ['Family Name', 'name'],
+                      ['Address',     'address'],
+                      ['City',        'city'],
+                      ['State',       'state'],
+                      ['Country',     'country'],
+                    ].map(([label, key]) => (
+                      <div key={key}>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
+                        <input
+                          type="text"
+                          value={familyForm[key] || ''}
+                          onChange={e => setFamilyForm(f => ({ ...f, [key]: e.target.value }))}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                        />
                       </div>
-                      <div className="text-xs text-slate-500 mt-1">{desc}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ───── Notifications ───── */}
+            {activeSection === 'notifications' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Notification Preferences</h2>
+                {isLoading ? (
+                  <div className="space-y-3">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
+                ) : (
+                  <div className="space-y-3">
+                    {[
+                      ['email_notifications',        'Email Notifications',        'Receive updates and alerts by email', '📧'],
+                      ['push_notifications',         'Push Notifications',         'Real-time browser/app alerts',        '🔔'],
+                      ['birthday_notifications',     'Birthday & Anniversary',     'Alerts for member birthdays',         '🎂'],
+                      ['event_notifications',        'Event Reminders',            'Upcoming event notifications',        '📅'],
+                      ['announcement_notifications', 'Announcements',              'Family-wide announcements',           '📢'],
+                      ['whatsapp_notifications',     'WhatsApp Notifications',     'Alerts via WhatsApp (if configured)', '💬'],
+                    ].map(([key, title, desc, emoji]) => (
+                      <div key={key} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <span className="text-2xl w-8 text-center">{emoji}</span>
+                        <div className="flex-1">
+                          <div className="font-bold text-sm text-slate-900 dark:text-white">{title}</div>
+                          <div className="text-xs text-slate-400 mt-0.5">{desc}</div>
+                        </div>
+                        <Toggle checked={notifForm[key]} onChange={v => setNotifForm(n => ({ ...n, [key]: v }))} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ───── Appearance ───── */}
+            {activeSection === 'appearance' && (
+              <div className="space-y-8">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Appearance</h2>
+
+                {/* Theme */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Theme Mode</label>
+                  <div className="grid grid-cols-3 gap-4 max-w-sm">
+                    {[['Light', 'light', Sun], ['Dark', 'dark', Moon], ['System', 'System', SettingsIcon]].map(([label, val, Icon]) => (
+                      <button
+                        key={val}
+                        onClick={() => setAppearForm(a => ({ ...a, theme: val }))}
+                        className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
+                          appearForm.theme === val
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                        }`}
+                      >
+                        <Icon size={24} className={appearForm.theme === val ? 'text-indigo-600' : 'text-slate-400'} />
+                        <span className={`text-sm font-bold ${appearForm.theme === val ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Language</label>
+                  <select
+                    value={appearForm.language}
+                    onChange={e => setAppearForm(a => ({ ...a, language: e.target.value }))}
+                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  >
+                    {['English', 'Hindi', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Marathi', 'Gujarati'].map(l => <option key={l}>{l}</option>)}
+                  </select>
+                </div>
+
+                {/* Timezone */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Timezone</label>
+                  <select
+                    value={appearForm.timezone}
+                    onChange={e => setAppearForm(a => ({ ...a, timezone: e.target.value }))}
+                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  >
+                    {['UTC', 'UTC+5:30 (IST)', 'UTC-5 (EST)', 'UTC-8 (PST)', 'UTC+1 (CET)', 'UTC+8 (SGT)'].map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* ───── Security ───── */}
+            {activeSection === 'security' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Change Password</h2>
+                <div className="max-w-md space-y-4">
+                  {[
+                    ['Current Password', 'currentPassword'],
+                    ['New Password',     'newPassword'],
+                    ['Confirm Password', 'confirmPassword'],
+                  ].map(([label, key]) => (
+                    <div key={key}>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
+                      <div className="relative">
+                        <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="password"
+                          value={pwForm[key]}
+                          onChange={e => setPwForm(p => ({ ...p, [key]: e.target.value }))}
+                          placeholder={`Enter ${label.toLowerCase()}`}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                        />
+                      </div>
                     </div>
                   ))}
+                  <p className="text-xs text-slate-400">Use at least 8 characters with a mix of letters and numbers.</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeSection === 'notifications' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Notification Preferences</h2>
-              <div className="space-y-4">
-                {[
-                  ['emailEvents', 'Event Reminders via Email', 'Get notified about upcoming family events', '📅'],
-                  ['emailBirthdays', 'Birthday & Anniversary Alerts', 'Receive birthday and anniversary notifications', '🎂'],
-                  ['pushAlerts', 'Push Notifications', 'Real-time alerts for important family updates', '🔔'],
-                  ['smsOtp', 'SMS OTP Verification', 'Use SMS for two-factor authentication', '📱'],
-                  ['weeklyDigest', 'Weekly Family Digest', 'A weekly summary of family activities', '📰'],
-                ].map(([key, title, desc, emoji]) => (
-                  <div key={key} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <span className="text-2xl">{emoji}</span>
-                    <div className="flex-1">
-                      <div className="font-bold text-sm text-slate-900 dark:text-white">{title}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{desc}</div>
-                    </div>
-                    <button onClick={() => setNotifications(n => ({ ...n, [key]: !n[key] }))} className={`w-12 h-6 rounded-full transition-all duration-300 relative ${notifications[key] ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'}`}>
-                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${notifications[key] ? 'left-6' : 'left-0.5'}`} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          </div>
 
-          {activeSection === 'security' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Security Settings</h2>
-              <div className="space-y-4">
-                {[
-                  { title: 'Two-Factor Authentication', desc: 'Add an extra layer of security to your account', badge: 'Enabled', badgeColor: '#10B981', bg: 'rgba(16,185,129,0.1)', emoji: '🔐' },
-                  { title: 'Active Sessions', desc: '3 active sessions across devices', badge: 'Manage', badgeColor: '#4F46E5', bg: 'rgba(79,70,229,0.1)', emoji: '💻' },
-                  { title: 'Change Password', desc: 'Last changed 3 months ago', badge: 'Update', badgeColor: '#F59E0B', bg: 'rgba(245,158,11,0.1)', emoji: '🔑' },
-                  { title: 'Login History', desc: 'View recent login activity', badge: 'View Log', badgeColor: '#6B7280', bg: 'rgba(107,114,128,0.1)', emoji: '📋' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                    <span className="text-2xl">{item.emoji}</span>
-                    <div className="flex-1">
-                      <div className="font-bold text-sm text-slate-900 dark:text-white">{item.title}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{item.desc}</div>
-                    </div>
-                    <span style={{ background: item.bg, color: item.badgeColor }} className="text-xs font-bold px-3 py-1 rounded-full">{item.badge}</span>
-                    <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeSection === 'appearance' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Appearance</h2>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Theme Mode</label>
-                <div className="grid grid-cols-2 gap-4 max-w-md">
-                  {[['light', 'Light Mode', Sun], ['dark', 'Dark Mode', Moon]].map(([val, label, Icon]) => (
-                    <button key={val} onClick={() => setTheme(val)} className={`p-6 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${theme === val ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-slate-700'}`}>
-                      <Icon size={28} className={theme === val ? 'text-indigo-600' : 'text-slate-400'} />
-                      <span className={`text-sm font-bold ${theme === val ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Primary Color</label>
-                <div className="flex gap-3">
-                  {['#4F46E5', '#7C3AED', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444'].map(color => (
-                    <button key={color} style={{ width: 36, height: 36, borderRadius: '50%', background: color, border: color === '#4F46E5' ? '3px solid #111827' : '3px solid transparent', transition: 'all 0.2s' }} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSection === 'profile' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">My Profile</h2>
-              <div className="flex items-center gap-6 p-5 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl">
-                <img src="https://i.pravatar.cc/100?u=a04258" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '3px solid #4F46E5' }} alt="Profile" />
-                <div className="flex-1">
-                  <div className="font-black text-xl text-slate-900 dark:text-white">{fullName}</div>
-                  <div className="text-sm text-slate-500 mt-1">{roleName} • {displayEmail}</div>
-                </div>
-                <button className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-sm">Change Photo</button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[['Full Name', fullName], ['Email', displayEmail], ['Phone', user?.memberProfile?.phone || '+91 9876543210'], ['Role', roleName], ['Location', 'Not Set'], ['Joined', 'Recently']].map(([label, val]) => (
-                  <div key={label}>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
-                    <input defaultValue={val} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Save button */}
-          <div className="mt-8 flex gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
-            <button onClick={handleSave} className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all ${saved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/30'}`}>
-              {saved ? <><Check size={16} /> Saved!</> : 'Save Changes'}
+          {/* ── Footer save bar ── */}
+          <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex gap-3 items-center">
+            <button
+              onClick={handleSave}
+              disabled={isSaving || isLoading}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+            >
+              {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Save Changes
             </button>
-            <button className="px-6 py-2.5 rounded-xl font-semibold text-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">Cancel</button>
+            <button
+              type="button"
+              onClick={() => {
+                if (familyData && activeSection === 'general') setFamilyForm({ name: familyData.name || '', address: familyData.address || '', city: familyData.city || '', state: familyData.state || '', country: familyData.country || '' });
+                if (meData) {
+                  const s = meData.memberSettings || {};
+                  if (activeSection === 'notifications') setNotifForm({ email_notifications: s.email_notifications ?? true, push_notifications: s.push_notifications ?? true, birthday_notifications: s.birthday_notifications ?? true, event_notifications: s.event_notifications ?? true, announcement_notifications: s.announcement_notifications ?? true, whatsapp_notifications: s.whatsapp_notifications ?? false });
+                  if (activeSection === 'appearance') setAppearForm({ theme: s.theme || 'System', language: s.language || 'English', timezone: s.timezone || 'UTC' });
+                  if (activeSection === 'profile') setProfileForm({ firstName: meData.firstName || '', lastName: meData.lastName || '', phone: meData.phone || '' });
+                }
+                if (activeSection === 'security') setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+              }}
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </div>
