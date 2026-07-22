@@ -20,7 +20,34 @@ export default function Analytics() {
   });
 
   if (isLoading) {
-     return <div className="p-10 font-bold text-slate-500 text-center">Loading analytics data...</div>;
+    return (
+      <div className="space-y-6 pb-10 animate-pulse">
+        {/* Header skeleton */}
+        <div>
+          <div className="h-8 w-40 bg-slate-200 dark:bg-slate-700 rounded-xl mb-2" />
+          <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+        </div>
+        {/* KPI skeletons */}
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          {[0,1,2,3].map(i => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4">
+              <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl flex-shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                <div className="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
+                <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Chart skeletons */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-64" />
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-64" />
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-72" />
+      </div>
+    );
   }
 
   const { stats: fetchedStats = {}, memberGrowth = [], activityData = [], roleData = [] } = analyticsData || {};
