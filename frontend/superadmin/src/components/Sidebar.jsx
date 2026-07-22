@@ -39,7 +39,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-20">
+    <aside className="w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-20">
       {/* Logo */}
       <div className="h-20 flex items-center px-7 border-b border-[#E2E8F0]/60">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center mr-3.5 shadow-md flex-shrink-0">
