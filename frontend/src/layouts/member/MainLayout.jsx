@@ -84,7 +84,7 @@ export default function MainLayout({ navItems, bottomNav }) {
         
         {/* Logo Section */}
         <div className="h-[76px] flex items-center justify-between px-6 shrink-0 mt-2 border-b border-transparent">
-           <div className="flex items-center gap-3">
+           <Link to="/member/dashboard" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
               <div className="w-9 h-9 bg-blue-500 rounded-xl flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20 text-white">
                  <Users size={20} />
               </div>
@@ -92,7 +92,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                 <span className="font-bold text-[17px] text-slate-900 dark:text-white tracking-tight">FamilyHub</span>
                 <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">MEMBER PORTAL</span>
               </div>
-           </div>
+           </Link>
            <button className="lg:hidden text-slate-500 p-1" onClick={() => setIsMobileMenuOpen(false)}>
              <X size={20} />
           </button>

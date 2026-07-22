@@ -86,7 +86,7 @@ export default function MainLayout({ navItems, bottomNav }) {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         <div className="h-[76px] flex items-center justify-between px-6 shrink-0 mt-2 border-b border-slate-100 dark:border-slate-800/60 pb-2 mb-2">
-          <div className="flex items-center gap-3">
+          <Link to="/admin/dashboard" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
              <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#12b0ad" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -96,7 +96,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                <span className="font-bold text-[17px] text-slate-900 dark:text-white tracking-tight">FamilyHub OS</span>
                <span className="text-[12.5px] font-medium text-slate-500 mt-0.5">Admin Portal</span>
              </div>
-          </div>
+          </Link>
           <button className="lg:hidden text-slate-500 p-1" onClick={() => setIsMobileMenuOpen(false)}>
              <X size={20} />
           </button>
