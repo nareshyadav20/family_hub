@@ -82,6 +82,7 @@ model User {
   groupComments   GroupPostComment[]
   groupLikes      GroupPostLike[]
 
+  @@index([familyId])
   @@map("users")
 }
 
@@ -189,6 +190,8 @@ model Event {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
+  @@index([familyId])
+  @@index([eventDate])
   @@map("events")
 }
 
@@ -223,6 +226,8 @@ model Document {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([familyId])
+  @@index([createdAt])
   @@map("documents")
 }
 
@@ -276,6 +281,8 @@ model Announcement {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([familyId])
+  @@index([createdAt])
   @@map("announcements")
 }
 
@@ -310,6 +317,8 @@ model Notification {
 
   createdAt   DateTime @default(now())
   
+  @@index([familyId])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -343,6 +352,7 @@ model Group {
   
   posts           GroupPost[]
   
+  @@index([familyId])
   @@map("groups")
 }
 
@@ -377,6 +387,8 @@ model GroupMessage {
   
   createdAt DateTime @default(now())
 
+  @@index([groupId])
+  @@index([createdAt])
   @@map("group_messages")
 }
 
@@ -393,6 +405,9 @@ model Message {
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
 
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
   @@map("messages")
 }
 
@@ -417,6 +432,7 @@ model FamilyHistory {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([familyId])
   @@map("family_history")
 }
 

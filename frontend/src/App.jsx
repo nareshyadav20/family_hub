@@ -1,61 +1,63 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import api from './services/api';
 import { globalLogout } from './utils/auth';
 
+import PageLoader from './components/loaders/PageLoader';
+
 /* --- ADMIN IMPORTS --- */
-import AdminMainLayout from './layouts/MainLayout';
-import AdminDashboard from './pages/Dashboard';
-import Members from './pages/Members';
-import AddMember from './pages/AddMember';
-import InviteMember from './pages/InviteMember';
-import Events from './pages/Events';
-import FamilyTree from './pages/FamilyTree';
-import FamilyHistory from './pages/FamilyHistory';
-import JoinRequests from './pages/JoinRequests';
-import Gallery from './pages/Gallery';
-import CreateEvent from './pages/events/CreateEvent';
-import EventDetails from './pages/events/EventDetails';
-import Announcements from './pages/Announcements';
-import Polls from './pages/Polls';
-import Notifications from './pages/Notifications';
-import Documents from './pages/Documents';
-import Analytics from './pages/Analytics';
-import Calendar from './pages/Calendar';
-import DigitalVault from './pages/DigitalVault';
-import Assets from './pages/Assets';
-import Settings from './pages/Settings';
-import AIAssistant from './pages/AIAssistant';
-import Finance from './pages/Finance';
-import Messages from './pages/Messages';
-import Profile from './pages/Profile';
-import FamilyGroups from './pages/FamilyGroups';
+const AdminMainLayout = lazy(() => import('./layouts/MainLayout'));
+const AdminDashboard = lazy(() => import('./pages/Dashboard'));
+const Members = lazy(() => import('./pages/Members'));
+const AddMember = lazy(() => import('./pages/AddMember'));
+const InviteMember = lazy(() => import('./pages/InviteMember'));
+const Events = lazy(() => import('./pages/Events'));
+const FamilyTree = lazy(() => import('./pages/FamilyTree'));
+const FamilyHistory = lazy(() => import('./pages/FamilyHistory'));
+const JoinRequests = lazy(() => import('./pages/JoinRequests'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const CreateEvent = lazy(() => import('./pages/events/CreateEvent'));
+const EventDetails = lazy(() => import('./pages/events/EventDetails'));
+const Announcements = lazy(() => import('./pages/Announcements'));
+const Polls = lazy(() => import('./pages/Polls'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Documents = lazy(() => import('./pages/Documents'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Calendar = lazy(() => import('./pages/Calendar'));
+const DigitalVault = lazy(() => import('./pages/DigitalVault'));
+const Assets = lazy(() => import('./pages/Assets'));
+const Settings = lazy(() => import('./pages/Settings'));
+const AIAssistant = lazy(() => import('./pages/AIAssistant'));
+const Finance = lazy(() => import('./pages/Finance'));
+const Messages = lazy(() => import('./pages/Messages'));
+const Profile = lazy(() => import('./pages/Profile'));
+const FamilyGroups = lazy(() => import('./pages/FamilyGroups'));
 
 /* --- MEMBER IMPORTS --- */
-import MemberMainLayout from './layouts/member/MainLayout';
-import MemberDashboard from './pages/member/Dashboard';
-import MemberFamily from './pages/member/Family';
-import MemberGallery from './pages/member/Gallery';
-import MemberEvents from './pages/member/Events';
-import MemberEventDetails from './pages/member/EventDetails';
-import MemberFamilyTree from './pages/member/FamilyTree';
-import MemberMessages from './pages/member/Messages';
-import MemberAnnouncements from './pages/member/Announcements';
-import MemberNotifications from './pages/member/Notifications';
-import MemberDocuments from './pages/member/Documents';
-import MemberAIAssistant from './pages/member/AIAssistant';
-import MemberProfile from './pages/member/Profile';
-import MemberProfileSetup from './pages/member/ProfileSetup';
-import MemberSettings from './pages/member/Settings';
-import MemberCalendarPage from './pages/member/Calendar';
-import MemberFamilyGroups from './pages/member/FamilyGroups';
-import LiveStreamPage from './pages/events/LiveStreamPage';
+const MemberMainLayout = lazy(() => import('./layouts/member/MainLayout'));
+const MemberDashboard = lazy(() => import('./pages/member/Dashboard'));
+const MemberFamily = lazy(() => import('./pages/member/Family'));
+const MemberGallery = lazy(() => import('./pages/member/Gallery'));
+const MemberEvents = lazy(() => import('./pages/member/Events'));
+const MemberEventDetails = lazy(() => import('./pages/member/EventDetails'));
+const MemberFamilyTree = lazy(() => import('./pages/member/FamilyTree'));
+const MemberMessages = lazy(() => import('./pages/member/Messages'));
+const MemberAnnouncements = lazy(() => import('./pages/member/Announcements'));
+const MemberNotifications = lazy(() => import('./pages/member/Notifications'));
+const MemberDocuments = lazy(() => import('./pages/member/Documents'));
+const MemberAIAssistant = lazy(() => import('./pages/member/AIAssistant'));
+const MemberProfile = lazy(() => import('./pages/member/Profile'));
+const MemberProfileSetup = lazy(() => import('./pages/member/ProfileSetup'));
+const MemberSettings = lazy(() => import('./pages/member/Settings'));
+const MemberCalendarPage = lazy(() => import('./pages/member/Calendar'));
+const MemberFamilyGroups = lazy(() => import('./pages/member/FamilyGroups'));
+const LiveStreamPage = lazy(() => import('./pages/events/LiveStreamPage'));
 
 /* --- SHARED IMPORTS --- */
-import Login from './pages/Login';
-import Landing from './pages/Landing';
+const Login = lazy(() => import('./pages/Login'));
+const Landing = lazy(() => import('./pages/Landing'));
 
 import {
   LayoutDashboard, Users, UserPlus, GitFork, CalendarDays, Calendar as CalIcon,
@@ -120,7 +122,7 @@ function ComingSoon({ title }) {
 }
 
 
-import ChangePassword from './pages/ChangePassword';
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 
 function ProtectedAdminRoute({ children }) {
   const params = new URLSearchParams(window.location.search);
@@ -222,7 +224,14 @@ function PublicRoute({ children }) {
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 window.__queryClient = queryClient;
 
 function SessionWatcher() {
@@ -404,7 +413,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-       <AppLayer />
+       <Suspense fallback={<PageLoader />}>
+         <AppLayer />
+       </Suspense>
        <Toaster position="top-right" />
     </QueryClientProvider>
   );

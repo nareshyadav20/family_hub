@@ -10,6 +10,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { sendInvitationEmail, sendForgotPasswordEmail } = require('./services/emailService');
 const crypto = require('crypto');
+const compression = require('compression');
 
 const prisma = new PrismaClient();
 const app = express();
@@ -24,6 +25,7 @@ const io = new Server(server, {
 
 app.set('socketio', io); // Keep accessible globally
 
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));

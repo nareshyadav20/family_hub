@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { TableRowSkeleton } from '../components/loaders/SkeletonLoaders';
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -237,7 +238,13 @@ export default function Members() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                {isLoading ? (
-                  <tr><td colSpan="11" className="text-center py-8 text-slate-500 font-bold">Loading Directory...</td></tr>
+                  <>
+                     <TableRowSkeleton columns={11} />
+                     <TableRowSkeleton columns={11} />
+                     <TableRowSkeleton columns={11} />
+                     <TableRowSkeleton columns={11} />
+                     <TableRowSkeleton columns={11} />
+                  </>
                ) : liveMembers.length === 0 ? (
                   <tr>
                      <td colSpan="11" className="text-center py-16">

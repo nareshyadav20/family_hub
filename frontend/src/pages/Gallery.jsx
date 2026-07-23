@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { GridSkeleton } from '../components/loaders/SkeletonLoaders';
 
 const tags = ['All', 'Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
 const uploadTags = ['Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
@@ -126,10 +127,10 @@ export default function Gallery() {
 
       {/* Masonry Grid */}
       <div className="columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
-        {isLoading && <div className="text-slate-500 col-span-full">Loading gallery...</div>}
+        {isLoading && <div className="col-span-full"><GridSkeleton count={8} /></div>}
         {filtered.map(photo => (
           <div key={photo.id} className="break-inside-avoid relative rounded-2xl overflow-hidden group cursor-pointer bg-slate-100 dark:bg-slate-800 shadow-sm hover:shadow-xl transition-all duration-500" style={{ height: photo.h }}>
-            <img src={photo.url} alt="family" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
+            <img src={photo.url} loading="lazy" alt="family" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             {/* Tag */}

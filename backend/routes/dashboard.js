@@ -21,37 +21,44 @@ router.get('/stats', authenticateToken, async (req, res) => {
     const familyId = req.user.familyId;
     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
-    const totalMembers = await prisma.user.count({ where: { familyId, role: { not: 'SUPER_ADMIN' } } });
-    const pendingRequests = await prisma.user.count({ where: { familyId, status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } } });
-    const activeMembers = await prisma.user.count({ where: { familyId, status: 'ACTIVE' } });
-    
-    // Upcoming Events
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const upcomingEvents = await prisma.event.count({ where: { familyId, eventDate: { gte: today } } });
 
-    // Gallery Uploads (documents)
-    const galleryUploads = await prisma.document.count({ where: { familyId } });
+    // Fire all counts concurrently using Promise.all
+    const [
+      totalMembers,
+      pendingRequests,
+      activeMembers,
+      upcomingEvents,
+      galleryUploads,
+      notifications,
+      newMembersThisMonth,
+      allProfiles
+    ] = await Promise.all([
+      prisma.user.count({ where: { familyId, role: { not: 'SUPER_ADMIN' } } }),
+      prisma.user.count({ where: { familyId, status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } } }),
+      prisma.user.count({ where: { familyId, status: 'ACTIVE' } }),
+      prisma.event.count({ where: { familyId, eventDate: { gte: today } } }),
+      prisma.document.count({ where: { familyId } }),
+      prisma.notification.count({ where: { familyId } }),
+      prisma.user.count({ where: { familyId, createdAt: { gte: new Date(today.getFullYear(), today.getMonth(), 1) } } }),
+      prisma.memberProfile.findMany({ 
+        where: { user: { familyId }, dob: { not: null } },
+        select: { dob: true }
+      })
+    ]);
 
     // Today's Birthdays
-    const allProfiles = await prisma.memberProfile.findMany({ 
-       where: { user: { familyId }, dob: { not: null } } 
-    });
     const todaysBirthdays = allProfiles.filter(p => {
        const d = new Date(p.dob);
        return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
     }).length;
 
-    // Monthly Growth (New members this month)
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const newMembersThisMonth = await prisma.user.count({ where: { familyId, createdAt: { gte: startOfMonth } } });
-    
+    // Monthly Growth
     let monthlyGrowth = 12; // Base baseline
     if (totalMembers > 0) {
         monthlyGrowth = Math.round((newMembersThisMonth / totalMembers) * 100);
     }
-    
-    const notifications = await prisma.notification.count({ where: { familyId } });
 
     res.json({
        totalMembers,
@@ -73,28 +80,28 @@ router.get('/stats', authenticateToken, async (req, res) => {
 router.get('/monthly-activity', authenticateToken, async (req, res) => {
   try {
      const familyId = req.user.familyId;
-     const activity = [];
      const now = new Date();
      
+     // Generate an array of month periods
+     const periods = [];
      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-        
-        const members = await prisma.user.count({
-           where: { familyId, createdAt: { gte: d, lt: nextMonth } }
-        });
-        
-        const events = await prisma.event.count({
-           where: { familyId, createdAt: { gte: d, lt: nextMonth } }
-        });
-        
-        activity.push({
-           month: d.toLocaleString('default', { month: 'short' }),
-           members: members,
-           events: events
+        periods.push({
+           d: new Date(now.getFullYear(), now.getMonth() - i, 1),
+           nextMonth: new Date(now.getFullYear(), now.getMonth() - i + 1, 1),
+           monthLabel: new Date(now.getFullYear(), now.getMonth() - i, 1).toLocaleString('default', { month: 'short' })
         });
      }
+
+     // Fetch counts concurrently
+     const activityPromises = periods.map(async ({ d, nextMonth, monthLabel }) => {
+        const [members, events] = await Promise.all([
+           prisma.user.count({ where: { familyId, createdAt: { gte: d, lt: nextMonth } } }),
+           prisma.event.count({ where: { familyId, createdAt: { gte: d, lt: nextMonth } } })
+        ]);
+        return { month: monthLabel, members, events };
+     });
      
+     const activity = await Promise.all(activityPromises);
      res.json(activity);
   } catch (error) {
     console.error('Dashboard Monthly Activity Error:', error);
@@ -106,23 +113,28 @@ router.get('/monthly-activity', authenticateToken, async (req, res) => {
 router.get('/recent-activity', authenticateToken, async (req, res) => {
   try {
      const familyId = req.user.familyId;
-     const recentUsers = await prisma.user.findMany({
-        where: { familyId },
-        take: 5,
-        orderBy: { createdAt: 'desc' }
-     });
      
-     const recentEvents = await prisma.event.findMany({
-        where: { familyId },
-        take: 5,
-        orderBy: { createdAt: 'desc' }
-     });
-     
-     const recentDocs = await prisma.document.findMany({
-        where: { familyId },
-        take: 5,
-        orderBy: { createdAt: 'desc' }
-     });
+     // Fetch recent records concurrently with optimized .select statements
+     const [recentUsers, recentEvents, recentDocs] = await Promise.all([
+       prisma.user.findMany({
+          where: { familyId },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, firstName: true, lastName: true, status: true, createdAt: true }
+       }),
+       prisma.event.findMany({
+          where: { familyId },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, name: true, createdAt: true }
+       }),
+       prisma.document.findMany({
+          where: { familyId },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, name: true, createdAt: true }
+       })
+     ]);
      
      const feed = [];
      
