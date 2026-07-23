@@ -56,7 +56,7 @@ export default function AIAssistant() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_280px] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
         {/* Chat */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col" style={{ height: 580 }}>
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -111,7 +111,7 @@ export default function AIAssistant() {
         </div>
 
         {/* Suggestions panel */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm">
+        <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm">
           <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-4 flex items-center gap-2">
             <Lightbulb size={16} className="text-amber-500" /> Suggested Questions
           </h3>

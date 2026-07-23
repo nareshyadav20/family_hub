@@ -71,7 +71,7 @@ export default function Finance() {
         ))}
       </div>
 
-      <div className="grid grid-cols-[1fr_380px] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
         {/* Transactions */}
         <div>
           <div className="flex justify-between items-center mb-4">

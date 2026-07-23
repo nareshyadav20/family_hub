@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Search, Paperclip, Smile, Phone, Video, MoreHorizontal, CheckCheck, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, Search, Paperclip, Smile, Phone, Video, MoreHorizontal, CheckCheck, FileText, ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
@@ -142,7 +142,7 @@ export default function Messages() {
       <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Messages</h1>
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex" style={{ height: '620px' }}>
         {/* Contacts List */}
-        <div className="w-80 border-r border-slate-100 dark:border-slate-800 flex flex-col shrink-0">
+        <div className={`${selected ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-slate-100 dark:border-slate-800 flex flex-col shrink-0`}>
           <div className="p-4 border-b border-slate-100 dark:border-slate-800">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -184,11 +184,12 @@ export default function Messages() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col relative">
+        <div className={`${selected ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative`}>
           {selected ? (
             <>
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  <button onClick={() => setSelected(null)} className="md:hidden p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 mr-1"><ChevronLeft size={18} /></button>
                   <div className={`w-9 h-9 rounded-xl ${selected.color || 'bg-indigo-500'} text-white flex items-center overflow-hidden justify-center font-bold text-xs shadow-sm`}>
                     {selected.avatar ? <img src={selected.avatar} alt={selected.name} className="w-full h-full object-cover" /> : selected.initials}
                   </div>

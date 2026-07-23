@@ -1,67 +1,77 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-@layer base {
-  :root {
-    --background: #F8FAFC;
-    --foreground: #111827;
-    --card: #FFFFFF;
-    --card-foreground: #111827;
-    --popover: #FFFFFF;
-    --popover-foreground: #111827;
-    --primary: #4F46E5;
-    --primary-foreground: #FFFFFF;
-    --secondary: #7C3AED;
-    --secondary-foreground: #FFFFFF;
-    --muted: #F1F5F9;
-    --muted-foreground: #64748B;
-    --accent: #14B8A6;
-    --accent-foreground: #FFFFFF;
-    --destructive: #EF4444;
-    --destructive-foreground: #FFFFFF;
-    --border: #E2E8F0;
-    --input: #E2E8F0;
-    --ring: #4F46E5;
-    --radius: 16px;
-  }
-
-  .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --card: #1e293b;
-    --card-foreground: #f8fafc;
-    --popover: #1e293b;
-    --popover-foreground: #f8fafc;
-    --primary: #4F46E5;
-    --primary-foreground: #FFFFFF;
-    --secondary: #7C3AED;
-    --secondary-foreground: #FFFFFF;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --accent: #14B8A6;
-    --accent-foreground: #FFFFFF;
-    --border: #334155;
-    --input: #334155;
-    --ring: #4F46E5;
-  }
+:root {
+  --background: #F8FAFC;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #4F46E5;
+  --primary-foreground: #FFFFFF;
+  --secondary: #7C3AED;
+  --secondary-foreground: #FFFFFF;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #14B8A6;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #4F46E5;
+  --radius: 16px;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans;
-  }
-  h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: 'Poppins', sans-serif;
-  }
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #4F46E5;
+  --primary-foreground: #FFFFFF;
+  --secondary: #7C3AED;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #14B8A6;
+  --accent-foreground: #FFFFFF;
+  --border: #334155;
+  --input: #334155;
+  --ring: #4F46E5;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Poppins', sans-serif;
 }
 
 .glassmorphism {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 shadow-soft;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }
+
+.dark .glassmorphism {
+  background-color: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 
 @media (max-width: 767px) {
   .responsive-table blockquote, 
@@ -123,3 +133,167 @@
     text-transform: uppercase;
   }
 }
+
+/* Member & Admin Portal Mobile Responsiveness Overrides */
+@media (max-width: 1024px) {
+  /* Adjustments for medium screens */
+  .lg\:col-span-3, .lg\:col-span-2 {
+    grid-column: span 3 / span 3 !important;
+  }
+  
+  /* Stacking the custom Finance layouts */
+  .grid-cols-\[1fr_380px\] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* General page content padding reduction for both member and admin layouts */
+  .flex-1.overflow-y-auto.w-full.pt-6.pb-20.px-4.md\:px-10,
+  .flex-1.overflow-y-auto.px-4.py-6.md\:px-10.md\:py-10 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-top: 1rem !important;
+    padding-bottom: 5rem !important;
+  }
+
+  /* Form & card padding adjustments */
+  .p-6, .p-8 {
+    padding: 1rem !important;
+  }
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .py-8 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  
+  /* Welcome banner styling scale down */
+  .relative.rounded-3xl.overflow-hidden.shadow-sm img {
+    height: 160px !important;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm .absolute.inset-0.p-8 {
+    padding: 1rem !important;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm p {
+    font-size: 0.85rem !important;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 {
+    margin-top: 0.75rem !important;
+  }
+
+  /* Settings Page Header & tabs spacing */
+  .mt-16 {
+    margin-top: 1rem !important;
+  }
+  .max-w-6xl.mx-auto.px-4 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    margin-top: 0.5rem !important;
+  }
+
+  /* Messages/chat height & mobile adjustments */
+  .h-\[calc\(100vh-180px\)\] {
+    height: calc(100vh - 120px) !important;
+  }
+
+  /* Admin Dashboard header flex wrap and spacing */
+  .flex.justify-between.items-end.mb-8 {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.25rem !important;
+  }
+  .flex.justify-between.items-end.mb-8 .flex.gap-3 {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  .flex.justify-between.items-end.mb-8 .flex.gap-3 button {
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+  }
+
+  /* Drawer responsiveness */
+  .fixed.right-0.top-0.h-full.w-\[400px\] {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  /* Family Tree Height responsiveness */
+  .min-h-\[600px\] {
+    min-height: 400px !important;
+  }
+
+  /* Stacking the custom Settings and AI Assistant layouts */
+  .grid-cols-\[220px_1fr\],
+  .grid-cols-\[1fr_280px\] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Digital Vault horizontal scroll view */
+  .vault-table-container {
+    overflow-x: auto !important;
+  }
+  .grid-cols-\[2fr_1fr_1fr_1fr_120px\] {
+    min-width: 800px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Scale headings */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Welcome banner layout for extra small devices */
+  .relative.rounded-3xl.overflow-hidden.shadow-sm img {
+    height: 180px !important;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Flex elements that need stacking */
+  .flex-row-stack {
+    flex-direction: column !important;
+  }
+  
+  /* Alignment and spacing improvements */
+  .gap-6 {
+    gap: 1rem !important;
+  }
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
+  
+  /* Profile setup form styling */
+  .flex.items-center.gap-6 {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  /* General Grid-cols-2 changes to list view on small devices */
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Card headers list layout in JoinRequests */
+  .bg-white.dark\:bg-slate-900.rounded-2xl.border.border-slate-100.dark\:border-slate-800.shadow-sm.p-5.flex.flex-col.gap-4 .flex.items-center.gap-4 {
+    flex-wrap: wrap !important;
+  }
+}
+

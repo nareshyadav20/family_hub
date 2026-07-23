@@ -182,14 +182,14 @@ export default function MainLayout({ navItems, bottomNav }) {
              </button>
              
              <div className="relative">
-                <button onClick={() => setShowNotifs(!showNotifs)} className="relative text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors outline-none pt-1 cursor-pointer">
-                  <Bell size={20} strokeWidth={2.5} />
-                  {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#EF4444] text-[10px] font-bold text-white rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 shadow-sm">
-                       {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length}
-                    </span>
-                  )}
-                </button>
+                 <button onClick={() => navigate('/admin/dashboard/notifications')} className="relative text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors outline-none pt-1 cursor-pointer">
+                   <Bell size={20} strokeWidth={2.5} />
+                   {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length > 0 && (
+                     <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#EF4444] text-[10px] font-bold text-white rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 shadow-sm">
+                        {notifications.filter(n => !n.isRead && !localStorage.getItem(`notif_read_${n.id}`)).length}
+                     </span>
+                   )}
+                 </button>
                 {showNotifs && (
                    <div className="absolute top-10 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden outline-none">
                       <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">

@@ -75,7 +75,7 @@ export default function DigitalVault() {
       </div>
 
       {/* Documents table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm vault-table-container">
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 grid grid-cols-[2fr_1fr_1fr_1fr_120px] gap-4">
           {['Document Name', 'Category', 'Size', 'Date Added', 'Actions'].map((h, i) => (
             <div key={h} className={`text-xs font-bold text-slate-400 uppercase tracking-wider ${i === 4 ? 'text-right' : ''}`}>{h}</div>

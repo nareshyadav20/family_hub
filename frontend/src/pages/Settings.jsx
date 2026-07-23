@@ -163,7 +163,7 @@ export default function Settings() {
         <p className="text-sm text-slate-500 mt-1">Manage family preferences, notifications, security and profile.</p>
       </div>
 
-      <div className="grid grid-cols-[220px_1fr] gap-6 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start">
         {/* ── Sidebar nav ── */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 shadow-sm">
           {sections.map(({ id, label, icon: Icon }) => (
