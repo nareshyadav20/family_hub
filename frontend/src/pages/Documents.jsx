@@ -93,83 +93,71 @@ export default function Documents() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left whitespace-nowrap border-collapse responsive-table">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800/80">
-                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Document Name</th>
-                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Uploader</th>
-                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Details</th>
-                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Status & Visibility</th>
-                 <th className="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-              {filtered.map(doc => (
-                <tr key={doc.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                   <td className="px-4 py-4 min-w-[200px]">
-                      <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
-                            <FileText size={18} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filtered.map(doc => (
+             <div key={doc.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden">
+                <div className="flex items-start gap-4">
+                   <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+                      <FileText size={24} />
+                   </div>
+                   <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                         <div className="pr-4">
+                            <p className="font-bold text-slate-900 dark:text-white text-[15px] truncate leading-tight">{doc.name}</p>
+                            <p className="text-[11px] text-slate-400 font-medium mt-1">Uploaded {new Date(doc.createdAt).toLocaleDateString()}</p>
                          </div>
-                         <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{doc.name}</p>
-                            <p className="text-xs text-slate-400 font-medium">Uploaded {new Date(doc.createdAt).toLocaleDateString()}</p>
+                         <div className="flex flex-col gap-1 items-end shrink-0">
+                            {doc.status === 'PENDING' && <span className="inline-flex px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 text-[10px] items-center gap-1 font-bold"><ShieldCheck size={10} /> Pending</span>}
+                            {doc.status === 'VERIFIED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[10px] items-center gap-1 font-bold"><CheckCircle2 size={10} /> Verified</span>}
+                            {doc.status === 'REJECTED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-600 text-[10px] items-center gap-1 font-bold"><XCircle size={10} /> Rejected</span>}
+                            <span className="inline-flex px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] items-center gap-1 font-bold">
+                              <Lock size={10} /> {doc.visibility}
+                            </span>
                          </div>
                       </div>
-                   </td>
-                   <td className="px-4 py-4 min-w-[150px]">
-                      <div className="flex items-center gap-2">
-                         <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300">
-                           {doc.uploader?.firstName?.charAt(0) || 'U'}
-                         </div>
-                         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {doc.uploader?.firstName} {doc.uploader?.lastName}
-                         </span>
+                      
+                      <div className="flex items-center gap-2 mt-3 text-xs font-medium text-slate-500">
+                         <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 font-bold">{doc.category}</span>
+                         <span>• {doc.type}</span>
+                         <span>• {doc.size}</span>
                       </div>
-                   </td>
-                   <td className="px-4 py-4 min-w-[120px]">
-                      <div className="text-xs font-bold text-slate-500 whitespace-nowrap">{doc.category}</div>
-                      <div className="text-[10px] text-slate-400 font-medium">{doc.type} • {doc.size}</div>
-                   </td>
-                   <td className="px-4 py-4 min-w-[150px]">
-                      <div className="flex flex-col gap-1.5 items-start">
-                         {doc.status === 'PENDING' && <span className="inline-flex px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 text-[10px] items-center gap-1 font-bold border border-amber-200 dark:border-amber-500/20"><ShieldCheck size={10} /> Pending</span>}
-                         {doc.status === 'VERIFIED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[10px] items-center gap-1 font-bold border border-emerald-200 dark:border-emerald-500/20"><CheckCircle2 size={10} /> Verified</span>}
-                         {doc.status === 'REJECTED' && <span className="inline-flex px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-600 text-[10px] items-center gap-1 font-bold border border-rose-200 dark:border-rose-500/20"><XCircle size={10} /> Rejected</span>}
-                         
-                         <span className="inline-flex px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] items-center gap-1 font-bold">
-                           <Lock size={10} /> {doc.visibility}
-                         </span>
+                   </div>
+                </div>
+
+                <div className="pt-4 mt-1 border-t border-slate-50 dark:border-slate-800/80 flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300">
+                        {doc.uploader?.firstName?.charAt(0) || 'U'}
                       </div>
-                   </td>
-                   <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2 pr-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                         {doc.status === 'PENDING' && (
-                           <>
-                             <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'VERIFIED' })} className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 flex items-center justify-center transition-colors shadow-sm" title="Verify">
-                               <CheckCircle2 size={14} />
-                             </button>
-                             <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'REJECTED' })} className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-500/20 flex items-center justify-center transition-colors shadow-sm" title="Reject">
-                               <XCircle size={14} />
-                             </button>
-                           </>
-                         )}
-                         <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 flex items-center justify-center transition-colors shadow-sm" title="Preview">
-                           <Eye size={14} />
-                         </button>
-                         <button className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-colors shadow-sm" title="Download">
-                           <Download size={14} />
-                         </button>
-                      </div>
-                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                         {doc.uploader?.firstName} {doc.uploader?.lastName}
+                      </span>
+                   </div>
+                   
+                   <div className="flex items-center justify-end gap-2">
+                      {doc.status === 'PENDING' && (
+                        <>
+                          <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'VERIFIED' })} className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 flex items-center justify-center transition-colors shadow-sm" title="Verify">
+                            <CheckCircle2 size={14} />
+                          </button>
+                          <button onClick={() => updateStatus.mutate({ id: doc.id, status: 'REJECTED' })} className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-500/20 flex items-center justify-center transition-colors shadow-sm" title="Reject">
+                            <XCircle size={14} />
+                          </button>
+                        </>
+                      )}
+                      <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 flex items-center justify-center transition-colors shadow-sm" title="Preview">
+                        <Eye size={14} />
+                      </button>
+                      <button className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-colors shadow-sm" title="Download">
+                        <Download size={14} />
+                      </button>
+                   </div>
+                </div>
+             </div>
+          ))}
 
           {filtered.length === 0 && (
-            <div className="py-16 text-center">
+            <div className="col-span-1 lg:col-span-2 py-16 text-center">
               <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
                 <FileText size={32} />
               </div>

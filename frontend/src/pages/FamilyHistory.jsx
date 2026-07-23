@@ -184,97 +184,78 @@ export default function FamilyHistory() {
         
         {/* Table Area */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left whitespace-nowrap border-collapse responsive-table">
-              <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800">
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white">Title</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Category</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Date</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Related Members</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Location</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Added By</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white whitespace-nowrap">Status</th>
-                  <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white text-center whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                {isLoading && (
-                   <tr><td colSpan="8" className="p-8 text-center text-slate-500 font-bold tracking-wider text-sm">Loading database...</td></tr>
-                )}
-                {!isLoading && filtered.length === 0 && (
-                   <tr>
-                      <td colSpan="8" className="p-16 text-center">
-                         <div className="flex flex-col items-center justify-center">
-                            <div className="w-16 h-16 bg-purple-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-purple-500">
-                               <BookOpen size={32} />
+          <div className="grid grid-cols-1 gap-4 p-4">
+             {isLoading && (
+                <div className="p-8 text-center text-slate-500 font-bold tracking-wider text-sm">Loading database...</div>
+             )}
+             {!isLoading && filtered.length === 0 && (
+                <div className="p-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-slate-50/50 dark:bg-slate-900/50">
+                   <div className="w-16 h-16 bg-purple-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-purple-500 mx-auto">
+                      <BookOpen size={32} />
+                   </div>
+                   <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">No history records yet</h3>
+                   <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">Begin documenting your family’s legacy. Add key milestones, properties, or ancestral origins.</p>
+                   <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all mx-auto">
+                      <Plus size={16} /> Add First Event
+                   </button>
+                </div>
+             )}
+             {filtered.map(item => (
+                <div key={item.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-5 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row gap-5 items-start">
+                   <img src={item.thumbnail} alt={item.title} className="w-full md:w-32 h-32 md:h-24 rounded-xl object-cover shadow-sm bg-slate-100 shrink-0" />
+                   
+                   <div className="flex-1 min-w-0 flex flex-col h-full">
+                      <div className="flex flex-col md:flex-row md:items-start justify-between gap-2 mb-2">
+                         <div>
+                            <div className="flex items-center gap-2 mb-1">
+                               <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${item.catColor}`}>
+                                 {item.category}
+                               </span>
+                               <span className="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                                 {item.status}
+                               </span>
                             </div>
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">No history records yet</h3>
-                            <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">Begin documenting your family’s legacy. Add key milestones, properties, or ancestral origins.</p>
-                            <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all">
-                               <Plus size={16} /> Add First Event
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate leading-tight">{item.title}</h3>
+                            <p className="text-sm text-slate-500 font-medium line-clamp-2 mt-1">{item.subtitle}</p>
+                         </div>
+                         <div className="flex items-center gap-2 shrink-0 md:flex-col md:items-end">
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{item.date}</span>
+                            <span className="text-xs font-semibold text-slate-400">{item.location}</span>
+                         </div>
+                      </div>
+
+                      <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex items-center gap-2">
+                               <span className="text-xs text-slate-400 font-semibold">Added by:</span>
+                               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{item.addedBy}</span>
+                            </div>
+                            
+                            <div className="flex items-center">
+                               {item.members.map((m, i) => (
+                                 <img key={i} src={m} alt="member" className={`w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 object-cover ${i > 0 && '-ml-2'}`} />
+                               ))}
+                               {item.extraMembers > 0 && (
+                                 <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-600 dark:text-slate-300 -ml-2 z-10 shrink-0">
+                                   +{item.extraMembers}
+                                 </div>
+                               )}
+                               {item.members.length === 0 && <span className="text-[10px] text-slate-400 font-medium ml-1">No related</span>}
+                            </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-1.5 shrink-0">
+                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors">
+                              <Eye size={14} />
+                            </button>
+                            <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors">
+                              <MoreVertical size={14} />
                             </button>
                          </div>
-                      </td>
-                   </tr>
-                )}
-                {filtered.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                    <td className="px-6 py-4 min-w-[300px]">
-                      <div className="flex items-center gap-4">
-                        <img src={item.thumbnail} alt={item.title} className="w-16 h-12 rounded-lg object-cover shadow-sm bg-slate-100 shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{item.title}</p>
-                          <p className="text-xs text-slate-500 font-medium truncate mt-0.5 max-w-[200px]">{item.subtitle}</p>
-                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap ${item.catColor}`}>
-                        {item.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                      {item.date}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        {item.members.map((m, i) => (
-                          <img key={i} src={m} alt="member" className={`w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 object-cover ${i > 0 && '-ml-2'}`} />
-                        ))}
-                        {item.extraMembers > 0 && (
-                          <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300 -ml-2 z-10 shrink-0">
-                            +{item.extraMembers}
-                          </div>
-                        )}
-                        {item.members.length === 0 && <span className="text-xs text-slate-400 font-medium whitespace-nowrap">No related</span>}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                       <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 line-clamp-2 max-w-[120px]">{item.location}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                      {item.addedBy}
-                    </td>
-                    <td className="px-6 py-4">
-                       <span className="inline-flex px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[11px] font-bold whitespace-nowrap">
-                         {item.status}
-                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                       <div className="flex items-center justify-center gap-2">
-                          <button className="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors flex items-center justify-center">
-                            <Eye size={16} />
-                          </button>
-                          <button className="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
-                            <MoreVertical size={16} />
-                          </button>
-                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                   </div>
+                </div>
+             ))}
           </div>
 
           {/* Pagination */}

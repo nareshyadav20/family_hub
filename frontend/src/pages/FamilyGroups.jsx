@@ -82,71 +82,58 @@ export default function FamilyGroups() {
              </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border rounded-2xl shadow-sm overflow-hidden">
-             <div className="p-4 border-b dark:border-slate-800 flex gap-4">
-                <div className="relative w-full max-w-sm">
-                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                   <input type="text" placeholder="Search groups..." className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+             <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input type="text" placeholder="Search groups..." className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 shadow-sm" />
+             </div>
+             <button className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2 shadow-sm"><Filter size={16} /> Filter</button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+             {groups.length === 0 ? (
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900">
+                   <Users size={40} className="mx-auto text-blue-500 mb-3" />
+                   <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No groups created</h3>
+                   <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create dedicated groups for branches of the family, specific events, or interest circles.</p>
+                   <button onClick={goCreate} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
+                      <Plus size={16} /> Create First Group
+                   </button>
                 </div>
-                <button className="px-4 py-2 bg-slate-50 border rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2"><Filter size={16} /> Filter</button>
-             </div>
-             <div className="overflow-x-auto">
-               <table className="w-full text-left text-sm whitespace-nowrap border-collapse responsive-table">
-                  <thead>
-                     <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b dark:border-slate-800">
-                        <th className="p-4">Group Name</th>
-                        <th className="p-4">Category</th>
-                        <th className="p-4">Privacy</th>
-                        <th className="p-4">Members</th>
-                        <th className="p-4">Status</th>
-                        <th className="p-4 text-right">Actions</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     {groups.length === 0 ? (
-                        <tr>
-                           <td colSpan="6" className="py-16 text-center">
-                              <div className="flex flex-col items-center justify-center">
-                                 <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-blue-500 shadow-sm">
-                                    <Users size={32} />
-                                 </div>
-                                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No groups created</h3>
-                                 <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create dedicated groups for branches of the family, specific events, or interest circles.</p>
-                                 <button onClick={goCreate} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all">
-                                    <Plus size={16} /> Create First Group
-                                 </button>
-                              </div>
-                           </td>
-                        </tr>
-                     ) : (
-                        groups.map(g => (
-                           <tr key={g.id} className="border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                              <td className="p-4">
-                                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => goDetails(g.id)}>
-                                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold">{g.name.charAt(0)}</div>
-                                    <div>
-                                       <h4 className="font-bold text-slate-900 dark:text-white">{g.name}</h4>
-                                       <p className="text-xs text-slate-500 truncate w-40">{g.description}</p>
-                                    </div>
-                                 </div>
-                              </td>
-                              <td className="p-4 text-slate-600 font-medium">{g.category}</td>
-                              <td className="p-4">
-                                 <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${g.privacy === 'Private' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                                    {g.privacy}
-                                 </span>
-                              </td>
-                              <td className="p-4 text-slate-600 font-bold">{g._count?.members || 0}</td>
-                              <td className="p-4 text-slate-600 font-medium">{g.status}</td>
-                              <td className="p-4 text-right">
-                                 <button onClick={() => goDetails(g.id)} className="text-blue-600 hover:text-blue-800 font-bold text-sm px-3 py-1.5 bg-blue-50 rounded-lg">View</button>
-                              </td>
-                           </tr>
-                        ))
-                     )}
-                  </tbody>
-               </table>
-             </div>
+             ) : (
+                groups.map(g => (
+                  <div key={g.id} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+                     <div className="h-28 bg-gradient-to-br from-blue-500 to-indigo-600 relative p-4 cursor-pointer" onClick={() => goDetails(g.id)}>
+                        <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/20 backdrop-blur-md text-white text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
+                           {g.privacy === 'Private' ? <Lock size={10} /> : <Globe size={10} />}
+                           {g.privacy}
+                        </div>
+                     </div>
+                     <div className="px-5 pb-5 relative -mt-8 flex-1 flex flex-col">
+                        <div className="w-16 h-16 bg-white dark:bg-slate-900 p-1 rounded-2xl shadow-sm">
+                           <div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center font-black text-2xl text-blue-600">
+                              {g.name.charAt(0)}
+                           </div>
+                        </div>
+                        <h3 className="text-lg font-bold mt-3 text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => goDetails(g.id)}>{g.name}</h3>
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1 mb-2">{g.category}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 min-h-[40px]">{g.description || 'No description provided.'}</p>
+                        
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                           <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-500">{g._count?.members || 0} Members</span>
+                              <span className="text-slate-300">•</span>
+                              <span className={`text-xs font-bold ${g.status === 'Active' ? 'text-emerald-500' : 'text-slate-400'}`}>{g.status}</span>
+                           </div>
+                           
+                           <button onClick={() => goDetails(g.id)} className="px-4 py-2 bg-blue-50 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-100 transition-colors">
+                              Manage
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                ))
+             )}
           </div>
         </>
       )}
