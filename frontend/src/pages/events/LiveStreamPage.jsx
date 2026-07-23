@@ -43,6 +43,30 @@ export default function LiveStreamPage() {
     );
   }
 
+  const now = new Date();
+  let isEventCompleted = false;
+  if (event.eventDate && event.endTime) {
+    const endDateTime = new Date(event.eventDate);
+    const [hours, minutes] = event.endTime.split(':');
+    if (!isNaN(parseInt(hours)) && !isNaN(parseInt(minutes))) {
+      endDateTime.setHours(parseInt(hours), parseInt(minutes), 0);
+      if (now > endDateTime) {
+        isEventCompleted = true;
+      }
+    }
+  }
+
+  if (isEventCompleted) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 px-4">
+        <WifiOff size={64} className="text-slate-500 mb-6" />
+        <div className="text-white font-black text-2xl md:text-3xl text-center mb-2">Event is completed</div>
+        <p className="text-slate-400 font-medium text-center max-w-md bg-slate-900 p-4 rounded-xl border border-slate-800 mb-8">The live stream for this event has ended.</p>
+        <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#2563EB] hover:bg-blue-600 rounded-xl font-bold text-white transition shadow-lg">Go Back</button>
+      </div>
+    );
+  }
+
   // Jitsi configuration fragments
   const config = [
     'config.disableDeepLinking=true',

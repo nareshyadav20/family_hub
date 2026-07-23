@@ -99,20 +99,42 @@ export default function Events() {
                     </div>
                     
                     {/* Role-Based Virtual Stream Button */}
-                    {(e.liveStream && e.streamId) && (
-                      <div className="mt-4 w-full">
-                         <button 
-                           onClick={(ev) => { ev.stopPropagation(); navigate(`/live/${e.streamId}`); }} 
-                           className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-700 transition font-bold text-sm shadow-md shadow-blue-500/20"
-                         >
-                           <Play className="w-4 h-4 fill-current" />
-                           Join Virtual Live Stream
-                           <span className="flex items-center gap-1.5 ml-2 bg-red-500/20 text-red-100 border border-red-500/50 px-2 py-0.5 rounded-full text-[10px] tracking-wider animate-pulse">
-                             <Radio size={10} /> LIVE
-                           </span>
-                         </button>
-                      </div>
-                    )}
+                    {(e.liveStream && e.streamId) && (() => {
+                      let isCompleted = false;
+                      if (e.eventDate && e.endTime) {
+                        const endDateTime = new Date(e.eventDate);
+                        const [hours, minutes] = e.endTime.split(':');
+                        if (!isNaN(parseInt(hours)) && !isNaN(parseInt(minutes))) {
+                          endDateTime.setHours(parseInt(hours), parseInt(minutes), 0);
+                          if (now > endDateTime) isCompleted = true;
+                        }
+                      }
+                      
+                      if (isCompleted) {
+                        return (
+                          <div className="mt-4 w-full">
+                             <button disabled className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg font-bold text-sm cursor-not-allowed">
+                               Event is completed
+                             </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="mt-4 w-full">
+                           <button 
+                             onClick={(ev) => { ev.stopPropagation(); navigate(`/live/${e.streamId}`); }} 
+                             className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-blue-700 transition font-bold text-sm shadow-md shadow-blue-500/20"
+                           >
+                             <Play className="w-4 h-4 fill-current" />
+                             Join Virtual Live Stream
+                             <span className="flex items-center gap-1.5 ml-2 bg-red-500/20 text-red-100 border border-red-500/50 px-2 py-0.5 rounded-full text-[10px] tracking-wider animate-pulse">
+                               <Radio size={10} /> LIVE
+                             </span>
+                           </button>
+                        </div>
+                      );
+                    })()}
                  </CardContent>
                </Card>
              );
