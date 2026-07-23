@@ -73,7 +73,7 @@ export default function Events() {
              const day = dateObj.getDate();
              
              return (
-               <Card key={e.id} className="border-0 shadow-sm dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
+               <Card key={e.id} onClick={() => navigate(`/member/dashboard/events/${e.id}`)} className="border-0 shadow-sm dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
                  <div className="h-40 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                     {e.bannerImage ? (
