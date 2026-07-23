@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { GridSkeleton } from '../../components/loaders/SkeletonLoaders';
 import { Users, MapPin, Phone, Mail, Heart, MessageCircle, Crown, Shield, User } from 'lucide-react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -71,6 +72,9 @@ export default function Family() {
           className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
       </div>
 
+      {isLoading ? (
+        <GridSkeleton count={6} />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map(m => {
           const badge = ROLE_BADGE[m.role];
@@ -113,6 +117,7 @@ export default function Family() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Search, Moon, Sun, Users, LogOut, Settings as SettingsIcon, UserCircle, Menu, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import { globalLogout } from '../../utils/auth';
+import PageLoader from '../../components/loaders/PageLoader';
 
 export default function MainLayout({ navItems, bottomNav }) {
   const location = useLocation();
@@ -242,7 +243,9 @@ export default function MainLayout({ navItems, bottomNav }) {
         {/* Page Scrollable Content */}
         <div className="flex-1 overflow-y-auto w-full pt-6 pb-20 px-4 md:px-10">
            <div className="max-w-[1200px] h-full mx-auto w-full">
-              <Outlet />
+              <Suspense fallback={<div className="pt-20"><PageLoader /></div>}>
+                 <Outlet />
+              </Suspense>
            </div>
         </div>
       </main>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CardSkeleton, GridSkeleton } from '../../components/loaders/SkeletonLoaders';
 import { Calendar, Image, Bell, Heart, MessageSquare, Users, Gift, ChevronRight, Play, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
@@ -74,6 +75,9 @@ export default function Dashboard() {
       )}
 
       {/* Stats */}
+      {isLoading ? (
+        <div className="mb-4"><GridSkeleton count={4} /></div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Family Members', value: stats.familyMembers, icon: Users, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' },
@@ -87,11 +91,12 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">{stat.label}</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">{isLoading ? '-' : stat.value}</h3>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white">{stat.value}</h3>
             </div>
           </div>
         ))}
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Family Feed */}
@@ -99,7 +104,10 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Feed</h2>
           
           {isLoading && (
-            <div className="text-center py-20 text-slate-400 font-medium">Fetching Live Feed...</div>
+            <div className="space-y-4">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
           )}
 
           {!isLoading && feedPosts.length === 0 && (
