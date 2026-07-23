@@ -45,7 +45,7 @@ export default function Dashboard() {
           <p className="text-indigo-200 text-sm font-medium mb-1">{greeting}, 👋</p>
           <h1 className="text-3xl font-black text-white mb-2">Welcome, {firstName}!</h1>
           <p className="text-indigo-200 text-sm">You have {upcomingBirthdays.length} upcoming birthdays and {upcomingEvents.length} events.</p>
-          <div className="flex gap-3 mt-5">
+          <div className="flex flex-wrap gap-3 mt-5">
             <Link to="/member/dashboard/events" className="flex items-center gap-2 bg-white text-indigo-700 text-sm font-bold px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all shadow-lg">
               <Calendar size={15} /> View Events
             </Link>
@@ -66,7 +66,7 @@ export default function Dashboard() {
                  <div className={`h-full bg-emerald-400 rounded-full`} style={{ width: `${completion}%` }}></div>
               </div>
            </div>
-           <div className="flex gap-4 shrink-0">
+           <div className="flex flex-wrap items-center gap-4 shrink-0 w-full md:w-auto">
               <button onClick={() => setShowBanner(false)} className="text-indigo-100 text-sm font-semibold hover:text-white transition-colors cursor-pointer">Remind Me Later</button>
               <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
            </div>

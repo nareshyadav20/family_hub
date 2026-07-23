@@ -191,11 +191,11 @@ export default function Settings() {
               <div className="space-y-6">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Information</h2>
                 {isLoading ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {[
                       ['Family Name', 'name'],
                       ['Address',     'address'],
@@ -256,7 +256,7 @@ export default function Settings() {
                 {/* Theme */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Theme Mode</label>
-                  <div className="grid grid-cols-3 gap-4 max-w-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-sm">
                     {[['Light', 'light', Sun], ['Dark', 'dark', Moon], ['System', 'System', SettingsIcon]].map(([label, val, Icon]) => (
                       <button
                         key={val}
@@ -332,7 +332,7 @@ export default function Settings() {
           </div>
 
           {/* ── Footer save bar ── */}
-          <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex gap-3 items-center">
+          <div className="px-4 sm:px-8 py-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col sm:flex-row gap-3 items-center">
             <button
               onClick={handleSave}
               disabled={isSaving || isLoading}

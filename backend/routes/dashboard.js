@@ -344,7 +344,7 @@ router.put('/settings/family', authenticateToken, async (req, res) => {
 // GET /api/v1/admin/dashboard/settings/me
 router.get('/settings/me', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { memberSettings: true, memberProfile: true },
@@ -360,7 +360,7 @@ router.get('/settings/me', authenticateToken, async (req, res) => {
 // PUT /api/v1/admin/dashboard/settings/notifications
 router.put('/settings/notifications', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const {
       email_notifications, push_notifications, birthday_notifications,
       event_notifications, announcement_notifications, whatsapp_notifications,
@@ -380,7 +380,7 @@ router.put('/settings/notifications', authenticateToken, async (req, res) => {
 // PUT /api/v1/admin/dashboard/settings/appearance
 router.put('/settings/appearance', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { theme, language, timezone } = req.body;
     const settings = await prisma.memberSettings.upsert({
       where: { userId },
@@ -397,7 +397,7 @@ router.put('/settings/appearance', authenticateToken, async (req, res) => {
 // PUT /api/v1/admin/dashboard/settings/profile
 router.put('/settings/profile', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { firstName, lastName, phone } = req.body;
     const updated = await prisma.user.update({
       where: { id: userId },

@@ -125,20 +125,20 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">Family Admin Dashboard</h1>
-          <p className="text-slate-500 font-medium">Overview of your family's activities and engagement.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">Family Admin Dashboard</h1>
+          <p className="text-slate-500 font-medium text-sm md:text-base">Overview of your family's activities and engagement.</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={() => navigate('/admin/dashboard/events/create')} className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl font-medium transition-all shadow-sm">
-             <CalendarDays size={18} /> Schedule Event
+        <div className="grid grid-cols-1 sm:flex sm:flex-wrap lg:flex-nowrap gap-2 md:gap-3 w-full md:w-auto mt-2 md:mt-0">
+          <button onClick={() => navigate('/admin/dashboard/events/create')} className="w-full sm:flex-1 md:flex-none flex items-center justify-center gap-1 md:gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-sm md:text-base font-medium transition-all shadow-sm">
+             <CalendarDays size={18} className="shrink-0" /> <span>Schedule Event</span>
           </button>
-          <button onClick={() => navigate('/admin/dashboard/members/invite')} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/30">
-             <Link size={18} /> Invite Member
+          <button onClick={() => navigate('/admin/dashboard/members/invite')} className="w-full sm:flex-1 md:flex-none flex items-center justify-center gap-1 md:gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-sm md:text-base font-medium transition-all shadow-lg shadow-emerald-500/30">
+             <Link size={18} className="shrink-0" /> Invite
           </button>
-          <button onClick={() => navigate('/admin/dashboard/members/add')} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/30">
-             <Plus size={18} /> Add Member
+          <button onClick={() => navigate('/admin/dashboard/members/add')} className="w-full sm:flex-1 md:flex-none flex items-center justify-center gap-1 md:gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-sm md:text-base font-medium transition-all shadow-lg shadow-blue-500/30">
+             <Plus size={18} className="shrink-0" /> Add
           </button>
         </div>
       </div>

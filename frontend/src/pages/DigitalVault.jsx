@@ -23,7 +23,7 @@ export default function DigitalVault() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Digital Vault</h1>
           <p className="text-sm text-slate-500 mt-1">Securely store all important family documents and certificates.</p>
