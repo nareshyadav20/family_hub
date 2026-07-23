@@ -24,9 +24,24 @@ export default function Events() {
 
   const now = new Date();
   
+  const getEventEndDateTime = (e) => {
+     let dt = new Date(e.eventDate);
+     if (e.endTime) {
+        const [hours, minutes] = e.endTime.split(':');
+        if (!isNaN(parseInt(hours)) && !isNaN(parseInt(minutes))) {
+           dt.setHours(parseInt(hours), parseInt(minutes), 0);
+        } else {
+           dt.setHours(23, 59, 59);
+        }
+     } else {
+        dt.setHours(23, 59, 59);
+     }
+     return dt;
+  };
+
   // Members do NOT see Draft events. Only Publisher events.
-  const upcomingEvents = events.filter(e => new Date(e.eventDate) >= now && e.status === 'Publish');
-  const pastEvents = events.filter(e => new Date(e.eventDate) < now && e.status === 'Publish');
+  const upcomingEvents = events.filter(e => getEventEndDateTime(e) >= now && e.status === 'Publish');
+  const pastEvents = events.filter(e => getEventEndDateTime(e) < now && e.status === 'Publish');
 
   const activeEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 

@@ -43,8 +43,23 @@ export default function Events() {
 
   const now = new Date();
   
-  const upcomingEvents = events.filter(e => new Date(e.eventDate) >= now && e.status !== 'Draft');
-  const pastEvents = events.filter(e => new Date(e.eventDate) < now && e.status !== 'Draft');
+  const getEventEndDateTime = (e) => {
+     let dt = new Date(e.eventDate);
+     if (e.endTime) {
+        const [hours, minutes] = e.endTime.split(':');
+        if (!isNaN(parseInt(hours)) && !isNaN(parseInt(minutes))) {
+           dt.setHours(parseInt(hours), parseInt(minutes), 0);
+        } else {
+           dt.setHours(23, 59, 59);
+        }
+     } else {
+        dt.setHours(23, 59, 59);
+     }
+     return dt;
+  };
+
+  const upcomingEvents = events.filter(e => getEventEndDateTime(e) >= now && e.status !== 'Draft');
+  const pastEvents = events.filter(e => getEventEndDateTime(e) < now && e.status !== 'Draft');
   const draftEvents = events.filter(e => e.status === 'Draft');
 
   const activeEvents = activeTab === 'upcoming' ? upcomingEvents : activeTab === 'past' ? pastEvents : draftEvents;
