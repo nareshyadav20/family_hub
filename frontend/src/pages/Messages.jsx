@@ -24,7 +24,7 @@ export default function Messages() {
   const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
   const SOCKET_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`;
 
-  const msgsEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   // Fetch conversations
   const { data: contacts = [], isLoading } = useQuery({
@@ -59,7 +59,9 @@ export default function Messages() {
 
   // Scroll to bottom
   useEffect(() => {
-      msgsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
   }, [msgs]);
 
   // Socket
@@ -207,7 +209,7 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
                 {msgsLoading && <div className="text-center text-slate-500 text-sm">Loading messages...</div>}
                 
                 {msgs.map(m => (
@@ -232,7 +234,7 @@ export default function Messages() {
                     </div>
                   </div>
                 ))}
-                <div ref={msgsEndRef} />
+
               </div>
 
               <div className="p-4 border-t border-slate-100 dark:border-slate-800 relative">

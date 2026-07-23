@@ -26,9 +26,13 @@ export default function AIAssistant() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [replyIdx, setReplyIdx] = useState(0);
-  const bottomRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const send = (text = input) => {
     if (!text.trim()) return;
@@ -59,7 +63,7 @@ export default function AIAssistant() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
         {/* Chat */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col" style={{ height: 580 }}>
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
                 {m.role === 'assistant' && (
@@ -89,7 +93,7 @@ export default function AIAssistant() {
                 </div>
               </div>
             )}
-            <div ref={bottomRef} />
+
           </div>
 
           <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex gap-3">
