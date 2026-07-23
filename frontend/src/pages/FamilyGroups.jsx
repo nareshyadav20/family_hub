@@ -91,7 +91,7 @@ export default function FamilyGroups() {
                 <button className="px-4 py-2 bg-slate-50 border rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2"><Filter size={16} /> Filter</button>
              </div>
              <div className="overflow-x-auto">
-               <table className="w-full text-left text-sm border-collapse">
+               <table className="w-full text-left text-sm whitespace-nowrap border-collapse responsive-table">
                   <thead>
                      <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold border-b dark:border-slate-800">
                         <th className="p-4">Group Name</th>

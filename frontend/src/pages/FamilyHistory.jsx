@@ -185,7 +185,7 @@ export default function FamilyHistory() {
         {/* Table Area */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left whitespace-nowrap border-collapse responsive-table">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800">
                   <th className="px-6 py-4 text-xs font-black text-slate-900 dark:text-white">Title</th>

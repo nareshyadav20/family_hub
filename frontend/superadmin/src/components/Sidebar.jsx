@@ -11,7 +11,8 @@ import {
   Settings, 
   Bell,
   User,
-  LogOut 
+  LogOut,
+  X 
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -29,7 +30,7 @@ const navigation = [
   { name: 'Profile',           href: '/profile',        icon: User },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -39,14 +40,19 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-20">
+    <aside className={`w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Logo */}
-      <Link to="/dashboard" className="h-20 flex items-center px-7 border-b border-[#E2E8F0]/60 hover:opacity-90 transition-opacity">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center mr-3.5 shadow-md flex-shrink-0">
-          <span className="text-white font-bold text-xl">F</span>
-        </div>
-        <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-blue-700">Hub OS</span>
-      </Link>
+      <div className="h-20 flex items-center justify-between px-7 border-b border-[#E2E8F0]/60">
+        <Link to="/dashboard" className="flex items-center hover:opacity-90 transition-opacity" onClick={() => setMobileMenuOpen?.(false)}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center mr-3.5 shadow-md flex-shrink-0">
+            <span className="text-white font-bold text-xl">F</span>
+          </div>
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-blue-700">Hub OS</span>
+        </Link>
+        <button className="lg:hidden text-gray-500" onClick={() => setMobileMenuOpen?.(false)}>
+          <X size={24} />
+        </button>
+      </div>
 
       {/* Nav */}
       <nav className="flex-1 px-5 py-6 space-y-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
@@ -56,6 +62,7 @@ export default function Sidebar() {
           <NavLink
             key={item.name}
             to={item.href}
+            onClick={() => setMobileMenuOpen?.(false)}
             className={({ isActive }) =>
               `relative group flex items-center px-4 py-3.5 text-[15px] font-semibold rounded-2xl transition-all duration-200 ${
                 isActive

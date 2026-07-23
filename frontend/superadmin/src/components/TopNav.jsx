@@ -1,4 +1,4 @@
-import { Bell as BellIcon, Search as SearchIcon, UserCircle as UserIcon, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Bell as BellIcon, Search as SearchIcon, UserCircle as UserIcon, Settings as SettingsIcon, LogOut, Menu } from 'lucide-react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 
@@ -11,7 +11,7 @@ function getSuperAdmin() {
   }
 }
 
-export default function TopNav() {
+export default function TopNav({ setMobileMenuOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -61,13 +61,16 @@ export default function TopNav() {
     : 'SA';
 
   return (
-    <header className="fixed top-0 right-0 left-64 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E2E8F0]/80 z-10 hidden md:flex items-center justify-between px-8 shadow-sm">
-      <div className="flex items-center">
-        <h1 className="text-xl font-semibold text-gray-800 tracking-tight">{currentTitle}</h1>
+    <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-white/70 backdrop-blur-xl border-b border-[#E2E8F0]/80 z-10 flex items-center justify-between px-4 sm:px-8 shadow-sm">
+      <div className="flex items-center gap-3">
+        <button className="lg:hidden text-gray-600 p-2 hover:bg-gray-100 rounded-lg" onClick={() => setMobileMenuOpen?.(true)}>
+          <Menu size={24} />
+        </button>
+        <h1 className="text-xl font-semibold text-gray-800 tracking-tight hidden sm:block">{currentTitle}</h1>
       </div>
 
       <div className="flex items-center space-x-6">
-        <div className="relative group">
+        <div className="relative group hidden md:block">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <SearchIcon className="h-4 w-4 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
           </div>

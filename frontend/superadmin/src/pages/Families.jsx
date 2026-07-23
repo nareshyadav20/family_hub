@@ -260,7 +260,7 @@ export default function Families() {
                 <div className="p-6 overflow-y-auto flex-1 space-y-6">
                   <div>
                     <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Family Details</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Family Name *</label>
                         <input required type="text" name="familyName" value={formData.familyName} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. The Smith Family" />
@@ -278,7 +278,7 @@ export default function Families() {
 
                   <div className="border-t border-gray-100 pt-6">
                     <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Primary Admin</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Admin Name *</label>
                         <input required type="text" name="adminName" value={formData.adminName} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" />
@@ -300,7 +300,7 @@ export default function Families() {
 
                   <div className="border-t border-gray-100 pt-6">
                     <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Subscription & Location</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
                         <select name="plan" value={formData.plan} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 bg-white outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
@@ -321,7 +321,7 @@ export default function Families() {
                       <div className="col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
                         <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none mb-3" placeholder="Street Address" />
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <input type="text" name="city" value={formData.city} onChange={handleChange} className="border border-gray-200 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="City" />
                           <input type="text" name="state" value={formData.state} onChange={handleChange} className="border border-gray-200 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="State" />
                           <input type="text" name="country" value={formData.country} onChange={handleChange} className="border border-gray-200 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="Country" />
