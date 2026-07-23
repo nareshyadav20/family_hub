@@ -48,7 +48,7 @@ export default function EmailLogs() {
       case 'PENDING':
       case 'PROCESSING': 
       case 'RETRYING': return <RefreshCw className="w-4 h-4 text-amber-500 animate-spin-slow" />;
-      default: return <AlertCircle className="w-4 h-4 text-gray-400" />;
+      default: return <AlertCircle className="w-4 h-4 text-gray-400 dark:text-slate-500" />;
     }
   };
 
@@ -62,12 +62,12 @@ export default function EmailLogs() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Email Logs Pipeline</h2>
-          <p className="text-sm text-gray-500 mt-1">Monitor all transactional email deliveries across the platform.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Email Logs Pipeline</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Monitor all transactional email deliveries across the platform.</p>
         </div>
         <button 
           onClick={fetchLogs}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh Pipeline
@@ -76,7 +76,7 @@ export default function EmailLogs() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Logged', value: filterStats.total, icon: Mail, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'Total Logged', value: filterStats.total, icon: Mail, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
           { label: 'Sent', value: filterStats.sent, icon: Send, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Pending / Retrying', value: filterStats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Failed', value: filterStats.failed, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
@@ -86,28 +86,28 @@ export default function EmailLogs() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-center gap-4"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4"
           >
             <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
               <stat.icon size={22} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-              <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex bg-slate-100 p-1 rounded-lg">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
             {['All', 'PENDING', 'SENT', 'FAILED'].map(s => (
               <button
                 key={s}
                 onClick={() => setStatus(s)}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  status === s ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  status === s ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 {s}
@@ -115,13 +115,13 @@ export default function EmailLogs() {
             ))}
           </div>
 
-          <div className="flex bg-slate-100 p-1 rounded-lg">
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
             {['Today', 'Last 7 Days', 'Last Month', 'All Time'].map(t => (
               <button
                 key={t}
                 onClick={() => setTimeframe(t)}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  timeframe === t ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  timeframe === t ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 {t}
@@ -132,7 +132,7 @@ export default function EmailLogs() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-50/50 text-slate-500 font-medium border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-900/50/50 text-slate-500 dark:text-slate-400 font-medium border-b border-slate-100 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4">Recipient</th>
                 <th className="px-6 py-4">Template</th>
@@ -145,33 +145,33 @@ export default function EmailLogs() {
             <tbody className="divide-y divide-slate-100">
               {logs.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500">
+                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
                     No email logs found for this filter.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={log.id} className="hover:bg-slate-50 dark:bg-slate-900/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-slate-400" />
-                        <span className="font-medium text-slate-900">{log.recipient}</span>
+                        <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                        <span className="font-medium text-slate-900 dark:text-white">{log.recipient}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{log.template}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{log.template}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyle(log.status)}`}>
                         <StatusIcon status={log.status} />
                         {log.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
                       {new Date(log.createdAt).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
                       {log.attempts} / {log.maxRetries}
                     </td>
-                    <td className="px-6 py-4 text-slate-500 max-w-xs truncate" title={log.errorMessage || ''}>
+                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400 max-w-xs truncate" title={log.errorMessage || ''}>
                       {log.errorMessage ? (
                          <span className="text-rose-600">{log.errorMessage}</span>
                       ) : (

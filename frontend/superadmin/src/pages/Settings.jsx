@@ -29,7 +29,7 @@ export default function Settings() {
   if (loading || !data) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600 dark:text-indigo-400" />
       </div>
     );
   }
@@ -38,13 +38,13 @@ export default function Settings() {
     {
       title: 'General',
       icon: Settings2,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-50 dark:bg-indigo-500/10',
       items: [
         { label: 'Platform Name', value: data.config.platformName },
         { label: 'Platform Version', value: data.config.version },
         { label: 'Timezone', value: data.config.timezone },
-        { label: 'Maintenance Mode', value: data.config.maintenance, highlight: 'text-slate-500 bg-slate-100' },
+        { label: 'Maintenance Mode', value: data.config.maintenance, highlight: 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800' },
       ]
     },
     {
@@ -76,7 +76,7 @@ export default function Settings() {
       color: 'text-amber-600',
       bg: 'bg-amber-50',
       items: [
-        { label: 'Google OAuth', value: data.config.googleOAuth, highlight: data.config.googleOAuth === 'Enabled' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100' },
+        { label: 'Google OAuth', value: data.config.googleOAuth, highlight: data.config.googleOAuth === 'Enabled' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800' },
         { label: 'Redirect URI', value: 'Configured' },
       ]
     },
@@ -88,7 +88,7 @@ export default function Settings() {
       items: [
         { label: 'JWT Expiry', value: data.config.jwtExpiry },
         { label: 'Password Policy', value: 'Strong' },
-        { label: '2FA', value: 'Disabled', highlight: 'text-slate-500 bg-slate-100' },
+        { label: '2FA', value: 'Disabled', highlight: 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800' },
       ]
     },
     {
@@ -109,8 +109,8 @@ export default function Settings() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Platform Settings</h2>
-        <p className="text-sm text-gray-500 mt-1">Global configurations including APIs, Email, Storage and Live Database Statistics.</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h2>
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Global configurations including APIs, Email, Storage and Live Database Statistics.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -120,20 +120,20 @@ export default function Settings() {
             initial={{ opacity: 0, scale: 0.95 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ delay: idx * 0.1 }}
-            className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
           >
-            <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50/50">
               <div className={`p-2 rounded-lg ${section.bg} ${section.color}`}>
                 <section.icon size={20} />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">{section.title}</h3>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{section.title}</h3>
             </div>
             <div className="p-6">
               <ul className="space-y-4">
                 {section.items.map((item, i) => (
                   <li key={i} className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-slate-500">{item.label}</span>
-                    <span className={`font-bold text-slate-900 ${item.highlight ? `px-2 py-0.5 rounded-md ${item.highlight}` : ''}`}>
+                    <span className="font-medium text-slate-500 dark:text-slate-400">{item.label}</span>
+                    <span className={`font-bold text-slate-900 dark:text-white ${item.highlight ? `px-2 py-0.5 rounded-md ${item.highlight}` : ''}`}>
                       {item.value}
                     </span>
                   </li>

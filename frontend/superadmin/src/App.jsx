@@ -47,7 +47,48 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+import { useEffect } from 'react';
+
 function App() {
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('superadmin_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const theme = user?.memberSettings?.theme;
+        if (theme === 'Dark' || (theme === 'System Default' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    } catch(e) {}
+    
+    // Setup listener for storage events
+    const handleStorage = () => {
+      try {
+        const userStr = localStorage.getItem('superadmin_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          const theme = user?.memberSettings?.theme;
+          if (theme === 'Dark' || (theme === 'System Default' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      } catch(e) {}
+    };
+    window.addEventListener('storage', handleStorage);
+    
+    // Also poll occasionally to catch same-tab updates
+    const interval = setInterval(handleStorage, 1000);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>

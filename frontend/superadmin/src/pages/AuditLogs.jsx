@@ -44,12 +44,12 @@ export default function AuditLogs() {
 
   const getColorClass = (moduleName) => {
     switch(moduleName?.toLowerCase()) {
-       case 'families': return 'text-indigo-600 bg-indigo-50 border border-indigo-100';
+       case 'families': return 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100';
        case 'members': return 'text-emerald-600 bg-emerald-50 border border-emerald-100';
        case 'calendar': return 'text-amber-600 bg-amber-50 border border-amber-100';
        case 'gallery': return 'text-blue-600 bg-blue-50 border border-blue-100';
        case 'subscription': return 'text-purple-600 bg-purple-50 border border-purple-100';
-       default: return 'text-slate-600 bg-slate-100 border border-slate-200';
+       default: return 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
     }
   };
 
@@ -84,36 +84,36 @@ export default function AuditLogs() {
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Audit Logs</h2>
-          <p className="text-sm text-gray-500 mt-1">Track system activity, administrator actions, and security events.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Logs</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Track system activity, administrator actions, and security events.</p>
         </div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
         
         {/* Actions Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-          <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl w-max">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-max">
             {['All', 'Today', 'Last 7 Days', 'Last Month'].map(filter => (
               <button 
                 key={filter} 
                 onClick={() => setActiveFilter(filter)} 
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${activeFilter === filter ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${activeFilter === filter ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 hover:bg-slate-200/50'}`}
               >
                 {filter}
               </button>
             ))}
           </div>
-          <div className="relative w-full md:w-96 flex bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-             <Search size={18} className="text-slate-400 mr-2 shrink-0 self-center" />
+          <div className="relative w-full md:w-96 flex bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+             <Search size={18} className="text-slate-400 dark:text-slate-500 mr-2 shrink-0 self-center" />
              <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search User, Family, or Action..." 
-                className="w-full bg-transparent text-sm outline-none text-slate-800 placeholder-slate-400 font-medium" 
+                className="w-full bg-transparent text-sm outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 font-medium" 
              />
-             <Filter size={18} className="text-slate-400 ml-2 shrink-0 self-center cursor-pointer hover:text-indigo-600 transition-colors" />
+             <Filter size={18} className="text-slate-400 dark:text-slate-500 ml-2 shrink-0 self-center cursor-pointer hover:text-indigo-600 dark:text-indigo-400 transition-colors" />
           </div>
         </div>
 
@@ -121,17 +121,17 @@ export default function AuditLogs() {
         <div className="overflow-x-auto min-h-[300px]">
           {loading ? (
              <div className="flex items-center justify-center h-48">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
              </div>
           ) : filteredLogs.length === 0 ? (
-             <div className="flex flex-col items-center justify-center h-48 text-slate-500">
+             <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">
                 <Shield size={32} className="text-slate-300 mb-3" />
                 <p>No audit logs found.</p>
              </div>
           ) : (
              <table className="w-full text-left border-collapse">
                <thead>
-                 <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                 <tr className="bg-slate-50 dark:bg-slate-900/50/50 border-b border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                    <th className="py-4 px-6 font-semibold">Time</th>
                    <th className="py-4 px-6 font-semibold">User</th>
                    <th className="py-4 px-6 font-semibold">Action</th>
@@ -140,14 +140,14 @@ export default function AuditLogs() {
                </thead>
                <tbody className="divide-y divide-slate-50">
                  {filteredLogs.map((log) => (
-                   <tr key={log.id} className="hover:bg-slate-50/80 transition-colors group">
-                     <td className="py-4 px-6 text-sm font-semibold text-slate-500 whitespace-nowrap">{formatTime(log.createdAt)}</td>
+                   <tr key={log.id} className="hover:bg-slate-50 dark:bg-slate-900/50/80 transition-colors group">
+                     <td className="py-4 px-6 text-sm font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{formatTime(log.createdAt)}</td>
                      <td className="py-4 px-6">
-                       <span className="font-bold text-slate-800 text-sm bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">{log.user}</span>
+                       <span className="font-bold text-slate-800 dark:text-slate-100 text-sm bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">{log.user}</span>
                      </td>
-                     <td className="py-4 px-6 text-sm font-medium text-slate-700">
+                     <td className="py-4 px-6 text-sm font-medium text-slate-700 dark:text-slate-200">
                         {log.action}
-                        {log.details && <span className="block text-xs font-normal text-slate-400 mt-0.5">{log.details}</span>}
+                        {log.details && <span className="block text-xs font-normal text-slate-400 dark:text-slate-500 mt-0.5">{log.details}</span>}
                      </td>
                      <td className="py-4 px-6">
                        <div className={`flex items-center gap-2 w-max px-3 py-1.5 rounded-lg ${getColorClass(log.module)}`}>

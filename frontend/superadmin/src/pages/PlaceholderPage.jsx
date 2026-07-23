@@ -4,8 +4,8 @@ export default function PlaceholderPage({ title, description, moduleName }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <p className="text-sm text-gray-500 mt-1">{description}</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{description}</p>
       </div>
 
       <motion.div 
@@ -17,8 +17,8 @@ export default function PlaceholderPage({ title, description, moduleName }) {
         <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
           <span className="text-2xl font-bold text-purple-600">🚧</span>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title} Module</h3>
-        <p className="text-gray-500 max-w-sm">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title} Module</h3>
+        <p className="text-gray-500 dark:text-slate-400 max-w-sm">
           The {moduleName} module is currently under development. Mock data and functional features will be rolled out in upcoming updates.
         </p>
       </motion.div>

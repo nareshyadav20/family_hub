@@ -76,8 +76,8 @@ export default function Subscriptions() {
   return (
     <div className="space-y-8 pb-12">
       <div>
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Subscriptions</h2>
-        <p className="text-sm text-gray-500 mt-2">Manage platform pricing plans and track active family subscriptions.</p>
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Subscriptions</h2>
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">Manage platform pricing plans and track active family subscriptions.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -99,19 +99,19 @@ export default function Subscriptions() {
               {getPlanIcon(plan.name)}
             </div>
             
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name} Plan</h3>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name} Plan</h3>
             <div className="flex items-baseline gap-1 mb-6">
-              <span className="text-4xl font-extrabold text-gray-900">{plan.price}</span>
+              <span className="text-4xl font-extrabold text-gray-900 dark:text-white">{plan.price}</span>
             </div>
 
             <div className="flex-1 space-y-4 mb-8">
-              <div className="flex items-center text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <div className="flex items-center text-sm font-medium text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-xl border border-gray-100 dark:border-slate-800">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 mr-3"></span>
-                <strong className="text-gray-900 mr-1">{plan.families?.toLocaleString() || '0'}</strong> active families
+                <strong className="text-gray-900 dark:text-white mr-1">{plan.families?.toLocaleString() || '0'}</strong> active families
               </div>
-              <div className="flex items-center text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <div className="flex items-center text-sm font-medium text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-xl border border-gray-100 dark:border-slate-800">
                 <span className="w-2 h-2 rounded-full bg-blue-500 mr-3"></span>
-                <strong className="text-gray-900 mr-1">{plan.storage}</strong> cloud storage
+                <strong className="text-gray-900 dark:text-white mr-1">{plan.storage}</strong> cloud storage
               </div>
             </div>
 
@@ -120,7 +120,7 @@ export default function Subscriptions() {
               className={`w-full py-3 px-4 font-semibold rounded-xl transition-all duration-200 ${
                 plan.id === 'premium' 
                 ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5' 
-                : 'bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-800 hover:bg-gray-50'
+                : 'bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-700 hover:border-gray-300 text-gray-800 dark:text-slate-100 hover:bg-gray-50 dark:bg-slate-900/50'
               }`}
             >
               Edit Plan
@@ -137,50 +137,50 @@ export default function Subscriptions() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+              className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
             >
-              <button onClick={closeEditModal} className="absolute right-6 top-6 text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 rounded-full p-2">
+              <button onClick={closeEditModal} className="absolute right-6 top-6 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:text-slate-300 transition-colors bg-gray-50 dark:bg-slate-900/50 rounded-full p-2">
                 <X size={20} />
               </button>
               
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Edit {editPlan.name} Plan</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit {editPlan.name} Plan</h3>
               
               <form onSubmit={handleSave} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Plan Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Plan Name</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Pricing Display</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Pricing Display</label>
                   <input
                     type="text"
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     placeholder="e.g. $49/mo or Free"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Storage Limit</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">Storage Limit</label>
                   <input
                     type="text"
                     value={formData.storage}
                     onChange={(e) => setFormData({...formData, storage: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                     placeholder="e.g. 50 GB"
                     required
                   />
                 </div>
                 
                 <div className="pt-4 flex gap-3">
-                  <button type="button" onClick={closeEditModal} className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">
+                  <button type="button" onClick={closeEditModal} className="flex-1 px-4 py-3 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 text-gray-700 dark:text-slate-200 font-bold rounded-xl transition-colors">
                     Cancel
                   </button>
                   <button type="submit" className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">

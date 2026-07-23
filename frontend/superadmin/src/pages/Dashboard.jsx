@@ -54,7 +54,7 @@ export default function Dashboard() {
     { name: 'Total Members', value: apiKpis.totalMembers?.toLocaleString() || '0', change: '+24%', icon: UserCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
     { name: 'Monthly Revenue', value: apiKpis.monthlyRevenue, change: '+14%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-100' },
     { name: 'Active Subscriptions', value: apiKpis.activeSubscriptions?.toLocaleString() || '0', change: '+5%', icon: CreditCard, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { name: 'Storage Usage', value: apiKpis.storageUsage, change: '+12 GB', icon: HardDrive, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+    { name: 'Storage Usage', value: apiKpis.storageUsage, change: '+12 GB', icon: HardDrive, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100' },
     { name: 'API Requests', value: apiKpis.apiRequests, change: '+5%', icon: Globe, color: 'text-cyan-600', bg: 'bg-cyan-100' },
     { name: 'Platform Health', value: apiKpis.platformHealth, change: 'Stable', icon: Activity, color: 'text-green-600', bg: 'bg-green-100' },
   ];
@@ -72,9 +72,9 @@ export default function Dashboard() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">{kpi.name}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">{kpi.name}</p>
                 <div className="flex items-baseline space-x-2">
-                  <h3 className="text-2xl font-bold text-gray-900">{kpi.value}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{kpi.value}</h3>
                   <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                     {kpi.change}
                   </span>
@@ -97,10 +97,10 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between xl:items-start mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Platform Growth</h3>
-              <p className="text-sm text-gray-500">Families & Members over time</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Platform Growth</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Families & Members over time</p>
             </div>
-            <select className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-2">
+            <select className="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-2">
               <option>Last 7 months</option>
               <option>This Year</option>
             </select>
@@ -138,21 +138,21 @@ export default function Dashboard() {
           className="card-premium p-6"
         >
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-            <p className="text-sm text-gray-500">Latest platform events</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Latest platform events</p>
           </div>
           <div className="space-y-6">
             {recentActivity.map((activity, index) => (
               <div key={activity.id || index} className="flex relative">
-                <div className="h-10 w-10 min-w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 mr-4 z-10 border-2 border-white shadow-sm">
+                <div className="h-10 w-10 min-w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-slate-300 mr-4 z-10 border-2 border-white shadow-sm">
                   {activity.user}
                 </div>
                 {index !== recentActivity.length - 1 && (
                   <div className="absolute top-10 left-5 w-px h-10 bg-gray-200"></div>
                 )}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">{activity.title}</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">{activity.desc}</p>
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</h4>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{activity.desc}</p>
                   <p className="text-xs text-purple-600 font-medium mt-1">{activity.time}</p>
                 </div>
               </div>
@@ -170,8 +170,8 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
-              <p className="text-sm text-gray-500">Last 7 days revenue</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Overview</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Last 7 days revenue</p>
             </div>
             <h3 className="text-xl font-bold text-emerald-600">+{data.kpis.monthlyRevenue}</h3>
           </div>

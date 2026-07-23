@@ -45,6 +45,27 @@ const websiteRouter = require('./routes/website');
 const superadminRouter = require('./routes/superadmin');
 const googleCalendarRouter = require('./routes/googleCalendar');
 
+app.use(async (req, res, next) => {
+  // Only apply to protected /api/ routes, excluding auth and superadmin
+  if (req.path.startsWith('/api/') && !req.path.startsWith('/api/v1/auth') && !req.path.startsWith('/api/v1/superadmin')) {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.familyId && decoded.role !== 'SUPER_ADMIN') {
+          const family = await prisma.family.findUnique({ where: { id: decoded.familyId } });
+          if (family && family.status === 'Suspended') {
+            return res.status(403).json({ error: 'Your family account is suspended. Please contact support.' });
+          }
+        }
+      } catch (err) {
+        // We do not reject here, let the route's authenticateToken handle invalid tokens
+      }
+    }
+  }
+  next();
+});
+
 app.use('/api', memberSettingsRouter);
 app.use('/api/v1/admin/dashboard', dashboardRouter);
 app.use('/api/v1/admin/announcements', announcementsRouter);
@@ -170,9 +191,16 @@ app.post('/api/v1/auth/login', async (req, res) => {
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { family: true }
+    });
     if (!user || !user.password) {
       return res.status(401).json({ error: 'Invalid credentials.' });
+    }
+
+    if (user.role !== 'SUPER_ADMIN' && user.family && user.family.status === 'Suspended') {
+      return res.status(403).json({ error: 'Your family account is suspended. Please contact support.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

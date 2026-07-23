@@ -150,7 +150,7 @@ export default function Plans() {
   };
 
   const stats = [
-    { name: 'Total Plans', value: plans.length.toString(), icon: Layers, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+    { name: 'Total Plans', value: plans.length.toString(), icon: Layers, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100' },
     { name: 'Active Subscribers', value: plans.reduce((acc, p) => acc + (p.families || 0), 0).toString(), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-100' },
     { name: 'Trial Users', value: '0', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' }, 
     { name: 'Monthly Revenue', value: '₹0', icon: IndianRupee, color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -160,8 +160,8 @@ export default function Plans() {
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Subscription Plans</h2>
-          <p className="text-sm text-gray-500 mt-1">Configure plan tiers, features, member limits, and pricing.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Subscription Plans</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Configure plan tiers, features, member limits, and pricing.</p>
         </div>
         <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow-md font-medium text-sm">
           <Plus size={18} />
@@ -177,37 +177,37 @@ export default function Plans() {
             initial={{ opacity: 0, y: 15 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ delay: idx * 0.1 }}
-            className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4"
+            className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4"
           >
             <div className={`p-4 rounded-xl ${stat.bg} ${stat.color}`}>
               <stat.icon size={24} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-500">{stat.name}</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stat.value}</h3>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{stat.name}</p>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{stat.value}</h3>
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Plans Table */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           {loading ? (
              <div className="flex justify-center items-center h-48">
-               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+               <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
              </div>
           ) : plans.length === 0 ? (
-             <div className="flex justify-center flex-col items-center h-48 text-gray-500">
+             <div className="flex justify-center flex-col items-center h-48 text-gray-500 dark:text-slate-400">
                <p className="mb-4">No plans found</p>
-               <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition font-medium text-sm">
+               <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-lg hover:bg-indigo-100 transition font-medium text-sm">
                  <Plus size={18} /> Create Plan
                </button>
              </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-sm font-semibold text-slate-600">
+                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300">
                   <th className="py-4 px-6">Plan</th>
                   <th className="py-4 px-6">Price</th>
                   <th className="py-4 px-6 text-center">Families</th>
@@ -219,12 +219,12 @@ export default function Plans() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {plans.map((plan) => (
-                  <tr key={plan.id || plan.name} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-4 px-6 font-bold text-slate-900">{plan.name}</td>
-                    <td className="py-4 px-6 font-medium text-slate-700">{plan.price}</td>
-                    <td className="py-4 px-6 text-center text-slate-600">{plan.families || 0}</td>
-                    <td className="py-4 px-6 text-slate-600">{plan.storage}</td>
-                    <td className="py-4 px-6 text-slate-500 text-sm">{plan.features || 'Standard Features'}</td>
+                  <tr key={plan.id || plan.name} className="hover:bg-slate-50 dark:bg-slate-900/50/50 transition-colors">
+                    <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">{plan.name}</td>
+                    <td className="py-4 px-6 font-medium text-slate-700 dark:text-slate-200">{plan.price}</td>
+                    <td className="py-4 px-6 text-center text-slate-600 dark:text-slate-300">{plan.families || 0}</td>
+                    <td className="py-4 px-6 text-slate-600 dark:text-slate-300">{plan.storage}</td>
+                    <td className="py-4 px-6 text-slate-500 dark:text-slate-400 text-sm">{plan.features || 'Standard Features'}</td>
                     <td className="py-4 px-6">
                       <span className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full w-max ${plan.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                         <CheckCircle2 size={14} /> {plan.status || 'Active'}
@@ -234,28 +234,28 @@ export default function Plans() {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEditClick(plan)}
-                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" 
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-500/10 rounded-lg transition" 
                           title="Edit Plan"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => togglePlanStatus(plan)}
-                          className={`p-2 rounded-lg transition ${plan.status === 'Active' ? 'text-emerald-500 hover:text-red-500 hover:bg-red-50' : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'}`}
+                          className={`p-2 rounded-lg transition ${plan.status === 'Active' ? 'text-emerald-500 hover:text-red-500 hover:bg-red-50' : 'text-slate-400 dark:text-slate-500 hover:text-emerald-600 hover:bg-emerald-50'}`}
                           title={plan.status === 'Active' ? 'Disable Plan' : 'Enable Plan'}
                         >
                           <Power size={16} />
                         </button>
                         <button 
                           onClick={() => viewSubscribers(plan)}
-                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" 
                           title="View Subscribers"
                         >
                           <Eye size={16} />
                         </button>
                         <button 
                           onClick={() => deletePlan(plan.id)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" 
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition" 
                           title="Delete Plan"
                         >
                           <Trash2 size={16} />
@@ -281,12 +281,12 @@ export default function Plans() {
             />
             <motion.div 
                initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-               className="bg-white rounded-2xl shadow-xl w-full max-w-lg z-10 overflow-hidden flex flex-col"
+               className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg z-10 overflow-hidden flex flex-col"
             >
               <form onSubmit={handleCreateOrUpdatePlan} className="flex flex-col">
-                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                  <h3 className="text-lg font-bold text-gray-900">{editingPlan ? 'Edit Plan' : 'Add New Plan'}</h3>
-                  <button type="button" onClick={handleCloseModal} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600">
+                <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50/50">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{editingPlan ? 'Edit Plan' : 'Add New Plan'}</h3>
+                  <button type="button" onClick={handleCloseModal} disabled={isSubmitting} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:text-slate-300">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -294,31 +294,31 @@ export default function Plans() {
                 <div className="p-6 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Plan Name *</label>
-                      <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Pro" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Plan Name *</label>
+                      <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Pro" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">DB Match Name</label>
-                      <input type="text" name="dbName" value={formData.dbName} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Premium" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">DB Match Name</label>
+                      <input type="text" name="dbName" value={formData.dbName} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Premium" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
-                      <input required type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. ₹999/month" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Price *</label>
+                      <input required type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. ₹999/month" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Storage *</label>
-                      <input required type="text" name="storage" value={formData.storage} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. 100 GB" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Storage *</label>
+                      <input required type="text" name="storage" value={formData.storage} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. 100 GB" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Features (Comma separated)</label>
-                    <input type="text" name="features" value={formData.features} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Basic, Gallery, Calendar" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Features (Comma separated)</label>
+                    <input type="text" name="features" value={formData.features} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Basic, Gallery, Calendar" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status" value={formData.status} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2 bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Status</label>
+                    <select name="status" value={formData.status} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
@@ -326,8 +326,8 @@ export default function Plans() {
                   </div>
                 </div>
 
-                <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 mt-auto">
-                  <button type="button" disabled={isSubmitting} onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex justify-end gap-3 mt-auto">
+                  <button type="button" disabled={isSubmitting} onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-slate-900/50">
                     Cancel
                   </button>
                   <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center gap-2 shadow-sm">
@@ -352,11 +352,11 @@ export default function Plans() {
             />
             <motion.div 
                initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-               className="bg-white rounded-2xl shadow-xl w-full max-w-lg z-10 overflow-hidden flex flex-col max-h-[80vh]"
+               className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg z-10 overflow-hidden flex flex-col max-h-[80vh]"
             >
-              <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 className="text-lg font-bold text-gray-900">{selectedPlanName} Subscribers</h3>
-                <button type="button" onClick={() => setIsSubscribersModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50/50">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{selectedPlanName} Subscribers</h3>
+                <button type="button" onClick={() => setIsSubscribersModalOpen(false)} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:text-slate-300">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -364,25 +364,25 @@ export default function Plans() {
               <div className="p-6 overflow-y-auto flex-1">
                 {loadingSubscribers ? (
                   <div className="flex justify-center items-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
                   </div>
                 ) : subscribers.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
+                  <div className="text-center py-12 text-gray-500 dark:text-slate-400">
                     No active subscribers on this plan.
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {subscribers.map((sub) => (
-                      <div key={sub.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-slate-50 transition-colors">
+                      <div key={sub.id} className="flex items-center justify-between p-3 border border-gray-100 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:bg-slate-900/50 transition-colors">
                         <div>
-                          <div className="font-semibold text-slate-900">{sub.name}</div>
-                          <div className="text-xs text-slate-500 font-mono mt-0.5">{sub.code}</div>
+                          <div className="font-semibold text-slate-900 dark:text-white">{sub.name}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{sub.code}</div>
                         </div>
                         <div className="text-right">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-150">
                             {sub.status || 'Active'}
                           </span>
-                          <div className="text-xs text-slate-400 mt-1">Created: {sub.date}</div>
+                          <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">Created: {sub.date}</div>
                         </div>
                       </div>
                     ))}
@@ -390,8 +390,8 @@ export default function Plans() {
                 )}
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <button type="button" onClick={() => setIsSubscribersModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+              <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex justify-end">
+                <button type="button" onClick={() => setIsSubscribersModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-slate-900/50">
                   Close
                 </button>
               </div>

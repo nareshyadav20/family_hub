@@ -36,7 +36,7 @@ export default function Signup() {
             <ShieldAlert size={28} className="text-white" />
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight mb-2">Provision Super Admin</h2>
-          <p className="text-slate-400 text-sm">Register a new global infrastructure manager</p>
+          <p className="text-slate-400 dark:text-slate-500 text-sm">Register a new global infrastructure manager</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -44,29 +44,29 @@ export default function Signup() {
              <div className="flex-1">
                <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">First Name</label>
                <div className="relative">
-                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                 <input type="text" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600" placeholder="Alpha" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} />
+                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={18} />
+                 <input type="text" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600 dark:text-slate-300" placeholder="Alpha" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} />
                </div>
              </div>
              <div className="flex-1">
                <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">Last Name</label>
-               <input type="text" className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600" placeholder="Admin" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} />
+               <input type="text" className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600 dark:text-slate-300" placeholder="Admin" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} />
              </div>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">Admin Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <input type="email" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600" placeholder="administrator@familyhub.os" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={18} />
+              <input type="email" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600 dark:text-slate-300" placeholder="administrator@familyhub.os" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
             </div>
           </div>
           
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">Master Password</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <input type="password" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={18} />
+              <input type="password" required className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all placeholder:text-slate-600 dark:text-slate-300" placeholder="••••••••" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
             </div>
           </div>
 
@@ -79,7 +79,7 @@ export default function Signup() {
           </button>
         </form>
         
-        <p className="text-center text-sm text-slate-500 mt-8">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-8">
           Already Provisioned? <Link to="/login" className="text-teal-400 hover:text-teal-300 font-semibold underline underline-offset-4 decoration-teal-400/30">Secure Sign In</Link>
         </p>
       </div>

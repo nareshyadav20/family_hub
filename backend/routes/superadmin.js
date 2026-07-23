@@ -222,6 +222,33 @@ router.get('/families/:id', async (req, res) => {
   }
 });
 
+// Update specific family status
+router.put('/families/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!['Active', 'Trial', 'Suspended'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
+    const updatedFamily = await prisma.family.update({
+      where: { id },
+      data: { status }
+    });
+    
+    // Also log the action
+    await prisma.auditLog.create({ 
+      data: { user: 'Super Admin', action: 'Updated Family Status', module: 'Families', details: `Updated Family ID: ${id} status to ${status}` }
+    });
+
+    res.json({ success: true, data: updatedFamily, message: 'Family status updated successfully' });
+  } catch (error) {
+    console.error('Error updating family status:', error);
+    res.status(500).json({ success: false, message: 'Server error updating family status' });
+  }
+});
+
 // Get Dashboard Stats for Super Admin
 router.get('/dashboard/stats', async (req, res) => {
   try {

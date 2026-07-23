@@ -40,7 +40,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   };
 
   return (
-    <aside className={`w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <aside className={`w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white dark:bg-slate-900/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Logo */}
       <div className="h-20 flex items-center justify-between px-7 border-b border-[#E2E8F0]/60">
         <Link to="/dashboard" className="flex items-center hover:opacity-90 transition-opacity" onClick={() => setMobileMenuOpen?.(false)}>
@@ -49,14 +49,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
           </div>
           <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-blue-700">Hub OS</span>
         </Link>
-        <button className="lg:hidden text-gray-500" onClick={() => setMobileMenuOpen?.(false)}>
+        <button className="lg:hidden text-gray-500 dark:text-slate-400" onClick={() => setMobileMenuOpen?.(false)}>
           <X size={24} />
         </button>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-5 py-6 space-y-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-        <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Platform</p>
+        <p className="px-3 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3">Platform</p>
 
         {navigation.map((item) => (
           <NavLink
@@ -67,7 +67,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
               `relative group flex items-center px-4 py-3.5 text-[15px] font-semibold rounded-2xl transition-all duration-200 ${
                 isActive
                   ? 'bg-purple-50 text-purple-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:bg-slate-800 hover:text-gray-900 dark:text-white'
               }`
             }
           >
@@ -76,7 +76,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
                 <item.icon
                   size={22}
                   className={`flex-shrink-0 mr-4 transition-colors duration-200 ${
-                    isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-600'
+                    isActive ? 'text-purple-600' : 'text-gray-400 dark:text-slate-500 group-hover:text-gray-600 dark:text-slate-300'
                   }`}
                   aria-hidden="true"
                 />
@@ -100,9 +100,9 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
       <div className="px-5 pb-6 pt-3 border-t border-[#E2E8F0]/60">
         <button
           onClick={handleLogout}
-          className="flex w-full items-center px-4 py-3.5 text-[15px] font-semibold rounded-2xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 group"
+          className="flex w-full items-center px-4 py-3.5 text-[15px] font-semibold rounded-2xl text-gray-600 dark:text-slate-300 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 group"
         >
-          <LogOut size={22} className="flex-shrink-0 mr-4 text-gray-400 group-hover:text-red-500" />
+          <LogOut size={22} className="flex-shrink-0 mr-4 text-gray-400 dark:text-slate-500 group-hover:text-red-500" />
           Logout
         </button>
       </div>
