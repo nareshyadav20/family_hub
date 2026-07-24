@@ -98,9 +98,9 @@ export default function TopNav({ setMobileMenuOpen }) {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:text-gray-900 dark:text-white transition-colors focus:outline-none"
             >
-              {superAdmin.avatar ? (
+              {superAdmin.avatar || superAdmin.avatarUrl ? (
                 <img
-                  src={superAdmin.avatar}
+                  src={superAdmin.avatar || superAdmin.avatarUrl}
                   alt="Avatar"
                   className="h-8 w-8 rounded-full object-cover flex-shrink-0 shadow-sm border-2 border-white ring-1 ring-purple-200"
                 />

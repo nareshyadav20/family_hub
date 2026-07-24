@@ -192,7 +192,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                <div className="relative pl-1 md:pl-3 lg:border-l border-[#E9E5F8]">
                   <button onClick={() => setShowAvatarMenu(!showAvatarMenu)} className="flex items-center gap-2 md:gap-3 cursor-pointer outline-none hover:opacity-90 transition-opacity p-1">
                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white shadow-md relative shrink-0">
-                        <img src={activeUser.avatar || "https://i.pravatar.cc/150?u=4242"} className="w-full h-full object-cover" alt="Profile" />
+                        <img src={activeUser.avatar || activeUser.avatarUrl || "https://i.pravatar.cc/150?u=4242"} className="w-full h-full object-cover" alt="Profile" />
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#2EB67D] border-2 border-white rounded-full"></span>
                      </div>
                      <div className="hidden sm:flex flex-col items-start leading-[1.2]">

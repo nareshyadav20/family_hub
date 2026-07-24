@@ -42,12 +42,16 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   return (
     <aside className={`w-64 flex-shrink-0 h-screen fixed inset-y-0 left-0 bg-white dark:bg-slate-900/70 backdrop-blur-xl border-r border-[#E2E8F0] shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Logo */}
-      <div className="h-20 flex items-center justify-between px-7 border-b border-[#E2E8F0]/60">
-        <Link to="/dashboard" className="flex items-center hover:opacity-90 transition-opacity" onClick={() => setMobileMenuOpen?.(false)}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center mr-3.5 shadow-md flex-shrink-0">
-            <span className="text-white font-bold text-xl">F</span>
-          </div>
-          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-blue-700">Hub OS</span>
+      <div className="h-20 flex items-center justify-between px-6 border-b border-[#E2E8F0]/60">
+        <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity" onClick={() => setMobileMenuOpen?.(false)}>
+           <img src="/logo.png" alt="Family Hub Logo" className="w-12 h-12 shrink-0 object-contain rounded-xl" />
+           <div className="flex flex-col leading-none">
+             <div className="flex items-center gap-1">
+               <span className="font-bold text-[20px] text-[#2E1E6B] tracking-tight">Family</span>
+               <span className="font-bold text-[20px] text-[#7C5CFC] tracking-tight">Hub</span>
+             </div>
+             <span className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mt-0.5">Superadmin</span>
+           </div>
         </Link>
         <button className="lg:hidden text-gray-500 dark:text-slate-400" onClick={() => setMobileMenuOpen?.(false)}>
           <X size={24} />

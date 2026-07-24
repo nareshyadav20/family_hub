@@ -34,13 +34,12 @@ export default function Profile() {
     },
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(['superadmin_profile', userId], updatedUser);
-      // Update local storage user in case name/avatar changed
       localStorage.setItem('superadmin_user', JSON.stringify(updatedUser));
       toast.success('Profile updated successfully!');
       setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
-      // Clear pending avatar state after save
       setAvatarPreview(null);
       setAvatarBase64(null);
+      window.location.reload();
     },
     onError: () => {
       toast.error('Failed to update profile');
