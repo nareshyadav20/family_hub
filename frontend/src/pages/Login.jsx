@@ -152,10 +152,23 @@ export default function Login() {
       <div className="w-full max-w-[1250px] mx-auto flex flex-col min-h-[calc(100vh-4rem)]">
         
         {/* Top Header Row */}
-        <div className="flex items-center gap-3 mb-2 lg:mb-4 flex-none">
-           <img src="/logo.png" alt="Family Hub Logo" className="w-10 h-10 object-contain rounded-xl shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.08)]" />
-           <div className="flex items-center gap-2 leading-none">
-             <span className="font-bold text-[20px] text-slate-800 tracking-tight">FamilyHub OS</span>
+        <div className="flex items-center gap-4 mb-2 lg:mb-4 flex-none">
+           <button 
+             onClick={() => {
+               if (view === 'login' || view === 'signup') navigate('/');
+               else if (view === 'register_admin' || view === 'register_member') setView('signup');
+               else if (view === 'forgot') setView('login');
+               else navigate('/');
+             }} 
+             className="text-[#6B7280] hover:text-[#7C5CFC] transition-colors bg-white hover:bg-[#FAF8FF] w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-sm border border-[#E9E5F8] shrink-0"
+           >
+             <ArrowLeft size={18} />
+           </button>
+           <div className="flex items-center gap-3">
+             <img src="/logo.png" alt="Family Hub Logo" className="w-10 h-10 object-contain rounded-xl shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.08)]" />
+             <div className="flex items-center gap-2 leading-none">
+               <span className="font-bold text-[20px] text-slate-800 tracking-tight">FamilyHub OS</span>
+             </div>
            </div>
         </div>
 
@@ -310,19 +323,7 @@ export default function Login() {
           <div className="lg:col-span-5 w-full max-w-md mx-auto">
             <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-6 lg:p-9 relative w-full text-left text-slate-800">
               
-              {/* Back Arrow Button */}
-              {view !== 'login' && view !== 'signup' && (
-                <button 
-                  onClick={() => {
-                    if (view === 'register_admin' || view === 'register_member') setView('signup');
-                    else if (view === 'forgot') setView('login');
-                    else navigate('/');
-                  }} 
-                  className="absolute top-6 left-6 text-[#6B7280] hover:text-[#7C5CFC] transition-colors bg-[#FAF8FF] w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm border border-[#E9E5F8]"
-                >
-                  <ArrowLeft size={16} />
-                </button>
-              )}
+
 
               <div className="text-center mb-6">
                  <h2 className="text-[25px] font-bold text-slate-800 tracking-tight mb-1.5 leading-tight">
@@ -371,10 +372,7 @@ export default function Login() {
                   <button type="submit" disabled={loading} className="w-full mt-2 py-3 bg-[#383084] hover:bg-[#2C266F] text-white font-bold text-sm rounded-xl shadow-md transition-all outline-none disabled:opacity-70">
                     {loading ? 'Authenticating...' : 'Sign In'}
                   </button>
-                  <div className="text-center mt-4">
-                     <span className="text-xs font-semibold text-[#6B7280]">Don't have an account? </span>
-                     <button type="button" onClick={() => setView('signup')} className="text-xs font-bold text-[#7C5CFC] hover:text-[#6B49F6] transition-colors">Register</button>
-                  </div>
+
                 </form>
               )}
 
