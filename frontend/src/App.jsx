@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import api from './services/api';
 import { globalLogout } from './utils/auth';
 
 import PageLoader from './components/loaders/PageLoader';
+import Splash from './components/Splash';
 
 /* --- ADMIN IMPORTS --- */
 const AdminMainLayout = lazy(() => import('./layouts/MainLayout'));
@@ -358,6 +359,8 @@ function AppLayer() {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   // Execute synchronous extraction to prevent child components from firing Bearer Null 401 traps
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -414,9 +417,13 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-       <Suspense fallback={<PageLoader />}>
-         <AppLayer />
-       </Suspense>
+       {showSplash ? (
+         <Splash onFinish={() => setShowSplash(false)} />
+       ) : (
+         <Suspense fallback={<PageLoader />}>
+           <AppLayer />
+         </Suspense>
+       )}
        <Toaster position="top-right" />
     </QueryClientProvider>
   );
