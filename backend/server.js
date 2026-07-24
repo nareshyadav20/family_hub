@@ -895,6 +895,19 @@ app.put('/api/v1/documents/:id/status', async (req, res) => {
   } catch(err) { res.status(500).json({ error: 'Server error' }); }
 });
 
+app.delete('/api/v1/documents/:id', authenticateToken, async (req, res) => {
+  try {
+     const docId = req.params.id;
+     await prisma.document.delete({
+        where: { id: docId }
+     });
+     res.json({ success: true, message: 'Document deleted' });
+  } catch(err) { 
+     console.error('Error deleting document:', err);
+     res.status(500).json({ error: 'Server error' }); 
+  }
+});
+
 // ==========================================
 // EVENTS API (Admin)
 // ==========================================

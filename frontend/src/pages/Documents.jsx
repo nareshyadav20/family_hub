@@ -12,6 +12,26 @@ export default function Documents() {
   const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [search, setSearch] = useState('');
 
+  const handlePreview = (doc) => {
+    if (!doc.url) return;
+    if (doc.url.startsWith('data:')) {
+      const w = window.open();
+      if (w) w.document.write(`<iframe src="${doc.url}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+    } else {
+      window.open(doc.url, '_blank');
+    }
+  };
+
+  const handleDownload = (doc) => {
+    if (!doc.url) return;
+    const a = document.createElement('a');
+    a.href = doc.url;
+    a.download = doc.name || 'document';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['adminDocuments'],
     queryFn: async () => {
@@ -145,10 +165,10 @@ export default function Documents() {
                           </button>
                         </>
                       )}
-                      <button className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 flex items-center justify-center transition-colors shadow-sm" title="Preview">
+                      <button onClick={() => handlePreview(doc)} className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 flex items-center justify-center transition-colors shadow-sm" title="Preview">
                         <Eye size={14} />
                       </button>
-                      <button className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-colors shadow-sm" title="Download">
+                      <button onClick={() => handleDownload(doc)} className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 flex items-center justify-center transition-colors shadow-sm" title="Download">
                         <Download size={14} />
                       </button>
                    </div>

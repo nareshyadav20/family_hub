@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Folder, FileText, Image as ImageIcon, Lock, Eye, Download, Search, Upload, ShieldCheck, CheckCircle2, Clock } from 'lucide-react';
+import { Folder, FileText, Image as ImageIcon, Lock, Eye, Download, Search, Upload, ShieldCheck, CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 const folders = ['All', 'Legal', 'Insurance', 'Events', 'Photos', 'Health'];
 
@@ -14,6 +15,17 @@ export default function Documents() {
   const [fileBase64, setFileBase64] = useState(null);
   const [uploadData, setUploadData] = useState({ name: '', category: 'Legal', visibility: 'PRIVATE' });
   const activeUser = JSON.parse(localStorage.getItem('user')) || {};
+
+  React.useEffect(() => {
+    const socket = io(window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com');
+    socket.on('document.verified', () => {
+       queryClient.invalidateQueries(['memberDocuments']);
+    });
+    socket.on('document.rejected', () => {
+       queryClient.invalidateQueries(['memberDocuments']);
+    });
+    return () => socket.disconnect();
+  }, [queryClient]);
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['memberDocuments'],
@@ -28,6 +40,38 @@ export default function Documents() {
       );
     }
   });
+
+  const deleteDoc = useMutation({
+    mutationFn: async (id) => {
+      const res = await axios.delete(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['memberDocuments']);
+    }
+  });
+
+  const handlePreview = (doc) => {
+    if (!doc.url) return;
+    if (doc.url.startsWith('data:')) {
+      const w = window.open();
+      if (w) w.document.write(`<iframe src="${doc.url}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+    } else {
+      window.open(doc.url, '_blank');
+    }
+  };
+
+  const handleDownload = (doc) => {
+    if (!doc.url) return;
+    const a = document.createElement('a');
+    a.href = doc.url;
+    a.download = doc.name || 'document';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const handleFileChange = (e) => {
       const file = e.target.files[0];
@@ -142,10 +186,16 @@ export default function Documents() {
                <div className="flex flex-col items-end gap-2 shrink-0">
                   {doc.status === 'VERIFIED' && <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md"><CheckCircle2 size={12}/> Verified</span>}
                   {doc.status === 'PENDING' && <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md"><Clock size={12}/> Pending</span>}
+                  {doc.status === 'REJECTED' && <span className="flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-md"><XCircle size={12}/> Rejected</span>}
                   
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <button className="p-1.5 rounded-[20px] bg-[#FCFBFF] hover:bg-[#FAF8FF] text-slate-600 transition-colors"><Eye size={14} /></button>
-                     <button className="p-1.5 rounded-[20px] bg-[#FAF8FF] hover:bg-blue-100 text-[#7C5CFC] transition-colors"><Download size={14} /></button>
+                     <button onClick={() => handlePreview(doc)} className="p-1.5 rounded-[20px] bg-[#FCFBFF] hover:bg-[#FAF8FF] text-slate-600 transition-colors"><Eye size={14} /></button>
+                     <button onClick={() => handleDownload(doc)} className="p-1.5 rounded-[20px] bg-[#FAF8FF] hover:bg-blue-100 text-[#7C5CFC] transition-colors"><Download size={14} /></button>
+                     {(doc.uploaderId === activeUser.memberId || doc.uploaderId === activeUser.id) && (
+                        <button onClick={() => deleteDoc.mutate(doc.id)} className="p-1.5 rounded-[20px] bg-[#FAF8FF] hover:bg-rose-100 text-rose-500 transition-colors">
+                           <Trash2 size={14} />
+                        </button>
+                     )}
                   </div>
                </div>
              </div>
