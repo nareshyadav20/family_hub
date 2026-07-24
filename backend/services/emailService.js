@@ -75,10 +75,29 @@ const sendInstantEmail = async (to, subject, html) => {
 
   console.log(`[EmailService]: Sending Email Instantly...`);
   
-  if (!isSmtpValid && process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && !isSmtpValid) {
     console.log(`[EmailQueue-MOCK]: 📧 Simulating immediate email to ${to}`);
     console.log(`[EmailQueue-MOCK]: Subject: ${subject}`);
     return { messageId: `mock-id-${Date.now()}` };
+  }
+
+  // Verify SMTP before every sendMail
+  try {
+    await transporter.verify();
+    console.log(`[EmailService]: SMTP Verify Before Send: Success`);
+    console.log(`[EmailService]: SMTP Host: ${transporter.options.host}`);
+    console.log(`[EmailService]: SMTP Port: ${transporter.options.port}`);
+    console.log(`[EmailService]: SMTP Secure: ${transporter.options.secure}`);
+    console.log(`[EmailService]: IPv4/IPv6 Family: ${transporter.options.family}`);
+    console.log(`[EmailService]: Connection Success: true`);
+    console.log(`[EmailService]: TLS Success: true`);
+    console.log(`[EmailService]: Authentication Success: true`);
+  } catch (err) {
+    console.error(`[EmailService]: SMTP Verify Before Send: Failed`);
+    console.error(`[EmailService]: SMTP Host: ${transporter.options.host}`);
+    console.error(`[EmailService]: IPv4/IPv6 Family: ${transporter.options.family}`);
+    console.error(`[EmailService]: Error Details:`, err);
+    throw err; // Throw the actual SMTP error in production
   }
 
   const info = await transporter.sendMail({
@@ -97,6 +116,7 @@ const sendInstantEmail = async (to, subject, html) => {
   console.log(`[EmailService]: Message ID: ${info.messageId}`);
   console.log(`[EmailService]: Recipient: ${to}`);
   console.log(`[EmailService]: Subject: ${subject}`);
+  console.log(`[EmailService]: SMTP Response: ${info.response}`);
   
   return info.messageId;
 };
@@ -187,11 +207,30 @@ const processAllPendingQueue = async () => {
           .replace(/\n\s*\n/g, '\n\n')
           .trim();
 
-        if (!isSmtpValid && process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== 'production' && !isSmtpValid) {
           console.log(`[EmailQueue-MOCK]: 📧 Simulating email to ${email.recipient}`);
           console.log(`[EmailQueue-MOCK]: Subject: ${email.subject}`);
           info = { messageId: `mock-id-${Date.now()}` };
         } else {
+          // Verify SMTP before every sendMail
+          try {
+            await transporter.verify();
+            console.log(`[EmailQueue]: SMTP Verify Before Send: Success`);
+            console.log(`[EmailQueue]: SMTP Host: ${transporter.options.host}`);
+            console.log(`[EmailQueue]: SMTP Port: ${transporter.options.port}`);
+            console.log(`[EmailQueue]: SMTP Secure: ${transporter.options.secure}`);
+            console.log(`[EmailQueue]: IPv4/IPv6 Family: ${transporter.options.family}`);
+            console.log(`[EmailQueue]: Connection Success: true`);
+            console.log(`[EmailQueue]: TLS Success: true`);
+            console.log(`[EmailQueue]: Authentication Success: true`);
+          } catch (err) {
+            console.error(`[EmailQueue]: SMTP Verify Before Send: Failed`);
+            console.error(`[EmailQueue]: SMTP Host: ${transporter.options.host}`);
+            console.error(`[EmailQueue]: IPv4/IPv6 Family: ${transporter.options.family}`);
+            console.error(`[EmailQueue]: Error Details:`, err);
+            throw err; // Throw the actual SMTP error in production
+          }
+
           info = await transporter.sendMail({
             from: `"${senderName}" <${senderEmail}>`,
             to: email.recipient,
