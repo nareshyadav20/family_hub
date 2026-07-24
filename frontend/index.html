@@ -8,35 +8,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <title>FamilyHub OS - ADMIN</title>
-  </head>
-  <body style="margin: 0; background-color: #2f6ce6;">
+  <body style="margin: 0; background-color: #f6f4fa;">
     <div id="root">
       <!-- Initial Splash Screen (shown while React loads) -->
-      <div id="initial-splash" style="position: fixed; inset: 0; background: linear-gradient(to bottom right, #2f6ce6, #16417C); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 10000; font-family: 'Inter', sans-serif;">
-        <div style="display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.7s ease-out; width: 100%; padding: 0 24px; box-sizing: border-box;">
-          <div style="width: 112px; height: 112px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border-radius: 28px; display: flex; align-items: center; justify-content: center; margin-bottom: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.2);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
-              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-              <path d="M20 3v4"/>
-              <path d="M22 5h-4"/>
-              <path d="M4 17v2"/>
-              <path d="M5 18H3"/>
-            </svg>
-          </div>
-          <h1 style="font-size: 40px; font-weight: 900; margin: 0 0 8px 0; letter-spacing: -0.025em;">FamilyHub</h1>
-          <p style="color: rgba(255, 255, 255, 0.8); font-size: 15px; font-weight: 500; margin: 0 0 64px 0; text-align: center;">Your Digital Family Operating System</p>
+      <div id="initial-splash" style="position: fixed; inset: 0; background: linear-gradient(135deg, #faf9fc 0%, #e6e0f5 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; font-family: 'Inter', sans-serif; overflow: hidden;">
+        
+        <!-- Decorative background elements -->
+        <div style="position: absolute; bottom: 0; right: -10%; width: 60%; height: 60%; background: radial-gradient(circle, rgba(124,92,252,0.08) 0%, rgba(255,255,255,0) 70%); pointer-events: none;"></div>
+        <div style="position: absolute; top: -10%; left: -10%; width: 50%; height: 50%; background: radial-gradient(circle, rgba(124,92,252,0.05) 0%, rgba(255,255,255,0) 70%); pointer-events: none;"></div>
+
+        <!-- Watermark Family Background -->
+        <img src="/hero-family.png" style="position: absolute; bottom: 0; left: 0; width: 100%; max-height: 50vh; object-fit: cover; object-position: bottom; opacity: 0.15; pointer-events: none; z-index: 1;" alt="" />
+
+        <div style="display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.7s ease-out; width: 100%; padding: 0 24px; box-sizing: border-box; z-index: 10;">
           
+          <!-- Logo Circle (Middle round tree) -->
+          <div style="width: 130px; height: 130px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 20px 40px -10px rgba(124, 92, 252, 0.2), 0 0 0 8px rgba(255,255,255,0.5); overflow: hidden; animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;">
+            <img src="/hero-tree.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Family Tree Logo" />
+          </div>
+
+          <!-- Title -->
+          <h1 style="font-size: 42px; font-weight: 900; margin: 0 0 8px 0; letter-spacing: -0.025em; color: #111827;">
+            Family<span style="color: #7C5CFC;">Hub</span>
+          </h1>
+          
+          <!-- Subtitle -->
+          <p style="color: #6B7280; font-size: 15px; font-weight: 500; margin: 0 0 60px 0; text-align: center;">Your Digital Family Operating System</p>
+          
+          <!-- Progress Bar -->
           <div style="width: 100%; max-width: 280px;">
-            <div style="height: 4px; width: 100%; background: rgba(255, 255, 255, 0.2); border-radius: 9999px; overflow: hidden; margin-bottom: 12px;">
-              <div id="splash-progress" style="height: 100%; width: 0%; background: white; border-radius: 9999px; transition: width 0.2s ease-out;"></div>
+            <div style="height: 6px; width: 100%; background: #ede9f7; border-radius: 9999px; overflow: hidden; margin-bottom: 12px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+              <div id="splash-progress" style="height: 100%; width: 0%; background: linear-gradient(90deg, #9f84fa, #7C5CFC); border-radius: 9999px; transition: width 0.2s ease-out;"></div>
             </div>
-            <p id="splash-progress-text" style="text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 600; letter-spacing: 0.05em; margin: 0;">0%</p>
+            <p id="splash-progress-text" style="text-align: center; color: #7C5CFC; font-size: 14px; font-weight: 700; margin: 0;">0%</p>
           </div>
         </div>
       </div>
       <style>
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.95); } }
       </style>
       <script>
         let p = 0;
