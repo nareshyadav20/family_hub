@@ -35,28 +35,28 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 font-sans px-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-sans px-4">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
         {/* Decorative Top Gradient */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
 
         <div className="text-center mb-8 pt-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/20">
             <ShieldAlert size={28} className="text-white" />
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight mb-2">Super Admin Portal</h2>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">Secure sign in to platform management</p>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Super Admin Portal</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Secure sign in to platform management</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">Admin Email</label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">Admin Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={18} />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
               <input 
                 type="email" 
                 required
-                className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-600 dark:text-slate-300"
+                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
                 placeholder="administrator@familyhub.os"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -65,18 +65,18 @@ export default function Login() {
           </div>
           
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-1.5 ml-1">Admin Password</label>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5 ml-1">Admin Password</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={18} />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
               <input 
                 type={showPassword ? "text" : "password"}
                 required 
-                className="w-full bg-slate-950 text-white border border-slate-800 rounded-xl px-4 py-3 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-600 dark:text-slate-300"
+                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none">
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors focus:outline-none">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -85,14 +85,14 @@ export default function Login() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/25 transition-all outline-none"
+            className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/25 transition-all outline-none transform active:scale-[0.98] text-[15px]"
           >
             {loading ? 'Authenticating...' : 'Secure Authorization'}
           </button>
         </form>
         
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-8">
-          Not a Super Admin? <Link to="/signup" className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4 decoration-indigo-400/30">Request Provisioning</Link>
+        <p className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 mt-8">
+          Not a Super Admin? <Link to="/signup" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold hover:underline underline-offset-4 decoration-indigo-400/30">Request Provisioning</Link>
         </p>
       </div>
     </div>

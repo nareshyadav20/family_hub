@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { GridSkeleton } from '../../components/loaders/SkeletonLoaders';
 import { Users, MapPin, Phone, Mail, Heart, MessageCircle, Crown, Shield, User } from 'lucide-react';
 
@@ -14,6 +14,7 @@ const ROLE_BADGE = {
 
 export default function Family() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState(() => {
     return new window.URLSearchParams(location.search).get('search') || '';
@@ -107,7 +108,13 @@ export default function Family() {
                     <div className="flex items-center gap-2.5 text-slate-600 dark:text-slate-400"><Heart size={14} className="text-slate-400 shrink-0" />Born {m.dob}</div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-100 transition-colors">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate('/member/dashboard/messages');
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-100 transition-colors"
+                    >
                       <MessageCircle size={15} /> Message
                     </button>
                   </div>

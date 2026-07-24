@@ -3,6 +3,8 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { sendMemberCredentialsEmail } = require('../services/emailService');
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -309,10 +311,30 @@ router.put('/requests/:id', authenticateToken, async (req, res) => {
        await prisma.user.delete({ where: { id: req.params.id }});
        return res.json({ success: true, message: 'Request rejected' });
     }
+    
+    // Approval logic
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
     const user = await prisma.user.update({
        where: { id: req.params.id },
-       data: { status: 'ACTIVE' }
+       data: { 
+         status: 'ACTIVE',
+         password: hashedPassword,
+         mustChangePassword: true,
+         isTemporaryPassword: true
+       }
     });
+
+    // Dispatch email
+    if (user.email) {
+      await sendMemberCredentialsEmail(
+        `${user.firstName} ${user.lastName || ''}`.trim(),
+        user.email,
+        tempPassword
+      );
+    }
+
     res.json({ success: true, data: user });
   } catch (error) {
     console.error('Update request error:', error);
