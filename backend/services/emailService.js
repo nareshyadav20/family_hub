@@ -22,7 +22,11 @@ const transporter = nodemailer.createTransport({
   },
   pool: true,
   maxConnections: 5,
-  maxMessages: 100
+  maxMessages: 100,
+  family: 4, // Force IPv4
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000
 });
 
 let isSmtpValid = true;
@@ -30,10 +34,14 @@ let isSmtpValid = true;
 transporter.verify((error, success) => {
   if (error) {
     isSmtpValid = false;
-    console.error(`✗ [EmailService]: SMTP Connection Failed: ${error.message}`);
-    console.log(`ℹ [EmailService]: Falling back to Console Mock for Local Development emails.`);
+    console.error(`✗ [EmailService]: SMTP Connection Failed:`, error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`ℹ [EmailService]: Falling back to Console Mock for Local Development emails.`);
+    }
   } else {
     console.log('✓ [EmailService]: SMTP Connected Successfully');
+    console.log(`✓ [EmailService]: SMTP Address: ${transporter.options.host}:${transporter.options.port}`);
+    console.log(`✓ [EmailService]: SMTP Response: Success`);
   }
 });
 
