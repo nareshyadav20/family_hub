@@ -15,7 +15,11 @@ export default function EmailLogs() {
     try {
       setLoading(true);
       const token = localStorage.getItem('superadmin_token');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/email-logs?status=${status}&timeframe=${timeframe}`, {
+      let rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      if (rawApiUrl.endsWith('/')) rawApiUrl = rawApiUrl.slice(0, -1);
+      const baseUrl = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl}/api/v1`;
+      
+      const res = await fetch(`${baseUrl}/superadmin/email-logs?status=${status}&timeframe=${timeframe}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

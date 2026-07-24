@@ -10,7 +10,7 @@ console.log('  SMTP_USER:', process.env.SMTP_USER ? '✓' : '✗');
 console.log('  SMTP_PASS:', process.env.SMTP_PASS ? 'Loaded ✓' : '✗');
 console.log('  MAIL_FROM_EMAIL:', process.env.MAIL_FROM_EMAIL ? '✓' : '✗');
 console.log('  MAIL_FROM_NAME:', process.env.MAIL_FROM_NAME ? '✓' : '✗');
-console.log('  EMAIL_MODE:', process.env.EMAIL_MODE || 'queue');
+console.log('  EMAIL_MODE:', process.env.EMAIL_MODE || 'instant');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
@@ -99,7 +99,8 @@ const dispatchEmail = async (recipient, subject, template, html) => {
     return { success: false, error: 'Prisma Client missing EmailQueue' };
   }
 
-  if (process.env.EMAIL_MODE === 'instant') {
+  const mode = process.env.EMAIL_MODE || 'instant';
+  if (mode === 'instant') {
     try {
       await sendInstantEmail(recipient, subject, html);
       await prisma.emailQueue.create({

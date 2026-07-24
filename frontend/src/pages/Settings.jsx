@@ -7,7 +7,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API = `${import.meta.env.VITE_API_URL}/api/v1/admin/dashboard`;
+let rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+if (rawApiUrl.endsWith('/')) rawApiUrl = rawApiUrl.slice(0, -1);
+const API = rawApiUrl.endsWith('/api/v1') ? `${rawApiUrl}/admin/dashboard` : `${rawApiUrl}/api/v1/admin/dashboard`;
 
 function authHeaders() {
   return { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
