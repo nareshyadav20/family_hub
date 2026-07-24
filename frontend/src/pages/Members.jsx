@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
+import { TableRowSkeleton } from '../components/loaders/SkeletonLoaders';
 
 const getStatusBadge = (status) => {
    switch (status) {

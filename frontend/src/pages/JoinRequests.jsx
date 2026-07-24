@@ -94,10 +94,12 @@ export default function JoinRequests() {
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${filter === tab.key ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${filter === tab.key ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}
           >
             {tab.label}
-            <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs font-bold ${filter === tab.key ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>{tab.count}</span>
+            {tab.count > 0 && (
+              <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${filter === tab.key ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>{tab.count}</span>
+            )}
           </button>
         ))}
       </div>

@@ -152,7 +152,7 @@ export default function Login() {
       <div className="w-full max-w-[1250px] mx-auto flex flex-col min-h-[calc(100vh-4rem)]">
 
         {/* Top Header Row */}
-        <div className="flex items-center gap-4 mb-2 lg:mb-4 flex-none">
+        <div className="flex items-center gap-2 mb-2 lg:mb-4 flex-none">
           <button
             onClick={() => {
               if (view === 'login' || view === 'signup') navigate('/');
@@ -160,15 +160,13 @@ export default function Login() {
               else if (view === 'forgot') setView('login');
               else navigate('/');
             }}
-            className="text-[#6B7280] hover:text-[#7C5CFC] transition-colors bg-white hover:bg-[#FAF8FF] w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shadow-sm border border-[#E9E5F8] shrink-0"
+            className="text-[#6B7280] hover:text-[#7C5CFC] transition-colors flex items-center justify-center cursor-pointer shrink-0 mr-1"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} strokeWidth={2.5} />
           </button>
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Family Hub Logo" className="w-10 h-10 object-contain rounded-xl shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.08)]" />
-            <div className="flex items-center gap-2 leading-none">
-              <span className="font-bold text-[20px] text-slate-800 tracking-tight">FamilyHub OS</span>
-            </div>
+          <img src="/logo.png" alt="Family Hub Logo" className="w-10 h-10 object-contain rounded-xl shrink-0 shadow-[0_2px_10px_rgb(0,0,0,0.08)]" />
+          <div className="flex items-center gap-2 leading-none ml-1">
+            <span className="font-bold text-[20px] text-slate-800 tracking-tight">FamilyHub OS</span>
           </div>
         </div>
 

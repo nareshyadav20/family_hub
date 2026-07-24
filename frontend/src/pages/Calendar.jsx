@@ -242,13 +242,13 @@ export default function Calendar() {
         {/* Days grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
           {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-24 border-b border-r border-slate-50 dark:border-slate-800/50" />
+            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-50 dark:border-slate-800/50" />
           ))}
           {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
             const dayEvents = getEventsForDay(day);
             const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
             return (
-              <div key={day} className={`h-24 p-1.5 border-b border-r border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group`}>
+              <div key={day} className={`h-20 p-1.5 border-b border-r border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group`}>
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold mb-1.5 transition-all ${isToday ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-slate-700 dark:text-slate-300 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600'}`}>{day}</div>
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((ev, idx) => (

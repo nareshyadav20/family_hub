@@ -108,7 +108,7 @@ export default function Family() {
                       <div className="flex items-center gap-2.5 text-slate-600"><Heart size={14} className="text-slate-400 shrink-0" />Born {m.dob}</div>
                     </div>
                     <div className="flex gap-2 pt-2">
-                      <button className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#FAF8FF] text-[#7C5CFC] text-sm font-bold rounded-[24px] hover:bg-blue-100 transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); navigate('/member/dashboard/messages'); }} className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#FAF8FF] text-[#7C5CFC] text-sm font-bold rounded-[24px] hover:bg-blue-100 transition-colors">
                         <MessageCircle size={15} /> Message
                       </button>
                     </div>

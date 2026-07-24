@@ -56,9 +56,6 @@ export default function Login() {
              <button type="submit" disabled={loading} className="w-full py-3.5 px-4 bg-[#7C5CFC] hover:bg-[#6B49F6] disabled:bg-[#7C5CFC]/50 text-white font-bold rounded-[16px] shadow-lg shadow-[#7C5CFC]/20 transition-all mb-4">
                {loading ? 'Signing In...' : 'Sign In'}
              </button>
-             <p className="text-center text-sm font-semibold text-[#6B7280]">
-               Don't have an account? <Link to="/signup" className="text-[#7C5CFC] font-bold hover:text-[#6B49F6] transition-colors">Sign up</Link>
-             </p>
           </form>
        </div>
     </div>

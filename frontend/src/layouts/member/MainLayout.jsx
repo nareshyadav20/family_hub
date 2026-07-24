@@ -232,15 +232,11 @@ export default function MainLayout({ navItems, bottomNav }) {
         <div className="flex-1 overflow-y-auto w-full pt-6 pb-20 px-4 md:px-10">
           <div className="max-w-[1200px] h-full mx-auto w-full">
             <Suspense fallback={<div className="pt-20"><PageLoader /></div>}>
-              <Outlet />
+              <Outlet context={{ memberData }} />
             </Suspense>
           </div>
-          {/* Page Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth scrollbar-thin scrollbar-thumb-[#E9E5F8] scrollbar-track-transparent">
-            <Outlet context={{ memberData }} />
-          </div>
+        </div>
       </main>
-
     </div>
   );
 }
