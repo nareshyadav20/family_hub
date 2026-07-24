@@ -28,7 +28,7 @@ export default function JoinRequests() {
         const mapped = res.data.data.map(req => ({
           ...req,
           name: `${req.firstName} ${req.lastName || ''}`.trim(),
-          status: (req.status === 'PENDING_INVITE' || req.status === 'INVITATION_SENT') ? 'pending' : req.status === 'ACTIVE' ? 'approved' : 'rejected'
+          status: (!req.isActive) ? 'rejected' : (req.status === 'PENDING_INVITE' || req.status === 'INVITATION_SENT') ? 'pending' : 'approved'
         }));
         setRequests(mapped);
       }

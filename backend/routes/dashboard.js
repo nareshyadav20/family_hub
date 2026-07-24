@@ -285,14 +285,13 @@ router.get('/requests', authenticateToken, async (req, res) => {
 
     const requests = await prisma.user.findMany({
       where: { 
-        familyId, 
-        // In the absence of an explicit join request map, PENDING_INVITE or INVITATION_SENT indicates they are waiting
-        status: { in: ['PENDING_INVITE', 'INVITATION_SENT'] } 
+        familyId,
+        id: { not: req.user.userId || req.user.id } // exclude the admin
       },
       orderBy: { createdAt: 'desc' },
       select: {
          id: true, firstName: true, lastName: true, email: true, phone: true, 
-         relationship: true, avatar: true, createdAt: true, status: true
+         relationship: true, avatar: true, createdAt: true, status: true, isActive: true
       }
     });
 
@@ -308,8 +307,11 @@ router.put('/requests/:id', authenticateToken, async (req, res) => {
   try {
     const { action } = req.body; // 'approve' or 'reject'
     if (action === 'reject') {
-       await prisma.user.delete({ where: { id: req.params.id }});
-       return res.json({ success: true, message: 'Request rejected' });
+       const user = await prisma.user.update({
+         where: { id: req.params.id },
+         data: { isActive: false }
+       });
+       return res.json({ success: true, message: 'Request rejected', data: user });
     }
     
     // Approval logic
