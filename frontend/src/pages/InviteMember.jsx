@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -14,6 +15,7 @@ export default function InviteMember() {
   const queryClient = useQueryClient();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [inviteResult, setInviteResult] = useState(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '', phone: '', email: '', gender: '', relationship: '', familyBranch: '', role: 'MEMBER',
@@ -331,7 +333,7 @@ export default function InviteMember() {
                          <input type="text" readOnly value={inviteResult.link} className="bg-transparent w-full outline-none text-xs text-slate-600 font-mono truncate" />
                       </div>
                       <button onClick={copyLink} className="p-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg" title="Copy Link"><ClipboardList size={18} /></button>
-                      <button className="p-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg" title="View QR"><QrCode size={18} /></button>
+                      <button type="button" onClick={() => setShowQrModal(true)} className="p-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg" title="View QR"><QrCode size={18} /></button>
                    </div>
 
                    <div className="flex gap-3 justify-center">
@@ -340,6 +342,30 @@ export default function InviteMember() {
                    </div>
                 </div>
              </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Large QR Code Modal */}
+      <AnimatePresence>
+        {showQrModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl relative max-w-sm w-full text-center">
+               <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20}/></button>
+               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Scan to Join</h3>
+               <p className="text-slate-500 text-sm mb-6">Scan this QR code with your phone's camera to directly access the family hub.</p>
+               <div className="bg-white p-4 rounded-2xl shadow-inner border border-slate-100 inline-block mx-auto">
+                  <QRCodeCanvas 
+                    value={inviteResult?.link || 'https://family-hub-seven-ecru.vercel.app/'} 
+                    size={220} 
+                    level={"H"}
+                    includeMargin={true}
+                  />
+               </div>
+               <div className="mt-6 text-xs text-slate-400 font-medium truncate px-4">
+                  {inviteResult?.link || 'https://family-hub-seven-ecru.vercel.app/'}
+               </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
