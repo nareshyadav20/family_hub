@@ -627,7 +627,16 @@ app.post('/api/v1/admin/members/invite', authenticateToken, async (req, res) => 
        console.log(`[WHATSAPP DISPATCH] Sending WhatsApp Template to ${phone} with OTP / Link...`);
     }
 
-    io.emit('notification.created', { message: `${firstName} has been invited to join the family.` });
+    const notif = await prisma.notification.create({
+       data: {
+          title: 'Member Invited',
+          message: `${firstName} has been invited to join the family.`,
+          type: 'member',
+          targetType: 'Admin',
+          familyId: req.user.familyId
+       }
+    });
+    io.emit('notification.created', notif);
 
     const appUrl = process.env.APP_URL || 'http://localhost:5173';
     res.status(201).json({
@@ -773,8 +782,26 @@ app.post('/api/v1/auth/invite/accept', async (req, res) => {
     const io = req.app.get('socketio');
     io.emit('member.accepted', { memberId: invite.userId });
     io.emit('member.updated', { memberId: invite.userId });
-    io.emit('notification.created', { message: `${invite.user.firstName} accepted the invitation.` });
-    io.emit('notification.created', { message: `${invite.user.firstName} joined the family.` });
+    const notif1 = await prisma.notification.create({
+      data: {
+        title: 'Invitation Accepted',
+        message: `${invite.user.firstName} accepted the invitation.`,
+        type: 'join',
+        targetType: 'All',
+        familyId: invite.user.familyId
+      }
+    });
+    io.emit('notification.created', notif1);
+    const notif2 = await prisma.notification.create({
+      data: {
+        title: 'New Member Joined',
+        message: `${invite.user.firstName} joined the family.`,
+        type: 'member',
+        targetType: 'All',
+        familyId: invite.user.familyId
+      }
+    });
+    io.emit('notification.created', notif2);
 
     res.json({ success: true, message: 'Profile completed successfully' });
   } catch(err) {
@@ -819,7 +846,16 @@ app.post('/api/v1/documents', authenticateToken, async (req, res) => {
      
      const io = req.app.get('socketio');
      io.emit('document.uploaded', { message: `New Document "${name}" uploaded and pending verification.` });
-     io.emit('notification.created', { message: `New Document "${name}" uploaded and pending verification.` });
+     const notifDoc = await prisma.notification.create({
+        data: {
+           title: 'Document Uploaded',
+           message: `New Document "${name}" uploaded and pending verification.`,
+           type: 'system',
+           targetType: 'Admin',
+           familyId: familyId
+        }
+     });
+     io.emit('notification.created', notifDoc);
      
      res.status(201).json(doc);
   } catch(err) { 
@@ -843,7 +879,16 @@ app.put('/api/v1/documents/:id/status', async (req, res) => {
      const io = req.app.get('socketio');
      if (status === 'VERIFIED') {
         io.emit('document.verified', { documentId: doc.id, message: `Your document ${doc.name} was verified!` });
-        io.emit('notification.created', { message: `Document ${doc.name} was successfully verified.` });
+        const notifVer = await prisma.notification.create({
+           data: {
+              title: 'Document Verified',
+              message: `Document ${doc.name} was successfully verified.`,
+              type: 'system',
+              targetType: 'All',
+              familyId: doc.familyId
+           }
+        });
+        io.emit('notification.created', notifVer);
      }
      
      res.json(doc);
