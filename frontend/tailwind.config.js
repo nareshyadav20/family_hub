@@ -8,6 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        blue: {
+          50: '#FAF8FF',
+          100: '#EEE8FF',
+          200: '#D6C8FF',
+          300: '#BCA6FF',
+          400: '#9E80FF',
+          500: '#7C5CFC',
+          600: '#7C5CFC', // Primary Brand Purple
+          700: '#6B49F6', // Brand Purple Hover
+          800: '#5838DF',
+          900: '#4323C6',
+          950: '#1C067F',
+        },
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",

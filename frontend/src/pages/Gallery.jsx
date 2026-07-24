@@ -101,7 +101,7 @@ export default function Gallery() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Gallery</h1>
           <p className="text-slate-500 text-sm mt-1">{photos.length} memories shared by the family</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30 cursor-pointer">
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-[#7C5CFC]/20 cursor-pointer">
           <Upload size={16} /> Upload Photos
         </button>
       </div>
@@ -113,13 +113,13 @@ export default function Gallery() {
           <input
             type="text" placeholder="Search by uploader or tag..."
             value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            className="w-full pl-9 pr-4 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
           {tags.map(tag => (
             <button key={tag} onClick={() => setActiveTag(tag)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${activeTag === tag ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${activeTag === tag ? 'bg-[#7C5CFC] text-white shadow-md shadow-[#7C5CFC]/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}
             >{tag}</button>
           ))}
         </div>
@@ -163,13 +163,13 @@ export default function Gallery() {
         ))}
       </div>
       {!isLoading && filtered.length === 0 && (
-         <div className="py-16 text-center bg-blue-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-blue-200 dark:border-slate-700 w-full mt-4">
-            <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-sm">
+         <div className="py-16 text-center bg-[#FAF8FF] rounded-3xl border border-dashed border-[#E9E5F8] w-full mt-4">
+            <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-[#7C5CFC] shadow-sm">
                <ImageIcon size={32} />
             </div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No photos found</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Preserve and share your family's most precious memories. Upload your first photo to start the gallery.</p>
-            <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
+            <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-semibold rounded-full shadow-md shadow-[#7C5CFC]/20 flex items-center justify-center gap-2 transition-all mx-auto">
                <Upload size={16} /> Upload Photos
             </button>
          </div>
@@ -185,7 +185,7 @@ export default function Gallery() {
                  <select 
                     value={uploadCategory} 
                     onChange={e => setUploadCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20"
                  >
                     {uploadTags.map(tag => (
                        <option key={tag} value={tag}>{tag}</option>
@@ -203,7 +203,7 @@ export default function Gallery() {
                      </div>
                  ) : (
                      <div className="text-center flex flex-col items-center">
-                        <Upload size={40} className="text-blue-500 mb-3" />
+                        <Upload size={40} className="text-[#7C5CFC] mb-3" />
                         <span className="text-sm font-bold text-slate-600 dark:text-slate-300 mb-1">No file chosen</span>
                         <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Browse or drop photos here</span>
                         <span className="text-xs text-slate-400 mt-1">Supports JPG, PNG (Max 5MB each)</span>
@@ -212,7 +212,7 @@ export default function Gallery() {
               </label>
 
               <div className="mt-5 flex gap-3">
-                 <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">
+                 <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-[#7C5CFC] hover:bg-[#6B49F6] disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Now'}
                  </button>
                  <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>

@@ -82,18 +82,18 @@ export default function Gallery() {
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 relative z-10 mt-4">
          <div className="space-y-4">
-           <h1 className="text-4xl font-serif italic text-slate-800 dark:text-white">Memories</h1>
-           <p className="text-slate-500 dark:text-slate-400 font-medium">Relive our favorite moments together.</p>
+           <h1 className="text-3xl font-bold tracking-tight text-[#1F2430]">Memories</h1>
+           <p className="text-slate-500 font-medium">Relive our favorite moments together.</p>
            <div className="flex gap-2 flex-wrap">
               {tags.map(tag => (
                 <button key={tag} onClick={() => setActiveTag(tag)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeTag === tag ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 hover:bg-slate-50'}`}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeTag === tag ? 'bg-[#7C5CFC] text-white shadow-sm' : 'bg-white border border-[#E9E5F8] text-slate-600 hover:bg-[#FCFBFF]'}`}
                 >{tag}</button>
               ))}
             </div>
          </div>
          <div className="flex gap-3">
-           <Button onClick={() => setShowModal(true)} className="rounded-full bg-black text-white dark:bg-white dark:text-black h-11 px-6 shadow-md hover:scale-105 transition-transform">
+           <Button onClick={() => setShowModal(true)} className="rounded-[16px] bg-[#7C5CFC] hover:bg-[#6B49F6] text-white h-11 px-6 shadow-sm hover:scale-105 transition-transform">
              <Upload className="h-4 w-4 mr-2" /> Add Photos
            </Button>
          </div>
@@ -143,15 +143,15 @@ export default function Gallery() {
       {/* Upload Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
-              <h2 className="text-xl font-bold font-serif italic text-slate-900 dark:text-white mb-4">Add Memory</h2>
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold font-serif italic text-[#1F2430] mb-4">Add Memory</h2>
               
               <div className="mb-4">
-                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">When was this?</label>
+                 <label className="block text-sm font-bold text-slate-700 mb-1.5">When was this?</label>
                  <select 
                     value={uploadCategory} 
                     onChange={e => setUploadCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    className="w-full px-4 py-2.5 rounded-[24px] border border-[#E9E5F8] bg-[#FCFBFF] text-sm focus:outline-none focus:ring-2 focus:ring-black"
                  >
                     {uploadTags.map(tag => (
                        <option key={tag} value={tag}>{tag}</option>
@@ -159,31 +159,31 @@ export default function Gallery() {
                  </select>
               </div>
 
-              <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full relative">
+              <label className="border-2 border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center justify-center bg-[#FCFBFF] cursor-pointer hover:bg-[#FAF8FF] transition-colors w-full relative">
                  <input type="file" accept="image/jpeg, image/png" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                  
                  {uploadPreview ? (
                      <div className="text-center w-full flex flex-col items-center">
-                        <img src={uploadPreview} alt="Preview" className="w-32 h-32 object-cover rounded-xl mx-auto mb-3 shadow-md border-2 border-white" />
-                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300 truncate w-3/4">{selectedFile?.name}</span>
+                        <img src={uploadPreview} alt="Preview" className="w-32 h-32 object-cover rounded-[24px] mx-auto mb-3 shadow-sm border-2 border-white" />
+                        <span className="text-sm font-bold text-slate-600 truncate w-3/4">{selectedFile?.name}</span>
                      </div>
                  ) : (
                      <div className="text-center flex flex-col items-center">
-                        <div className="w-12 h-12 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm mb-3">
-                           <Upload size={24} className="text-black dark:text-white" />
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+                           <Upload size={24} className="text-black" />
                         </div>
-                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">No file chosen</span>
-                        <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Browse or drop photos here</span>
+                        <span className="text-sm font-bold text-[#1F2430] mb-1">No file chosen</span>
+                        <span className="text-sm font-medium text-slate-500">Browse or drop photos here</span>
                         <span className="text-xs text-slate-400 mt-2 font-medium">Supports JPG, PNG (Max 5MB each)</span>
                      </div>
                  )}
               </label>
 
               <div className="mt-6 flex gap-3">
-                 <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-bold text-sm transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 shadow-md">
+                 <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white py-3 rounded-[16px] font-bold text-sm transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 shadow-sm">
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Now'}
                  </button>
-                 <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); }} className="px-6 bg-[#FAF8FF] hover:bg-slate-200 text-slate-700 py-3 rounded-[24px] font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </div>

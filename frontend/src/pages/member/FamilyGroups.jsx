@@ -56,7 +56,7 @@ export default function FamilyGroups() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Groups</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-[#1F2430]">Family Groups</h1>
             <p className="text-slate-500 text-sm mt-1">Connect in smaller circles with family branches or committees.</p>
          </div>
       </div>
@@ -65,9 +65,9 @@ export default function FamilyGroups() {
          {isLoading && <div className="col-span-full p-10 text-center font-bold text-slate-400">Loading groups...</div>}
          
          {!isLoading && groups.length === 0 && (
-            <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+            <div className="col-span-full py-16 text-center border-2 border-dashed border-[#E9E5F8] rounded-3xl">
                <Users size={40} className="mx-auto text-slate-300 mb-3" />
-               <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">No Groups Found</h3>
+               <h3 className="text-lg font-bold text-slate-700">No Groups Found</h3>
                <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1">Your family hasn't created any groups yet.</p>
             </div>
          )}
@@ -75,7 +75,7 @@ export default function FamilyGroups() {
          {groups.map(g => {
             const hasJoined = g.members?.length > 0;
             return (
-              <div key={g.id} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+              <div key={g.id} className="bg-white border border-[#E9E5F8] rounded-3xl overflow-hidden shadow-sm hover:shadow-sm transition-all flex flex-col group">
                  <div className="h-28 bg-gradient-to-br from-blue-500 to-indigo-600 relative p-4 cursor-pointer" onClick={() => hasJoined && setActiveGroup(g.id)}>
                     <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/20 backdrop-blur-md text-white text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
                        {g.privacy === 'Private' ? <Lock size={10} /> : <Globe size={10} />}
@@ -83,26 +83,26 @@ export default function FamilyGroups() {
                     </div>
                  </div>
                  <div className="px-5 pb-5 relative -mt-8 flex-1 flex flex-col">
-                    <div className="w-16 h-16 bg-white dark:bg-slate-900 p-1 rounded-2xl shadow-sm">
-                       <div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center font-black text-2xl text-blue-600">
+                    <div className="w-16 h-16 bg-white p-1 rounded-2xl shadow-sm">
+                       <div className="w-full h-full bg-[#FAF8FF] rounded-[24px] flex items-center justify-center font-black text-2xl text-[#7C5CFC]">
                           {g.name.charAt(0)}
                        </div>
                     </div>
-                    <h3 className="text-lg font-bold mt-3 text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => hasJoined && setActiveGroup(g.id)}>{g.name}</h3>
+                    <h3 className="text-lg font-bold mt-3 text-[#1F2430] group-hover:text-[#7C5CFC] transition-colors cursor-pointer" onClick={() => hasJoined && setActiveGroup(g.id)}>{g.name}</h3>
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1 mb-2">{g.category}</p>
                     <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 min-h-[40px]">{g.description || 'No description provided.'}</p>
                     
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#E9E5F8]">
                        <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-slate-500">{g._count?.members || 0} Members</span>
                        </div>
                        
                        {!hasJoined ? (
-                          <button onClick={() => joinMutate.mutate(g.id)} disabled={joinMutate.isPending} className="px-4 py-2 bg-blue-50 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-100 transition-colors">
+                          <button onClick={() => joinMutate.mutate(g.id)} disabled={joinMutate.isPending} className="px-4 py-2 bg-[#FAF8FF] text-[#7C5CFC] font-bold text-sm rounded-[24px] hover:bg-blue-100 transition-colors">
                              Join Group
                           </button>
                        ) : (
-                          <button onClick={() => setActiveGroup(g.id)} className="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-sm rounded-xl hover:bg-slate-200 transition-colors">
+                          <button onClick={() => setActiveGroup(g.id)} className="px-4 py-2 bg-[#FAF8FF] text-slate-700 font-bold text-sm rounded-[24px] hover:bg-slate-200 transition-colors">
                              Enter
                           </button>
                        )}
@@ -135,33 +135,33 @@ function GroupDetails({ groupMeta, onBack, token, socket }) {
 
    return (
       <div className="animate-in slide-in-from-right-4 duration-500">
-         <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 mb-4 transition-colors">
+         <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#1F2430] mb-4 transition-colors">
             ← Back to Groups
          </button>
          
-         <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[750px]">
+         <div className="bg-white border border-[#E9E5F8] rounded-3xl overflow-hidden shadow-sm flex flex-col h-[750px]">
             {/* Header */}
             <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-700 relative flex items-end px-8 pb-6">
                <div className="flex items-end gap-5 translate-y-8 z-10 w-full relative">
-                  <div className="w-24 h-24 bg-white dark:bg-slate-900 p-1.5 rounded-3xl shadow-xl flex-shrink-0">
-                     <div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center font-black text-4xl text-blue-600">
+                  <div className="w-24 h-24 bg-white p-1.5 rounded-3xl shadow-xl flex-shrink-0">
+                     <div className="w-full h-full bg-[#FAF8FF] rounded-2xl flex items-center justify-center font-black text-4xl text-[#7C5CFC]">
                         {group.name.charAt(0)}
                      </div>
                   </div>
                   <div className="flex-1 pb-1">
                      <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-white drop-shadow-sm">{group.name}</h2>
-                        <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-[10px] font-black rounded-full uppercase tracking-widest">{group.category}</span>
+                        <h2 className="text-2xl font-black text-[#1F2430] drop-shadow-sm">{group.name}</h2>
+                        <span className="px-2.5 py-1 bg-blue-100 text-[#2E1E6B] text-[10px] font-black rounded-full uppercase tracking-widest">{group.category}</span>
                      </div>
                      <p className="text-slate-500 font-medium text-sm mt-1">{group._count?.members || 1} Members</p>
                   </div>
                   <div className="pb-1 text-right">
                      {isAdmin ? (
-                        <button className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
+                        <button className="px-4 py-2 bg-[#FAF8FF] hover:bg-slate-200 text-slate-700 rounded-[24px] text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
                            <Settings size={16}/> Group Settings
                         </button>
                      ) : (
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-xs font-bold shadow-sm">You are a {activeUserMemberProfile.role}</span>
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-[20px] text-xs font-bold shadow-sm">You are a {activeUserMemberProfile.role}</span>
                      )}
                   </div>
                </div>
@@ -170,7 +170,7 @@ function GroupDetails({ groupMeta, onBack, token, socket }) {
             </div>
 
             {/* Nav Tabs */}
-            <div className="px-8 mt-12 border-b border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto scrollbar-none">
+            <div className="px-8 mt-12 border-b border-[#E9E5F8] flex gap-2 overflow-x-auto scrollbar-none">
                {[
                   { id: 'chat', label: 'Group Chat', icon: MessageSquare },
                   { id: 'members', label: 'Members', icon: Users },
@@ -179,24 +179,24 @@ function GroupDetails({ groupMeta, onBack, token, socket }) {
                   { id: 'documents', label: 'Documents', icon: FileText },
                   { id: 'polls', label: 'Polls', icon: BarChart },
                ].map(t => (
-                  <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all shrink-0 ${tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                  <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all shrink-0 ${tab === t.id ? 'border-blue-600 text-[#7C5CFC]' : 'border-transparent text-slate-500 hover:text-[#1F2430]'}`}>
                      <t.icon size={16} /> {t.label}
                   </button>
                ))}
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-hidden flex bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex-1 overflow-hidden flex bg-[#FCFBFF]/50">
                {tab === 'chat' && <DiscussionBoard groupId={group.id} token={token} socket={socket} activeProfile={activeUserMemberProfile} />}
                
                {tab === 'members' && (
                   <div className="flex-1 overflow-y-auto p-8">
                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                         {group.members?.map(m => (
-                           <div key={m.id} className="bg-white dark:bg-slate-800 border dark:border-slate-700 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+                           <div key={m.id} className="bg-white border p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-sm transition-shadow">
                               <img src={m.user?.avatar || `https://ui-avatars.com/api/?name=${m.user?.firstName}+${m.user?.lastName}&background=random`} className="w-12 h-12 rounded-full shadow-sm" alt="" />
                               <div className="flex-1 min-w-0">
-                                 <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{m.user?.firstName} {m.user?.lastName}</p>
+                                 <p className="font-bold text-sm text-[#1F2430] truncate">{m.user?.firstName} {m.user?.lastName}</p>
                                  <p className="text-[11px] font-bold text-slate-400 mt-0.5">{m.role}</p>
                               </div>
                               {isAdmin && m.userId !== localStorage.getItem('userId') && (
@@ -210,13 +210,13 @@ function GroupDetails({ groupMeta, onBack, token, socket }) {
 
                {['events', 'gallery', 'documents', 'polls'].includes(tab) && (
                   <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                     <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-slate-300 mb-4">
+                     <div className="w-20 h-20 bg-[#FAF8FF] rounded-3xl flex items-center justify-center text-slate-300 mb-4">
                         {tab === 'events' && <Calendar size={32} />}
                         {tab === 'gallery' && <ImageIcon size={32} />}
                         {tab === 'documents' && <FileText size={32} />}
                         {tab === 'polls' && <BarChart size={32} />}
                      </div>
-                     <h3 className="font-bold text-lg text-slate-700 dark:text-slate-200 capitalize w-full">Group {tab}</h3>
+                     <h3 className="font-bold text-lg text-slate-700 capitalize w-full">Group {tab}</h3>
                      <p className="text-slate-500 text-sm max-w-sm mt-2">This dedicated module space is coming in a future update! It will integrate flawlessly into your group isolation boundary.</p>
                   </div>
                )}
@@ -290,21 +290,21 @@ function DiscussionBoard({ groupId, token, socket, activeProfile }) {
 
    return (
       <div className="flex flex-col h-full w-full max-w-4xl mx-auto overflow-y-auto scrollbar-none py-6 px-4">
-         <form onSubmit={handleSend} className="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 mb-8 shrink-0">
+         <form onSubmit={handleSend} className="bg-white p-4 rounded-3xl shadow-sm border border-[#E9E5F8] mb-8 shrink-0">
             <textarea 
                value={text} 
                onChange={e => setText(e.target.value)} 
                placeholder="Share something with the group..." 
-               className="w-full min-h-[80px] bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-5 py-4 text-[15px] font-medium focus:ring-2 focus:ring-blue-500 resize-none outline-none mb-3"
+               className="w-full min-h-[80px] bg-[#FCFBFF] border-none rounded-2xl px-5 py-4 text-[15px] font-medium focus:ring-2 focus:ring-[#7C5CFC] resize-none outline-none mb-3"
             />
             <div className="flex justify-between items-center">
                <div className="flex gap-2">
-                  <button type="button" className="p-2.5 text-slate-400 hover:text-blue-500 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition-colors"><ImageIcon size={18} /></button>
-                  <button type="button" className="p-2.5 text-slate-400 hover:text-blue-500 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition-colors"><FileText size={18} /></button>
+                  <button type="button" className="p-2.5 text-slate-400 hover:text-[#7C5CFC] bg-[#FCFBFF] hover:bg-[#FAF8FF] rounded-[24px] transition-colors"><ImageIcon size={18} /></button>
+                  <button type="button" className="p-2.5 text-slate-400 hover:text-[#7C5CFC] bg-[#FCFBFF] hover:bg-[#FAF8FF] rounded-[24px] transition-colors"><FileText size={18} /></button>
                </div>
                <div className="flex items-center gap-3">
-                  {editingPost && <button type="button" onClick={() => {setEditingPost(null); setText('');}} className="text-sm font-bold text-slate-500 hover:text-slate-800">Cancel</button>}
-                  <button type="submit" disabled={!text.trim() || createMutate.isPending} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl disabled:opacity-50 hover:bg-blue-700 shadow-md flex gap-2 items-center">
+                  {editingPost && <button type="button" onClick={() => {setEditingPost(null); setText('');}} className="text-sm font-bold text-slate-500 hover:text-[#1F2430]">Cancel</button>}
+                  <button type="submit" disabled={!text.trim() || createMutate.isPending} className="px-6 py-2.5 bg-[#7C5CFC] text-white font-bold rounded-[24px] disabled:opacity-50 hover:bg-blue-700 shadow-sm flex gap-2 items-center">
                      <Send size={16} /> {editingPost ? 'Update Post' : 'Post'}
                   </button>
                </div>
@@ -318,33 +318,33 @@ function DiscussionBoard({ groupId, token, socket, activeProfile }) {
                const isAuthor = post.authorId === currentUserId;
                const hasLiked = post.likes?.length > 0;
                return (
-                  <div key={post.id} className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+                  <div key={post.id} className="bg-white rounded-3xl p-6 shadow-sm border border-[#E9E5F8]">
                      <div className="flex justify-between items-start mb-4">
                         <div className="flex gap-3 items-center">
-                           <img src={post.author?.avatar || `https://ui-avatars.com/api/?name=${post.author?.firstName}+${post.author?.lastName}`} className="w-10 h-10 rounded-full bg-slate-100" alt=""/>
+                           <img src={post.author?.avatar || `https://ui-avatars.com/api/?name=${post.author?.firstName}+${post.author?.lastName}`} className="w-10 h-10 rounded-full bg-[#FAF8FF]" alt=""/>
                            <div>
                               <div className="flex items-center gap-2">
-                                 <h4 className="font-bold text-slate-900 dark:text-white leading-none">{post.author?.firstName} {post.author?.lastName}</h4>
-                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full">{post.author?.role}</span>
+                                 <h4 className="font-bold text-[#1F2430] leading-none">{post.author?.firstName} {post.author?.lastName}</h4>
+                                 <span className="text-[10px] font-bold px-2 py-0.5 bg-[#FAF8FF] text-[#7C5CFC] rounded-full">{post.author?.role}</span>
                               </div>
                               <p className="text-xs font-semibold text-slate-500 mt-1">{new Date(post.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
                            </div>
                         </div>
                         {isAuthor && (
                            <div className="flex items-center gap-1">
-                              <button onClick={() => { setEditingPost(post); setText(post.content); window.scrollTo(0, 0); }} className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"><Settings size={14}/></button>
-                              <button onClick={() => deleteMutate.mutate(post.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><MoreVertical size={14}/></button>
+                              <button onClick={() => { setEditingPost(post); setText(post.content); window.scrollTo(0, 0); }} className="p-2 text-slate-400 hover:text-[#7C5CFC] hover:bg-[#FAF8FF] rounded-[20px]"><Settings size={14}/></button>
+                              <button onClick={() => deleteMutate.mutate(post.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-[20px]"><MoreVertical size={14}/></button>
                            </div>
                         )}
                      </div>
-                     <p className="text-[15px] font-medium text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                     <p className="text-[15px] font-medium text-[#1F2430] leading-relaxed whitespace-pre-wrap">{post.content}</p>
                      
-                     <div className="flex items-center gap-6 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                        <button onClick={() => likeMutate.mutate(post.id)} className={`flex items-center gap-1.5 font-bold text-sm ${hasLiked ? 'text-blue-600' : 'text-slate-500 hover:text-blue-600'}`}>
-                           <div className={`p-1.5 rounded-lg ${hasLiked ? 'bg-blue-50' : 'bg-slate-50 group-hover:bg-blue-50'}`}>❤️</div> {post._count?.likes || 0} Likes
+                     <div className="flex items-center gap-6 mt-6 pt-4 border-t border-[#E9E5F8]">
+                        <button onClick={() => likeMutate.mutate(post.id)} className={`flex items-center gap-1.5 font-bold text-sm ${hasLiked ? 'text-[#7C5CFC]' : 'text-slate-500 hover:text-[#7C5CFC]'}`}>
+                           <div className={`p-1.5 rounded-[20px] ${hasLiked ? 'bg-[#FAF8FF]' : 'bg-[#FCFBFF] group-hover:bg-[#FAF8FF]'}`}>❤️</div> {post._count?.likes || 0} Likes
                         </button>
-                        <button className="flex items-center gap-1.5 font-bold text-sm text-slate-500 hover:text-indigo-600">
-                           <div className="p-1.5 rounded-lg bg-slate-50 group-hover:bg-indigo-50"><MessageSquare size={16} /></div> {post._count?.comments || 0} Comments
+                        <button className="flex items-center gap-1.5 font-bold text-sm text-slate-500 hover:text-[#7C5CFC]">
+                           <div className="p-1.5 rounded-[20px] bg-[#FCFBFF] group-hover:bg-[#FAF8FF]"><MessageSquare size={16} /></div> {post._count?.comments || 0} Comments
                         </button>
                      </div>
                   </div>

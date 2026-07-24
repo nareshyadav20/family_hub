@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 110 110">
+  <!-- Big surrounding heart outline -->
+  <path d="M60,110 C25,85 10,60 10,40 C10,18 28,5 50,22 C55,27 60,35 60,35 C60,35 65,27 70,22 C92,5 110,18 110,40 C110,60 95,85 60,110 Z" fill="none" stroke="#7C5CFC" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+  
+  <!-- Central tree trunk branching into hearts -->
+  <path d="M45,110 C50,110 58,105 58,95 C58,80 50,70 50,60 C50,55 52,50 60,40 C68,50 70,55 70,60 C70,70 62,80 62,95 C62,105 70,110 75,110" stroke="#2E1E6B" strokeWidth="5.5" strokeLinecap="round" fill="none" />
+  
+  <!-- Top Central Heart -->
+  <path d="M60,65 C50,55 45,35 60,20 C75,35 70,55 60,65 Z" fill="#7C5CFC" stroke="#2E1E6B" strokeWidth="3" strokeLinejoin="round" />
+  
+  <!-- Left-Top Heart -->
+  <path d="M40,75 C25,75 15,60 30,45 C45,55 40,70 40,75 Z" fill="#9A7FFC" stroke="#2E1E6B" strokeWidth="3" strokeLinejoin="round" />
+  
+  <!-- Right-Top Heart -->
+  <path d="M80,75 C75,70 70,55 85,45 C100,60 90,75 80,75 Z" fill="#9A7FFC" stroke="#2E1E6B" strokeWidth="3" strokeLinejoin="round" />
+  
+  <!-- Left-Bottom Heart -->
+  <path d="M25,92 C15,85 20,70 30,75 C35,80 30,90 25,92 Z" fill="#B5A4FC" stroke="#2E1E6B" strokeWidth="3" strokeLinejoin="round" />
+  
+  <!-- Right-Bottom Heart -->
+  <path d="M95,92 C90,90 85,80 90,75 C100,70 105,85 95,92 Z" fill="#B5A4FC" stroke="#2E1E6B" strokeWidth="3" strokeLinejoin="round" />
+  
+  <!-- Small Central Heart -->
+  <path d="M60,82 C55,77 53,68 60,60 C67,68 65,77 60,82 Z" fill="#C5BAFC" stroke="#2E1E6B" strokeWidth="2.5" strokeLinejoin="round" />
+</svg>

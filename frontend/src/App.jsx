@@ -296,6 +296,7 @@ function AppLayer() {
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/member/login" element={<Navigate to="/login" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
 
           {/* FIRST LOGIN ROUTE */}
           <Route path="/admin/change-password" element={<AdminChangePasswordRoute><ChangePassword /></AdminChangePasswordRoute>} />
