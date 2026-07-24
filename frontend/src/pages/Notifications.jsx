@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCheck, Trash2, CalendarDays, MessageSquare, Users, Megaphone, AlertCircle } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, CalendarDays, MessageSquare, Users, Megaphone, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -31,6 +31,8 @@ export default function Notifications() {
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
   const [filter, setFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const socket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
@@ -90,6 +92,10 @@ export default function Notifications() {
        ? mappedNotifs.filter(n => !n.read) 
        : mappedNotifs.filter(n => n.type === filter);
 
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const currentItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const tabs = [
     { key: 'all', label: 'All' },
     { key: 'unread', label: `Unread (${unreadCount})` },
@@ -115,7 +121,7 @@ export default function Notifications() {
 
       <div className="flex gap-2 flex-wrap">
         {tabs.map(tab => (
-          <button key={tab.key} onClick={() => setFilter(tab.key)}
+          <button key={tab.key} onClick={() => { setFilter(tab.key); setCurrentPage(1); }}
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${filter === tab.key ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'}`}>
             {tab.label}
           </button>
@@ -125,7 +131,7 @@ export default function Notifications() {
       <div className="space-y-2">
         {isLoading && <div className="p-8 text-center text-slate-500">Loading notifications...</div>}
         
-        {filtered.map(notif => {
+        {currentItems.map(notif => {
           const { icon, iconColor } = getIconData(notif.type);
           
           return (
@@ -150,6 +156,33 @@ export default function Notifications() {
           <div className="text-center py-20 text-slate-400">
             <Bell className="mx-auto mb-3 opacity-30" size={40} />
             <p className="font-medium">No notifications here</p>
+          </div>
+        )}
+
+        {!isLoading && filtered.length > 0 && totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-6 mt-4">
+            <div className="text-sm font-medium text-slate-500">
+              Showing <span className="text-slate-700 dark:text-slate-300 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-slate-700 dark:text-slate-300 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-slate-700 dark:text-slate-300 font-bold">{filtered.length}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={18} className="text-slate-600 dark:text-slate-400" />
+              </button>
+              <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                {currentPage} <span className="text-slate-400 font-medium">/</span> {totalPages}
+              </div>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                <ChevronRight size={18} className="text-slate-600 dark:text-slate-400" />
+              </button>
+            </div>
           </div>
         )}
       </div>
