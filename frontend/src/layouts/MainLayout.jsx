@@ -82,10 +82,10 @@ export default function MainLayout({ navItems, bottomNav }) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 w-[270px] bg-white flex flex-col z-50 border-r border-[#E9E5F8] transition-transform duration-300 font-sans m-4 mr-0 rounded-3xl shadow-sm",
+        "fixed lg:static inset-y-0 left-0 w-[280px] bg-white flex flex-col z-50 border-r border-[#E9E5F8] transition-transform duration-300 font-sans lg:m-4 lg:mr-0 lg:rounded-3xl shadow-2xl lg:shadow-sm",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className="h-[76px] flex items-center justify-between px-6 shrink-0 mt-4 border-b border-[#E9E5F8] pb-4 mb-4">
+        <div className="h-[76px] flex items-center justify-between px-6 shrink-0 mt-2 lg:mt-4 border-b border-[#E9E5F8] pb-4 mb-4">
           <Link to="/admin/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
               {/* Cropped Heart-shaped Family Tree Logo Image */}
               <img src="/logo.png" alt="Family Hub Logo" className="w-12 h-12 shrink-0 object-contain rounded-xl" />
@@ -150,8 +150,8 @@ export default function MainLayout({ navItems, bottomNav }) {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <header className="h-20 bg-transparent flex items-center justify-between px-4 md:px-8 shrink-0 z-10 sticky top-0 gap-3 mt-4">
-          <div className="bg-white rounded-3xl shadow-sm border border-[#E9E5F8] w-full h-full flex items-center justify-between px-6">
+        <header className="admin-header-outer h-16 lg:h-20 bg-transparent flex items-center justify-between px-2 lg:px-4 md:px-8 shrink-0 z-10 sticky top-0 gap-3 mt-0 lg:mt-4">
+          <div className="admin-header-inner bg-white lg:rounded-3xl shadow-sm border-b lg:border border-[#E9E5F8] w-full h-full flex items-center justify-between px-4 lg:px-6">
             <div className="flex items-center gap-3 flex-1">
                <button className="lg:hidden text-[#6B7280] hover:bg-[#FAF8FF] p-2 rounded-xl" onClick={() => setIsMobileMenuOpen(true)}>
                  <Menu size={22} />
@@ -189,9 +189,9 @@ export default function MainLayout({ navItems, bottomNav }) {
                </div>
                
                {/* Dynamic Auth Header */}
-               <div className="relative pl-1 md:pl-3 border-l border-[#E9E5F8]">
+               <div className="relative pl-1 md:pl-3 lg:border-l border-[#E9E5F8]">
                   <button onClick={() => setShowAvatarMenu(!showAvatarMenu)} className="flex items-center gap-2 md:gap-3 cursor-pointer outline-none hover:opacity-90 transition-opacity p-1">
-                     <div className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-white shadow-md relative shrink-0">
+                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white shadow-md relative shrink-0">
                         <img src={activeUser.avatar || "https://i.pravatar.cc/150?u=4242"} className="w-full h-full object-cover" alt="Profile" />
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#2EB67D] border-2 border-white rounded-full"></span>
                      </div>
@@ -203,7 +203,7 @@ export default function MainLayout({ navItems, bottomNav }) {
                   </button>
 
                   {showAvatarMenu && (
-                     <div className="absolute top-14 right-0 w-56 bg-white border border-[#E9E5F8] rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col pt-1 outline-none">
+                     <div className="avatar-menu-dropdown absolute top-14 right-0 w-56 bg-white border border-[#E9E5F8] rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col pt-1 outline-none">
                          <Link to="/admin/dashboard/profile" onClick={() => setShowAvatarMenu(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-[#FAF8FF] text-[13px] font-bold text-[#1F2430] transition-colors">
                             <UserCircle size={18} className="text-[#6B7280]" /> My Profile
                          </Link>
@@ -221,7 +221,7 @@ export default function MainLayout({ navItems, bottomNav }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-10 bg-[#FAF8FF] w-full rounded-tl-[32px] mt-4 border-t border-l border-[#E9E5F8] shadow-inner">
+        <div className="admin-content-area flex-1 overflow-y-auto px-4 py-6 md:px-10 md:py-10 bg-[#FAF8FF] w-full lg:rounded-tl-[32px] mt-0 lg:mt-4 border-t lg:border-l border-[#E9E5F8] shadow-inner">
            <div className="max-w-[1400px] h-full w-full mx-auto">
               <Outlet />
            </div>

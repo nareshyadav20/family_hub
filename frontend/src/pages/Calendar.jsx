@@ -220,9 +220,9 @@ export default function Calendar() {
         ))}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+      <div className="calendar-wrapper bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
         {/* Calendar header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800 sticky left-0">
           <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
             <ChevronLeft size={20} />
           </button>
@@ -233,14 +233,14 @@ export default function Calendar() {
         </div>
 
         {/* Day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }} className="border-b border-slate-100 dark:border-slate-800">
+        <div className="calendar-grid-header grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
           {DAYS.map(day => (
             <div key={day} className="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">{day}</div>
           ))}
         </div>
 
         {/* Days grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        <div className="calendar-grid-body grid grid-cols-7">
           {Array.from({ length: firstDay }).map((_, i) => (
             <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-50 dark:border-slate-800/50" />
           ))}

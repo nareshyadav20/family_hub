@@ -39,19 +39,19 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       {/* Welcome Banner */}
-      <div className="relative rounded-3xl overflow-hidden shadow-sm">
+      <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-sm">
         <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1200&h=300&fit=crop" className="w-full h-48 object-cover" alt="Family" />
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-indigo-900/70 to-transparent" />
-        <div className="absolute inset-0 p-8 flex flex-col justify-center">
-          <p className="text-indigo-200 text-sm font-medium mb-1">{greeting}, 👋</p>
-          <h1 className="text-3xl font-black text-white mb-2">Welcome, {firstName}!</h1>
-          <p className="text-indigo-200 text-sm">You have {upcomingBirthdays.length} upcoming birthdays and {upcomingEvents.length} events.</p>
-          <div className="flex gap-3 mt-5">
-            <Link to="/member/dashboard/events" className="flex items-center gap-2 bg-white text-indigo-700 text-sm font-bold px-4 py-2 rounded-[24px] hover:bg-[#FAF8FF] transition-all shadow-lg">
-              <Calendar size={15} /> View Events
+        <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-center">
+          <p className="text-indigo-200 text-xs md:text-sm font-medium mb-1">{greeting}, 👋</p>
+          <h1 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight">Welcome, {firstName}!</h1>
+          <p className="text-indigo-200 text-xs md:text-sm max-w-[250px] md:max-w-none">You have {upcomingBirthdays.length} upcoming birthdays and {upcomingEvents.length} events.</p>
+          <div className="flex flex-wrap gap-2 md:gap-3 mt-4 md:mt-5">
+            <Link to="/member/dashboard/events" className="flex items-center gap-1 md:gap-2 bg-white text-indigo-700 text-xs md:text-sm font-bold px-3 md:px-4 py-2 rounded-[24px] hover:bg-[#FAF8FF] transition-all shadow-lg">
+              <Calendar size={14} className="md:w-[15px] md:h-[15px]" /> View Events
             </Link>
-            <Link to="/member/dashboard/gallery" className="flex items-center gap-2 bg-white/10 backdrop-blur text-white text-sm font-bold px-4 py-2 rounded-[24px] border border-white/20 hover:bg-white/20 transition-all">
-              <Image size={15} /> Gallery
+            <Link to="/member/dashboard/gallery" className="flex items-center gap-1 md:gap-2 bg-white/10 backdrop-blur text-white text-xs md:text-sm font-bold px-3 md:px-4 py-2 rounded-[24px] border border-white/20 hover:bg-white/20 transition-all">
+              <Image size={14} className="md:w-[15px] md:h-[15px]" /> Gallery
             </Link>
           </div>
         </div>

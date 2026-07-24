@@ -126,7 +126,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+      <div className="admin-dashboard-header flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
           <h1 className="text-[28px] font-bold text-[#1F2430] mb-1 tracking-tight">Family Admin Dashboard</h1>
           <p className="text-[#6B7280] font-semibold text-sm">Overview of your family's activities and engagement.</p>

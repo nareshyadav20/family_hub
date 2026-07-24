@@ -67,7 +67,7 @@ export default function MainLayout({ navItems, bottomNav }) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 w-[270px] bg-white flex flex-col z-50 border-r border-[#E9E5F8] transition-transform duration-300 font-sans m-4 mr-0 rounded-3xl shadow-sm",
+        "fixed lg:static inset-y-0 left-0 w-[270px] bg-white flex flex-col z-50 border-r border-[#E9E5F8] transition-transform duration-300 font-sans lg:m-4 lg:mr-0 lg:rounded-3xl shadow-sm",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
 
@@ -132,8 +132,8 @@ export default function MainLayout({ navItems, bottomNav }) {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
 
         {/* Top Header */}
-        <header className="h-20 bg-transparent flex items-center justify-between px-4 md:px-8 shrink-0 z-10 sticky top-0 gap-3 mt-4">
-          <div className="bg-white rounded-3xl shadow-sm border border-[#E9E5F8] w-full h-full flex items-center justify-between px-6">
+        <header className="h-16 md:h-20 bg-transparent flex items-center justify-between px-3 md:px-8 shrink-0 z-10 sticky top-0 gap-3 mt-2 md:mt-4">
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-sm border border-[#E9E5F8] w-full h-full flex items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-3 flex-1">
               <button className="lg:hidden text-[#6B7280] hover:bg-[#FAF8FF] p-2 rounded-xl" onClick={() => setIsMobileMenuOpen(true)}>
                 <Menu size={22} />
@@ -229,7 +229,7 @@ export default function MainLayout({ navItems, bottomNav }) {
         </header>
 
         {/* Page Scrollable Content */}
-        <div className="flex-1 overflow-y-auto w-full pt-6 pb-20 px-4 md:px-10">
+        <div className="flex-1 overflow-y-auto w-full pt-4 md:pt-6 pb-24 md:pb-20 px-3 md:px-10">
           <div className="max-w-[1200px] h-full mx-auto w-full">
             <Suspense fallback={<div className="pt-20"><PageLoader /></div>}>
               <Outlet context={{ memberData }} />

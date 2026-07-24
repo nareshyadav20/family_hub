@@ -154,7 +154,6 @@ h6,
 
 /* Member & Admin Portal Mobile Responsiveness Overrides */
 @media (max-width: 1024px) {
-
   /* Adjustments for medium screens */
   .lg\:col-span-3,
   .lg\:col-span-2 {
@@ -168,25 +167,40 @@ h6,
 }
 
 @media (max-width: 768px) {
-
   /* General page content padding reduction for both member and admin layouts */
   .flex-1.overflow-y-auto.w-full.pt-6.pb-20.px-4.md\:px-10,
-  .flex-1.overflow-y-auto.px-4.py-6.md\:px-10.md\:py-10 {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-    padding-top: 1rem !important;
+  .flex-1.overflow-y-auto.px-4.py-6.md\:px-10.md\:py-10,
+  .admin-content-area {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 1.5rem !important;
     padding-bottom: 5rem !important;
+    border-radius: 32px 32px 0 0 !important;
+    border-left: none !important;
+  }
+
+  /* Admin Header */
+  .admin-header-outer {
+    margin-top: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .admin-header-inner {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    border-radius: 24px !important;
   }
 
   /* Form & card padding adjustments */
   .p-6,
   .p-8 {
-    padding: 1rem !important;
+    padding: 1.25rem !important;
   }
 
   .px-6 {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
   }
 
   .py-8 {
@@ -208,44 +222,23 @@ h6,
     line-height: 2rem !important;
   }
 
-  .relative.rounded-3xl.overflow-hidden.shadow-sm p {
-    font-size: 0.85rem !important;
-  }
-
-  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 {
-    margin-top: 0.75rem !important;
-  }
-
-  /* Settings Page Header & tabs spacing */
-  .mt-16 {
-    margin-top: 1rem !important;
-  }
-
-  .max-w-6xl.mx-auto.px-4 {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-    margin-top: 0.5rem !important;
-  }
-
-  /* Messages/chat height & mobile adjustments */
-  .h-\[calc\(100vh-180px\)\] {
-    height: calc(100vh - 120px) !important;
-  }
-
-  /* Admin Dashboard header flex wrap and spacing */
-  .flex.justify-between.items-end.mb-8 {
+  /* Admin Dashboard Header flex wrap and spacing */
+  .admin-dashboard-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 1.25rem !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
   }
 
-  .flex.justify-between.items-end.mb-8 .flex.gap-3 {
+  .admin-dashboard-header > div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
     width: 100% !important;
-    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
   }
 
-  .flex.justify-between.items-end.mb-8 .flex.gap-3 button {
-    flex: 1 1 auto !important;
+  .admin-dashboard-header > div:last-child button {
+    width: 100% !important;
     justify-content: center !important;
   }
 
@@ -255,72 +248,44 @@ h6,
     max-width: 100vw !important;
   }
 
-  /* Family Tree Height responsiveness */
-  .min-h-\[600px\] {
-    min-height: 400px !important;
-  }
-
-  /* Stacking the custom Settings and AI Assistant layouts */
-  .grid-cols-\[220px_1fr\],
-  .grid-cols-\[1fr_280px\] {
-    grid-template-columns: 1fr !important;
-  }
-
   /* Digital Vault horizontal scroll view */
   .vault-table-container {
     overflow-x: auto !important;
   }
 
-  .grid-cols-\[2fr_1fr_1fr_1fr_120px\] {
-    min-width: 800px !important;
+  /* Calendar Grid Mobile View */
+  .calendar-wrapper {
+    overflow-x: auto !important;
+    padding-bottom: 0.5rem;
+  }
+  
+  .calendar-grid-header,
+  .calendar-grid-body {
+    min-width: 600px !important;
   }
 }
 
 @media (max-width: 480px) {
-
   /* Scale headings */
-  h1 {
+  h1, .text-3xl, .text-\[28px\] {
     font-size: 1.5rem !important;
+    line-height: 2rem !important;
   }
 
-  h2 {
+  h2, .text-2xl {
     font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  /* Profile Avatar Menu Mobile Fix */
+  .avatar-menu-dropdown {
+    right: -1rem !important;
+    width: 200px !important;
   }
 
   /* Welcome banner layout for extra small devices */
   .relative.rounded-3xl.overflow-hidden.shadow-sm img {
     height: 180px !important;
-  }
-
-  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .relative.rounded-3xl.overflow-hidden.shadow-sm .flex.gap-3 a {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Flex elements that need stacking */
-  .flex-row-stack {
-    flex-direction: column !important;
-  }
-
-  /* Alignment and spacing improvements */
-  .gap-6 {
-    gap: 1rem !important;
-  }
-
-  .gap-8 {
-    gap: 1.25rem !important;
-  }
-
-  /* Profile setup form styling */
-  .flex.items-center.gap-6 {
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
   }
 
   /* General Grid-cols changes to list view on small devices */
@@ -334,13 +299,26 @@ h6,
   }
 
   /* Card headers list layout in JoinRequests */
-  .bg-white.dark\:bg-slate-900.rounded-2xl.border.border-slate-100.dark\:border-slate-800.shadow-sm.p-5.flex.flex-col.gap-4 .flex.items-center.gap-4 {
+  .flex.items-center.gap-4 {
     flex-wrap: wrap !important;
+  }
+
+  .admin-header-inner {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Filter Tabs Wrap */
+  .flex.gap-2.flex-wrap {
+    gap: 0.5rem !important;
+  }
+  .flex.gap-2.flex-wrap button {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    justify-content: center !important;
   }
 }
 
 @media (max-width: 360px) {
-
   /* Extreme mobile (Mobile S - 320px) adjustments */
   .px-4,
   .px-5,
@@ -366,23 +344,9 @@ h6,
     gap: 0.5rem !important;
   }
 
-  /* Scale text down slightly */
-  h1,
-  .text-3xl {
-    font-size: 1.25rem !important;
-    line-height: 1.75rem !important;
-  }
-
-  h2,
-  .text-2xl {
-    font-size: 1.125rem !important;
-    line-height: 1.5rem !important;
-  }
-
   /* Make header flex stack or compact */
-  header.h-20 {
+  .admin-header-outer {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
-    gap: 0.25rem !important;
   }
 }
