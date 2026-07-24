@@ -198,8 +198,8 @@ export default function MainLayout({ navItems, bottomNav }) {
                     <p className="text-[11px] font-bold text-[#7C5CFC] uppercase tracking-wider">{userRole}</p>
                   </div>
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#7C5CFC] to-[#A088FF] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-purple-500/20 shrink-0">
-                    {activeUser.avatarUrl ? (
-                      <img src={activeUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-xl" />
+                    {(activeUser.avatar || activeUser.avatarUrl) ? (
+                      <img src={activeUser.avatar || activeUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-xl" />
                     ) : (
                       <span>{activeUser.firstName?.[0] || ''}{activeUser.lastName?.[0] || ''}</span>
                     )}
