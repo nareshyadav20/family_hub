@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Button } from '../components/ui/Button';
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -140,12 +141,12 @@ export default function Members() {
   
   const today = new Date();
   const liveMetrics = [
-    { label: 'Total Members', value: rawMembers.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Active Members', value: rawMembers.filter(m => m.status === 'ACTIVE').length, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Pending Invites', value: rawMembers.filter(m => ['PENDING_INVITE', 'INVITATION_SENT'].includes(m.status)).length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Profile Incomplete', value: rawMembers.filter(m => m.status === 'ACTIVE' && (m.memberProfile?.profileCompletion || 0) < 100).length, icon: FileText, color: 'text-rose-600', bg: 'bg-rose-50' },
-    { label: 'Family Branches', value: new Set(rawMembers.map(m => m.familyBranch).filter(Boolean)).size, icon: FamilyIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: "Today's Birthdays", value: rawMembers.filter(m => m.memberProfile?.dob && new Date(m.memberProfile.dob).getDate() === today.getDate() && new Date(m.memberProfile.dob).getMonth() === today.getMonth()).length, icon: AlertCircle, color: 'text-purple-600', bg: 'bg-purple-50' }
+    { label: 'Total Members', value: rawMembers.length, icon: Users, color: 'text-[#7C5CFC]', bg: 'bg-[#EEE8FF]' },
+    { label: 'Active Members', value: rawMembers.filter(m => m.status === 'ACTIVE').length, icon: UserCheck, color: 'text-[#2EB67D]', bg: 'bg-[#2EB67D]/10' },
+    { label: 'Pending Invites', value: rawMembers.filter(m => ['PENDING_INVITE', 'INVITATION_SENT'].includes(m.status)).length, icon: Clock, color: 'text-[#F6B93B]', bg: 'bg-[#F6B93B]/10' },
+    { label: 'Profile Incomplete', value: rawMembers.filter(m => m.status === 'ACTIVE' && (m.memberProfile?.profileCompletion || 0) < 100).length, icon: FileText, color: 'text-[#EF5350]', bg: 'bg-[#EF5350]/10' },
+    { label: 'Family Branches', value: new Set(rawMembers.map(m => m.familyBranch).filter(Boolean)).size, icon: FamilyIcon, color: 'text-[#7C5CFC]', bg: 'bg-[#EEE8FF]' },
+    { label: "Today's Birthdays", value: rawMembers.filter(m => m.memberProfile?.dob && new Date(m.memberProfile.dob).getDate() === today.getDate() && new Date(m.memberProfile.dob).getMonth() === today.getMonth()).length, icon: AlertCircle, color: 'text-[#7C5CFC]', bg: 'bg-[#EEE8FF]' }
   ];
 
   const handleRowClick = (m) => setActiveDrawer(m);
@@ -156,28 +157,28 @@ export default function Members() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
          <div>
-           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Family Directory</h1>
-           <p className="text-slate-500 text-sm mt-1">Enterprise management screen for family members and access controls.</p>
+           <h1 className="text-[28px] font-bold text-[#1F2430] tracking-tight">Family Directory</h1>
+           <p className="text-[#6B7280] text-[15px] font-semibold mt-1">Enterprise management screen for family members and access controls.</p>
          </div>
          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button onClick={() => navigate('/admin/dashboard/members/invite')} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm flex items-center gap-2 transition-all">
+            <Button onClick={() => navigate('/admin/dashboard/members/invite')} variant="success" className="flex items-center gap-2">
                <Mail size={16} /> Invite Member
-            </button>
-            <button onClick={() => navigate('/admin/dashboard/members/add')} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm flex items-center gap-2 transition-all">
+            </Button>
+            <Button onClick={() => navigate('/admin/dashboard/members/add')} variant="default" className="flex items-center gap-2">
                <Plus size={16} /> Add Member
-            </button>
+            </Button>
          </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {liveMetrics.map((m, i) => (
-           <div key={i} className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center">
-              <div className={`w-10 h-10 rounded-full ${m.bg} ${m.color} flex items-center justify-center mb-2`}>
+           <div key={i} className="bg-white rounded-[24px] p-4 border border-[#E9E5F8] shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+              <div className={`w-10 h-10 rounded-full ${m.bg} ${m.color} flex items-center justify-center mb-2 font-bold`}>
                  <m.icon size={20} strokeWidth={2.5} />
               </div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white">{m.value}</div>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{m.label}</div>
+              <div className="text-2xl font-bold text-[#1F2430]">{m.value}</div>
+              <div className="text-[12px] font-bold text-[#6B7280] uppercase tracking-wider mt-1">{m.label}</div>
            </div>
         ))}
       </div>

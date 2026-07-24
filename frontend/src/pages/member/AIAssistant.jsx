@@ -45,7 +45,7 @@ export default function AIAssistant() {
           <Sparkles size={22} className="text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">AI Assistant</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-[#1F2430]">AI Assistant</h1>
           <p className="text-slate-500 text-sm mt-0.5">Your smart family companion · Powered by Gemini</p>
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function AIAssistant() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5 shrink-0">
           {SUGGESTIONS.map((s, i) => (
             <button key={i} onClick={() => sendMessage(s)}
-              className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300 text-left hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-all shadow-sm hover:shadow-md">
+              className="bg-white border border-[#E9E5F8] rounded-2xl px-4 py-3.5 text-sm font-medium text-slate-700 text-left hover:border-violet-300 hover:bg-violet-50 transition-all shadow-sm hover:shadow-sm">
               {s}
             </button>
           ))}
@@ -63,23 +63,23 @@ export default function AIAssistant() {
       )}
 
       {/* Chat */}
-      <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 space-y-5">
+      <div className="flex-1 overflow-y-auto bg-white rounded-2xl border border-[#E9E5F8] shadow-sm p-5 space-y-5">
         {messages.map((msg, i) => (
           <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${msg.role === 'ai' ? 'bg-gradient-to-br from-violet-500 to-indigo-600' : 'bg-gradient-to-br from-blue-500 to-cyan-500'}`}>
+            <div className={`w-9 h-9 rounded-[24px] flex items-center justify-center shrink-0 ${msg.role === 'ai' ? 'bg-gradient-to-br from-violet-500 to-indigo-600' : 'bg-gradient-to-br from-blue-500 to-cyan-500'}`}>
               {msg.role === 'ai' ? <Sparkles size={16} className="text-white" /> : <User size={16} className="text-white" />}
             </div>
-            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm font-medium leading-relaxed whitespace-pre-line ${msg.role === 'ai' ? 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm' : 'bg-blue-600 text-white rounded-tr-sm'}`}>
+            <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm font-medium leading-relaxed whitespace-pre-line ${msg.role === 'ai' ? 'bg-[#FCFBFF] text-[#1F2430] rounded-tl-sm' : 'bg-[#7C5CFC] text-white rounded-tr-sm'}`}>
               {msg.text}
             </div>
           </div>
         ))}
         {loading && (
           <div className="flex gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-[24px] bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0">
               <Sparkles size={16} className="text-white" />
             </div>
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+            <div className="bg-[#FCFBFF] rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
               <Loader size={14} className="text-violet-500 animate-spin" />
               <span className="text-sm text-slate-400 font-medium">Thinking...</span>
             </div>
@@ -90,9 +90,9 @@ export default function AIAssistant() {
       {/* Input */}
       <div className="mt-4 flex gap-3 shrink-0">
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()}
-          type="text" placeholder="Ask me anything about the family..." className="flex-1 px-5 py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500/30 shadow-sm" />
+          type="text" placeholder="Ask me anything about the family..." className="flex-1 px-5 py-3.5 rounded-2xl bg-white border border-[#E9E5F8] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500/30 shadow-sm" />
         <button onClick={() => sendMessage()} disabled={!input.trim() || loading}
-          className="w-12 h-12 shrink-0 bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 rounded-2xl flex items-center justify-center text-white transition-all disabled:opacity-40 shadow-md shadow-violet-500/30">
+          className="w-12 h-12 shrink-0 bg-gradient-to-br from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 rounded-2xl flex items-center justify-center text-white transition-all disabled:opacity-40 shadow-sm shadow-violet-500/30">
           <Send size={16} />
         </button>
       </div>

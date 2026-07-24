@@ -46,10 +46,10 @@ export default function Dashboard() {
           <h1 className="text-3xl font-black text-white mb-2">Welcome, {firstName}!</h1>
           <p className="text-indigo-200 text-sm">You have {upcomingBirthdays.length} upcoming birthdays and {upcomingEvents.length} events.</p>
           <div className="flex gap-3 mt-5">
-            <Link to="/member/dashboard/events" className="flex items-center gap-2 bg-white text-indigo-700 text-sm font-bold px-4 py-2 rounded-xl hover:bg-indigo-50 transition-all shadow-lg">
+            <Link to="/member/dashboard/events" className="flex items-center gap-2 bg-white text-indigo-700 text-sm font-bold px-4 py-2 rounded-[24px] hover:bg-[#FAF8FF] transition-all shadow-lg">
               <Calendar size={15} /> View Events
             </Link>
-            <Link to="/member/dashboard/gallery" className="flex items-center gap-2 bg-white/10 backdrop-blur text-white text-sm font-bold px-4 py-2 rounded-xl border border-white/20 hover:bg-white/20 transition-all">
+            <Link to="/member/dashboard/gallery" className="flex items-center gap-2 bg-white/10 backdrop-blur text-white text-sm font-bold px-4 py-2 rounded-[24px] border border-white/20 hover:bg-white/20 transition-all">
               <Image size={15} /> Gallery
             </Link>
           </div>
@@ -68,7 +68,7 @@ export default function Dashboard() {
            </div>
            <div className="flex gap-4 shrink-0">
               <button onClick={() => setShowBanner(false)} className="text-indigo-100 text-sm font-semibold hover:text-white transition-colors cursor-pointer">Remind Me Later</button>
-              <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
+              <Link to="/member/dashboard/profile-setup" className="bg-white text-indigo-700 px-6 py-2.5 rounded-[24px] font-bold text-sm shadow-lg hover:shadow-xl transition-all">Continue Profile</Link>
            </div>
         </div>
       )}
@@ -76,18 +76,18 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Family Members', value: stats.familyMembers, icon: Users, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10' },
-          { label: 'My Photos', value: stats.myPhotos, icon: Image, color: 'text-violet-600 bg-violet-50 dark:bg-violet-500/10' },
-          { label: 'Events This Month', value: stats.eventsThisMonth, icon: Calendar, color: 'text-teal-600 bg-teal-50 dark:bg-teal-500/10' },
-          { label: 'New Messages', value: stats.newMessages, icon: MessageSquare, color: 'text-rose-600 bg-rose-50 dark:bg-rose-500/10' },
+          { label: 'Family Members', value: stats.familyMembers, icon: Users, color: 'text-[#7C5CFC] bg-[#FAF8FF] ' },
+          { label: 'My Photos', value: stats.myPhotos, icon: Image, color: 'text-violet-600 bg-violet-50 ' },
+          { label: 'Events This Month', value: stats.eventsThisMonth, icon: Calendar, color: 'text-teal-600 bg-teal-50 ' },
+          { label: 'New Messages', value: stats.newMessages, icon: MessageSquare, color: 'text-rose-600 bg-rose-50 ' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.color}`}>
+          <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-[#E9E5F8] flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300">
+            <div className={`w-12 h-12 rounded-[24px] flex items-center justify-center shrink-0 ${stat.color}`}>
               <stat.icon size={22} />
             </div>
             <div>
-              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">{stat.label}</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">{isLoading ? '-' : stat.value}</h3>
+              <p className="text-slate-500 text-xs font-medium">{stat.label}</p>
+              <h3 className="text-2xl font-black text-[#1F2430]">{isLoading ? '-' : stat.value}</h3>
             </div>
           </div>
         ))}
@@ -96,44 +96,44 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Family Feed */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Feed</h2>
+          <h2 className="text-xl font-bold text-[#1F2430]">Family Feed</h2>
           
           {isLoading && (
             <div className="text-center py-20 text-slate-400 font-medium">Fetching Live Feed...</div>
           )}
 
           {!isLoading && feedPosts.length === 0 && (
-             <div className="text-center py-20 text-slate-400 font-medium bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">No activity recorded yet</div>
+             <div className="text-center py-20 text-slate-400 font-medium bg-white rounded-2xl border border-[#E9E5F8] shadow-sm">No activity recorded yet</div>
           )}
 
           {feedPosts.map(post => (
-            <div key={post.id} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 animate-in fade-in duration-300">
+            <div key={post.id} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E9E5F8] animate-in fade-in duration-300">
               <div className="flex items-center gap-3 mb-4">
-                <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border border-slate-100" alt={post.author} />
+                <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border border-[#E9E5F8]" alt={post.author} />
                 <div>
-                  <div className="font-bold text-sm text-slate-900 dark:text-white">{post.author}</div>
+                  <div className="font-bold text-sm text-[#1F2430]">{post.author}</div>
                   <div className="text-xs text-slate-400">{post.time}</div>
                 </div>
                 {post.type === 'announcement' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600">Announcement</span>
+                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-[#FAF8FF] text-[#7C5CFC]">Announcement</span>
                 )}
                 {post.type === 'memory' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600">Memory</span>
+                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600">Memory</span>
                 )}
                 {post.type === 'photo' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600">Gallery</span>
+                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600">Gallery</span>
                 )}
               </div>
-              <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-3">{post.content}</p>
+              <p className="text-sm text-slate-700 leading-relaxed mb-3">{post.content}</p>
               {post.image && (
-                <img src={post.image} alt="" className="w-full h-auto max-h-96 object-cover rounded-xl mb-3 shadow-sm border border-slate-200 dark:border-slate-800" />
+                <img src={post.image} alt="" className="w-full h-auto max-h-96 object-cover rounded-[24px] mb-3 shadow-sm border border-[#E9E5F8]" />
               )}
-              <div className="flex items-center gap-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-4 pt-3 border-t border-[#E9E5F8]">
                 <button onClick={() => setLiked(p => { const n = new Set(p); n.has(post.id) ? n.delete(post.id) : n.add(post.id); return n; })} className={`flex items-center gap-2 text-sm font-semibold transition-colors ${liked.has(post.id) ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600'}`}>
                   <Heart size={16} fill={liked.has(post.id) ? 'currentColor' : 'none'} />
                   {post.likes + (liked.has(post.id) ? 1 : 0)}
                 </button>
-                <button className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-indigo-600 transition-colors">
+                <button className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-[#7C5CFC] transition-colors">
                   <MessageSquare size={16} /> {post.comments}
                 </button>
               </div>
@@ -145,17 +145,17 @@ export default function Dashboard() {
         <div className="space-y-4">
           
           {/* Profile Completion Tracking Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E9E5F8]">
+            <h3 className="font-bold text-[#1F2430] text-base mb-4 flex items-center justify-between">
                <span>Profile Completion</span>
                <span className="text-emerald-500 font-black">{completion}%</span>
             </h3>
             
             <div className="flex gap-1 mb-4 h-1.5 w-full">
-               <div className={`h-full flex-1 rounded-l-full ${completion >= 25 ? 'bg-emerald-500' : 'bg-slate-100 dark:bg-slate-800'}`}></div>
-               <div className={`h-full flex-1 ${completion >= 50 ? 'bg-emerald-500' : 'bg-slate-100 dark:bg-slate-800'}`}></div>
-               <div className={`h-full flex-1 ${completion >= 75 ? 'bg-emerald-500' : 'bg-slate-100 dark:bg-slate-800'}`}></div>
-               <div className={`h-full flex-1 ${completion >= 100 ? 'bg-emerald-500 rounded-r-full' : 'bg-slate-100 dark:bg-slate-800 rounded-r-full'}`}></div>
+               <div className={`h-full flex-1 rounded-l-full ${completion >= 25 ? 'bg-emerald-500' : 'bg-[#FAF8FF] '}`}></div>
+               <div className={`h-full flex-1 ${completion >= 50 ? 'bg-emerald-500' : 'bg-[#FAF8FF] '}`}></div>
+               <div className={`h-full flex-1 ${completion >= 75 ? 'bg-emerald-500' : 'bg-[#FAF8FF] '}`}></div>
+               <div className={`h-full flex-1 ${completion >= 100 ? 'bg-emerald-500 rounded-r-full' : 'bg-[#FAF8FF] rounded-r-full'}`}></div>
             </div>
 
             <div className="space-y-2 mb-5">
@@ -178,18 +178,18 @@ export default function Dashboard() {
             </div>
             
             {completion < 100 ? (
-               <Link to="/member/dashboard/profile-setup" className="w-full flex items-center justify-center gap-2 text-sm font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 py-2.5 rounded-xl transition-colors">
+               <Link to="/member/dashboard/profile-setup" className="w-full flex items-center justify-center gap-2 text-sm font-bold bg-[#FAF8FF] text-[#7C5CFC] hover:bg-indigo-100 py-2.5 rounded-[24px] transition-colors">
                   Continue Profile
                </Link>
             ) : (
-               <div className="w-full flex items-center justify-center gap-2 text-sm font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 py-2.5 rounded-xl">
+               <div className="w-full flex items-center justify-center gap-2 text-sm font-bold bg-emerald-50 text-emerald-600 py-2.5 rounded-[24px]">
                   Profile Complete 🎉
                </div>
             )}
           </div>
           {/* Birthdays */}
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-500/20">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
+            <h3 className="font-bold text-[#1F2430] text-base mb-4 flex items-center gap-2">
               <Gift size={18} className="text-amber-500" /> Upcoming Birthdays
             </h3>
             <div className="space-y-3">
@@ -200,7 +200,7 @@ export default function Dashboard() {
                 <div key={i} className="flex items-center gap-3">
                   <img src={b.avatar} className="w-9 h-9 rounded-full object-cover" alt={b.name} />
                   <div className="flex-1">
-                    <div className="font-bold text-sm text-slate-800 dark:text-slate-200 line-clamp-1">{b.name}</div>
+                    <div className="font-bold text-sm text-[#1F2430] line-clamp-1">{b.name}</div>
                     <div className="text-xs text-slate-500">{b.date}</div>
                   </div>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${b.daysLeft === 0 ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'}`}>
@@ -212,8 +212,8 @@ export default function Dashboard() {
           </div>
 
           {/* Upcoming Events */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E9E5F8]">
+            <h3 className="font-bold text-[#1F2430] text-base mb-4 flex items-center gap-2">
               <Calendar size={18} className="text-indigo-500" /> Upcoming Events
             </h3>
             <div className="space-y-3">
@@ -221,10 +221,10 @@ export default function Dashboard() {
                  <div className="text-xs font-semibold text-slate-500">No upcoming events scheduled.</div>
               )}
               {upcomingEvents.map((ev, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                <div key={i} className="flex items-start gap-3 p-3 rounded-[24px] hover:bg-[#FCFBFF] transition-colors cursor-pointer">
                   <div style={{ width: 4, height: 48, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-bold text-sm text-slate-900 dark:text-white truncate">{ev.title}</div>
+                    <div className="font-bold text-sm text-[#1F2430] truncate">{ev.title}</div>
                     <div className="text-xs text-slate-400 mt-0.5">{ev.date}</div>
                     <div className="text-xs text-slate-400">{ev.location}</div>
                   </div>
@@ -232,14 +232,14 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            <Link to="/member/dashboard/events" className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 pt-3 border-t border-slate-100 dark:border-slate-800 transition-colors">
+            <Link to="/member/dashboard/events" className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-[#7C5CFC] hover:text-indigo-700 pt-3 border-t border-[#E9E5F8] transition-colors">
               View All Events <ChevronRight size={14} />
             </Link>
           </div>
 
           {/* My Activity Chart */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E9E5F8]">
+            <h3 className="font-bold text-[#1F2430] text-base mb-4 flex items-center gap-2">
               <TrendingUp size={18} className="text-emerald-500" /> My Activity
             </h3>
             <div className="h-28">

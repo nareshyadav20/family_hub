@@ -38,29 +38,29 @@ export default function FamilyTree() {
   }, [members]);
 
   return (
-    <div className="h-full w-full flex flex-col space-y-4 animate-in fade-in duration-500">
+    <div className="h-full w-full flex flex-col space-y-6 animate-in fade-in duration-500">
        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Tree</h1>
-            <p className="text-muted-foreground text-sm mt-1">Interactive visualization of your lineage.</p>
+            <h1 className="text-[28px] font-bold tracking-tight text-[#1F2430]">Family Tree</h1>
+            <p className="text-[#6B7280] text-[15px] font-semibold mt-1">Interactive visualization of your lineage.</p>
           </div>
        </div>
-       <div className="flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden min-h-[600px]">
+       <div className="flex-1 bg-white rounded-[24px] border border-[#E9E5F8] shadow-sm overflow-hidden min-h-[600px]">
          <ReactFlow
            nodes={nodes}
            edges={edges}
            onNodesChange={onNodesChange}
            onEdgesChange={onEdgesChange}
            fitView
-           className="bg-slate-50 dark:bg-slate-950"
+           className="bg-[#FAF8FF]"
          >
            <Controls />
            <MiniMap 
              nodeColor={(node) => {
                switch (node.type) {
-                 case 'input': return '#3b82f6';
-                 case 'output': return '#10b981';
-                 default: return '#6366f1';
+                 case 'input': return '#7C5CFC';
+                 case 'output': return '#2EB67D';
+                 default: return '#7C5CFC';
                }
              }}
            />
