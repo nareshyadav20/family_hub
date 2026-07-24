@@ -176,12 +176,12 @@ export default function Login() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center flex-1 py-4">
 
           {/* Left Panel: Content & Constellation Illustration */}
-          <div className="lg:col-span-7 text-left flex flex-col justify-center pr-4">
-            <h1 className="text-[38px] lg:text-[50px] font-bold leading-[1.1] mb-4 text-slate-900 tracking-tight">
+          <div className="lg:col-span-7 text-left flex flex-col justify-center pr-0 lg:pr-4 mb-6 lg:mb-0">
+            <h1 className="text-[30px] sm:text-[38px] lg:text-[50px] font-bold leading-[1.1] mb-3 sm:mb-4 text-slate-900 tracking-tight">
               Let's Build Your<br />
               <span className="text-[#7C5CFC]">Family Hub</span>
             </h1>
-            <p className="text-[16px] lg:text-[17px] text-slate-600 font-medium leading-relaxed max-w-lg mb-6">
+            <p className="text-[14px] sm:text-[16px] lg:text-[17px] text-slate-600 font-medium leading-relaxed max-w-lg mb-4 sm:mb-6">
               We're here to help you get started on your family journey. Connect all your loved ones in one place.
             </p>
 
