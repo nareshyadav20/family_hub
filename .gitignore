@@ -45,3 +45,8 @@ fix.js
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore lockfiles
+backend/package-lock.json
+frontend/package-lock.json
+frontend/superadmin/package-lock.json
