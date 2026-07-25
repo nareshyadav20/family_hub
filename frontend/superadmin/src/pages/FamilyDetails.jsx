@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Shield, Calendar, Image, FileText, HardDrive, CreditCard, Activity, Settings, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/families';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/families`;
 
 const tabs = [
   { id: 'overview', name: 'Overview', icon: Activity },

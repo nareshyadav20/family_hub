@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Shield, ArrowRight, ArrowLeft, Eye, EyeOff, MessageSquare, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-let rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-if (rawApiUrl.endsWith('/')) rawApiUrl = rawApiUrl.slice(0, -1);
-const API_URL = rawApiUrl.endsWith('/api/v1') ? rawApiUrl : `${rawApiUrl}/api/v1`;
+
+
+const API_URL = `${API_BASE_URL}/api/v1`;
 
 export default function Login() {
   const [view, setView] = useState('login');

@@ -3,6 +3,7 @@ import { Button } from '../../components/ui/Button';
 import { Image as ImageIcon, Upload, Filter, Heart, MessageCircle, Search } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import API_BASE_URL from '../../config/api';
 
 const tags = ['All', 'Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
 const uploadTags = ['Reunion', 'Birthday', 'Wedding', 'Travel', 'Holiday', 'Festival'];
@@ -17,7 +18,7 @@ export default function Gallery() {
 
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
-  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${API_BASE_URL}/api/v1`;
 
   const { data: photos = [], isLoading } = useQuery({
       queryKey: ['gallery'],

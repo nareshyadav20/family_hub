@@ -5,12 +5,13 @@ import { Calendar, Image, Bell, Heart, MessageSquare, Users, Gift, ChevronRight,
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 export default function Dashboard() {
   const [liked, setLiked] = useState(new Set());
   const [showBanner, setShowBanner] = useState(true);
 
-  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${API_BASE_URL}/api/v1`;
   const token = localStorage.getItem('token');
 
   const { data: dashboardData, isLoading } = useQuery({

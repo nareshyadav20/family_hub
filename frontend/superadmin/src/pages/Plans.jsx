@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, Users, Clock, IndianRupee, Plus, Edit2, Power, Eye, CheckCircle2, X, Loader2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/subscriptions/plans';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/subscriptions/plans`;
 
 export default function Plans() {
   const [plans, setPlans] = useState([]);
@@ -134,7 +135,7 @@ export default function Plans() {
     setIsSubscribersModalOpen(true);
     setLoadingSubscribers(true);
     try {
-      const res = await axios.get(import.meta.env.VITE_API_URL + '/api/v1/superadmin/families');
+      const res = await axios.get(`${API_BASE_URL}/api/v1/superadmin/families`);
       if (res.data.success) {
         const matchNames = [plan.name.toLowerCase(), (plan.dbName || '').toLowerCase()].filter(Boolean);
         const planFamilies = res.data.data.filter(f => 

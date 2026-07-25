@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { 
+import API_BASE_URL from '../../config/api';
   Calendar, Clock, MapPin, Users, Check, X,
   Save, UploadCloud, Info, Video, MessageSquare,
   Globe, Shield, PlayCircle, Image as ImageIcon, Eye
@@ -38,7 +39,7 @@ export default function CreateEvent() {
   const mutation = useMutation({
     mutationFn: async (payload) => {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, payload, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/admin/events`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;

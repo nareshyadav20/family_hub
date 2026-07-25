@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Calendar, Clock, MapPin, ArrowLeft, Video, Radio, Ticket } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -12,7 +13,7 @@ export default function EventDetails() {
     queryKey: ['member_event', id],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events/${id}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/events/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;

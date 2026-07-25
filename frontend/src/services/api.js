@@ -1,12 +1,8 @@
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-let rawEnv = import.meta.env.VITE_API_URL;
-if (rawEnv) {
-  if (rawEnv.endsWith('/')) rawEnv = rawEnv.slice(0, -1);
-  if (rawEnv.endsWith('/api')) rawEnv += '/v1';
-  else if (!rawEnv.endsWith('/v1')) rawEnv += '/api/v1';
-}
-const baseURL = rawEnv || (window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '/api/v1' : 'https://family-hub-z48l.onrender.com/api/v1');
+
+const baseURL = `${API_BASE_URL}/api/v1`;
 
 const api = axios.create({
   baseURL: baseURL,

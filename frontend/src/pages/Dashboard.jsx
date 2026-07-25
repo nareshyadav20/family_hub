@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Button } from '../components/ui/Button';
+import API_BASE_URL from '../config/api';
 
 const timeAgo = (dateStr) => {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -21,7 +22,7 @@ const timeAgo = (dateStr) => {
   return `${Math.floor(h / 24)}d ago`;
 };
 
-const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL = `${API_BASE_URL}/api/v1`;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function Dashboard() {
 
   // Socket setup
   useEffect(() => {
-    const socket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
+    const socket = io(`${API_BASE_URL}`);
     const refresh = () => {
       queryClient.invalidateQueries(['dashboard_stats']);
       queryClient.invalidateQueries(['monthly_activity']);

@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Play, Image as ImageIcon, Users, Calendar, MessageSquare, Heart, Phone, Mail, ArrowRight, MessageCircle, Eye, EyeOff, Lock, User, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import '../landing.css';
+import API_BASE_URL from '../config/api';
 
-const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1`;
+const API_URL = `${API_BASE_URL}/api/v1`;
 
 export default function Home() {
   const navigate = useNavigate();

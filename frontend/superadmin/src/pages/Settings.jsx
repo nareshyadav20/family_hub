@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Settings2, Mail, Database, Globe, ShieldAlert, Activity, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/settings';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/settings`;
 
 export default function Settings() {
   const [data, setData] = useState(null);

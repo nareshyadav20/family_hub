@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Calendar as CalendarIcon, MapPin, Clock, ChevronRight, Image as ImageIcon, Play, Radio } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 export default function Events() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function Events() {
       // Re-using the unified admin fetch endpoint for data continuity 
       // (in a full production app, this would be grouped slightly differently)
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/events`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;

@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { MessageSquare, CheckCircle, Clock, AlertTriangle, Eye, UserPlus, Reply, XCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/support';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/support`;
 
 export default function Support() {
   const [data, setData] = useState({ tickets: [], stats: {} });

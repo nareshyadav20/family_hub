@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { ChevronRight, ArrowLeft, CheckCircle, Save, BookOpen, Shield, FileText } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 export default function ProfileSetup() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function ProfileSetup() {
     }
 
     try {
-      const res = await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
+      const res = await axios.put(`${API_BASE_URL}/api/v1/member/profile`, {
         currentStage: nextStage,
         profileCompletion: completion,
         ...formData

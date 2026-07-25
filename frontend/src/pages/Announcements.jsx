@@ -3,8 +3,9 @@ import { Megaphone, Plus, Edit2, Trash2, Globe, Lock, Users, ChevronDown, Chevro
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL =  `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${API_BASE_URL}/api/v1`;
 
 export default function Announcements() {
   const queryClient = useQueryClient();

@@ -4,6 +4,7 @@ import { Lock, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import api from '../services/api'; // Or use axios
+import API_BASE_URL from '../config/api';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -37,7 +38,7 @@ export default function ChangePassword() {
     try {
       // Typically the token is available if we got here
       const token = localStorage.getItem('token');
-      const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+      const API_URL = `${API_BASE_URL}/api/v1`;
       const response = await axios.post(`${API_URL}/auth/change-password`, {
         currentPassword,
         newPassword

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { ChevronRight, ChevronLeft, Check, ShieldCheck, Lock, User, Briefcase, Phone, FileText, Settings } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 export default function Onboarding() {
   const [searchParams] = useSearchParams();
@@ -38,7 +39,7 @@ export default function Onboarding() {
       setLoading(false);
       return;
     }
-    axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/verify-token?token=${token}`)
+    axios.get(`${API_BASE_URL}/api/v1/auth/invite/verify-token?token=${token}`)
       .then((res) => {
         if (res.data.valid) {
            setInviteData(res.data.user);
@@ -62,7 +63,7 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setSubmitting(true);
     try {
-       await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/auth/invite/accept`, {
+       await axios.post(`${API_BASE_URL}/api/v1/auth/invite/accept`, {
           token,
           ...formData
        });

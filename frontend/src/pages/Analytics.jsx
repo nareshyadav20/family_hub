@@ -3,8 +3,9 @@ import { TrendingUp, Users, CalendarDays, Image as ImageIcon, MessageSquare, Fol
 import { AreaChart, Area, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Legend } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL = `${API_BASE_URL}/api/v1`;
 
 export default function Analytics() {
   const token = localStorage.getItem('token');

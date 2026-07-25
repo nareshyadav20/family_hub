@@ -6,10 +6,11 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-let rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-if (rawApiUrl.endsWith('/')) rawApiUrl = rawApiUrl.slice(0, -1);
-const API = rawApiUrl.endsWith('/api/v1') ? `${rawApiUrl}/admin/dashboard` : `${rawApiUrl}/api/v1/admin/dashboard`;
+
+
+const API = `${API_BASE_URL}/api/v1/admin/dashboard`;
 
 function authHeaders() {
   return { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
@@ -134,7 +135,7 @@ export default function Settings() {
   });
 
   const pwMutation = useMutation({
-    mutationFn: (data) => axios.put(`${import.meta.env.VITE_API_URL}/api/v1/auth/change-password`, data, authHeaders()),
+    mutationFn: (data) => axios.put(`${API_BASE_URL}/api/v1/auth/change-password`, data, authHeaders()),
     onSuccess:  () => { setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); toast.success('Password changed!'); },
     onError:    (err) => toast.error(err?.response?.data?.message || 'Failed to change password'),
   });

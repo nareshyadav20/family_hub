@@ -12,8 +12,9 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL + '';
+const API_URL = API_BASE_URL;
 
 export default function Dashboard() {
   const [data, setData] = useState(null);

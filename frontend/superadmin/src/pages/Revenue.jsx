@@ -4,8 +4,9 @@ import { IndianRupee, TrendingUp, Calendar, AlertCircle, Loader2 } from 'lucide-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/revenue';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/revenue`;
 
 export default function Revenue() {
   const [data, setData] = useState({ transactions: [], summary: {}, chartData: [] });

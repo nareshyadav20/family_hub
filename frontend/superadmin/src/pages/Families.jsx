@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/families';
-const API_URL_RESEND = import.meta.env.VITE_API_URL + '/api/v1/superadmin/families/resend-email';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/families`;
+const API_URL_RESEND = `${API_BASE_URL}/api/v1/superadmin/families/resend-email`;
 
 export default function Families() {
   const [families, setFamilies] = useState([]);

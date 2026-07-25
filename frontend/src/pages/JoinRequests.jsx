@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock, MapPin, Phone, Mail, User, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
 const STATUS_MAP = {
   pending: { label: 'Pending', class: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' },
@@ -9,7 +10,7 @@ const STATUS_MAP = {
   rejected: { label: 'Rejected', class: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' },
 };
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/admin/dashboard/requests';
+const API_URL = `${API_BASE_URL}/api/v1/admin/dashboard/requests`;
 
 export default function JoinRequests() {
   const [requests, setRequests] = useState([]);

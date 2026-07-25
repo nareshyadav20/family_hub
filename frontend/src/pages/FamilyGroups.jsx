@@ -4,8 +4,9 @@ import axios from 'axios';
 import { Plus, Search, Filter, Users, Lock, Globe, MessageSquare, Image, MoreVertical, Send, File, Archive, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import API_BASE_URL from '../config/api';
 
-const API_URL =  `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+const API_URL =  `${API_BASE_URL}/api/v1`;
 
 export default function FamilyGroups() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export default function FamilyGroups() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`);
+    const newSocket = io(`${API_BASE_URL}`);
     setSocket(newSocket);
     return () => newSocket.disconnect();
   }, []);

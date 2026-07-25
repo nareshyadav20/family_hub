@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { ArrowLeft, Video, ShieldAlert, WifiOff } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 export default function LiveStreamPage() {
   const { streamId } = useParams();
@@ -14,7 +15,7 @@ export default function LiveStreamPage() {
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.get(
-        `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/events/live/${streamId}`,
+        `${API_BASE_URL}/api/v1/events/live/${streamId}`,
         { headers }
       );
       return res.data;

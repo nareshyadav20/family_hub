@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import API_BASE_URL from '../config/api';
 
 export default function InviteMember() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function InviteMember() {
   const mutation = useMutation({
     mutationFn: async (payload) => {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/invite`, payload, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/admin/members/invite`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success === false) {

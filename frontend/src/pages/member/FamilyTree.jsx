@@ -6,12 +6,13 @@ import 'reactflow/dist/style.css';
 
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 export default function FamilyTree() {
   const { data: members = [] } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

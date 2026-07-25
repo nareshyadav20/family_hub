@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Bell, Loader2, Info, AlertTriangle, CheckCircle, Shield } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/notifications';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/notifications`;
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);

@@ -224,6 +224,7 @@ function PublicRoute({ children }) {
 
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
+import API_BASE_URL from './config/api';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -401,7 +402,7 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname);
     }
 
-    const socketURL = (window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com');
+    const socketURL = (API_BASE_URL);
     const socket = io(socketURL);
     window.__activeSocket = socket;
     socket.on('member.created', () => queryClient.invalidateQueries({ queryKey: ['members'] }));

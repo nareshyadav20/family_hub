@@ -3,13 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { User, Mail, Lock, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
 export default function Signup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', role: 'SUPER_ADMIN' });
   const [loading, setLoading] = useState(false);
 
-  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${API_BASE_URL}/api/v1`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

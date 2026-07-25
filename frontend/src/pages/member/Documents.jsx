@@ -3,6 +3,7 @@ import { Folder, FileText, Image as ImageIcon, Lock, Eye, Download, Search, Uplo
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import io from 'socket.io-client';
+import API_BASE_URL from '../../config/api';
 
 const folders = ['All', 'Legal', 'Insurance', 'Events', 'Photos', 'Health'];
 
@@ -17,7 +18,7 @@ export default function Documents() {
   const activeUser = JSON.parse(localStorage.getItem('user')) || {};
 
   React.useEffect(() => {
-    const socket = io(window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com');
+    const socket = io(API_BASE_URL);
     socket.on('document.verified', () => {
        queryClient.invalidateQueries(['memberDocuments']);
     });
@@ -30,7 +31,7 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['memberDocuments'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/documents`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       // Filter out Private/Admin documents not owned by this user
@@ -43,7 +44,7 @@ export default function Documents() {
 
   const deleteDoc = useMutation({
     mutationFn: async (id) => {
-      const res = await axios.delete(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents/${id}`, {
+      const res = await axios.delete(`${API_BASE_URL}/api/v1/documents/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
@@ -95,7 +96,7 @@ export default function Documents() {
       const fileType = selectedFile.type.startsWith('image/') ? 'image' : 'pdf';
       const fileSize = (selectedFile.size / (1024*1024)).toFixed(2) + ' MB';
 
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/documents`, {
          name: uploadData.name,
          category: uploadData.category,
          visibility: uploadData.visibility,

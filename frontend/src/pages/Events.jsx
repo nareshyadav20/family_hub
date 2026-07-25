@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Calendar as CalendarIcon, MapPin, Users, Plus, Clock, ChevronRight, Image as ImageIcon, Trash2, Video } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
 export default function Events() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Events() {
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const token = localStorage.getItem('token');
-      await axios.delete(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/v1/admin/events/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     },
@@ -34,7 +35,7 @@ export default function Events() {
     queryKey: ['events'],
     queryFn: async () => {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/events`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/events`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return res.data;

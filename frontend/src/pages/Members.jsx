@@ -13,6 +13,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
 import { TableRowSkeleton } from '../components/loaders/SkeletonLoaders';
+import API_BASE_URL from '../config/api';
 
 const getStatusBadge = (status) => {
    switch (status) {
@@ -52,7 +53,7 @@ export default function Members() {
    const handleResendInvite = async (memberId) => {
       try {
          toast.loading('Resending invitation...', { id: 'resend' });
-         const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/invite/resend`, { memberId }, {
+         const res = await axios.post(`${API_BASE_URL}/api/v1/admin/members/invite/resend`, { memberId }, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
          });
          if (res.data.success === false) {
@@ -69,7 +70,7 @@ export default function Members() {
       if (!window.confirm(`Are you sure you want to delete ${selectedRows.length} members?`)) return;
       try {
          toast.loading('Deleting members...', { id: 'bulk-delete' });
-         await axios.delete(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/bulk`, {
+         await axios.delete(`${API_BASE_URL}/api/v1/admin/members/bulk`, {
             data: { ids: selectedRows },
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
          });
@@ -110,7 +111,7 @@ export default function Members() {
    const { data: rawMembers = [], isLoading, error } = useQuery({
       queryKey: ['members'],
       queryFn: async () => {
-         const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members`, {
+         const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
          });
          return res.data;

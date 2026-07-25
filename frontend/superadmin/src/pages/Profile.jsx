@@ -4,8 +4,9 @@ import { User, Shield, Mail, Smartphone, Lock, Globe, Camera, Save, Loader2, X, 
 import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/profile';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/profile`;
 
 export default function Profile() {
   const queryClient = useQueryClient();

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function Profile() {
   const { data, isLoading } = useQuery({
     queryKey: ['memberProfile'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/member/profile`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/member/profile`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
@@ -38,7 +39,7 @@ export default function Profile() {
     reader.onload = async (event) => {
        const base64String = event.target.result;
        try {
-          await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/avatar`, {
+          await axios.put(`${API_BASE_URL}/api/avatar`, {
              avatar: base64String
           }, {
              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }

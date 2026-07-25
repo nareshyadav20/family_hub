@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import EmojiPicker from 'emoji-picker-react';
+import API_BASE_URL from '../config/api';
 
 const formatTime = (isoString) => {
   if (!isoString) return '';
@@ -21,8 +22,8 @@ export default function Messages() {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const activeUser = userStr ? JSON.parse(userStr) : null;
-  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
-  const SOCKET_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}`;
+  const API_URL = `${API_BASE_URL}/api/v1`;
+  const SOCKET_URL = `${API_BASE_URL}`;
 
   const scrollContainerRef = useRef(null);
 

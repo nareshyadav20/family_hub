@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BookOpen, Plus, Calendar, Image as ImageIcon, FileText, Search, LayoutGrid, ChevronDown, RefreshCw, Eye, MoreVertical, ChevronLeft, ChevronRight, X, Upload, UserPlus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
 export default function FamilyHistory() {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export default function FamilyHistory() {
   const [fileBase64, setFileBase64] = useState(null);
   
   const token = localStorage.getItem('token');
-  const API_URL = `${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1`;
+  const API_URL = `${API_BASE_URL}/api/v1`;
 
   const { data: historyData = [], isLoading } = useQuery({
       queryKey: ['familyHistory'],

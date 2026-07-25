@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, ShieldCheck, XCircle, FileText, Download, CheckCircle2, MoreVertical, Eye, Lock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
 const folders = ['All', 'Legal', 'Insurance', 'Events', 'Photos', 'Health'];
 const statuses = ['All Statuses', 'PENDING', 'VERIFIED', 'REJECTED'];
@@ -35,7 +36,7 @@ export default function Documents() {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['adminDocuments'],
     queryFn: async () => {
-      const res = await axios.get(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/documents`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
@@ -46,7 +47,7 @@ export default function Documents() {
     mutationFn: async ({ id, status, visibility }) => {
       const payload = { status };
       if (visibility) payload.visibility = visibility;
-      const res = await axios.put(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/documents/${id}/status`, payload, {
+      const res = await axios.put(`${API_BASE_URL}/api/v1/documents/${id}/status`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;

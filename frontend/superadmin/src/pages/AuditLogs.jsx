@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Search, Filter, Shield, User, Users, Calendar, Image as ImageIcon, CreditCard, Activity, Settings, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/v1/superadmin/audit-logs';
+const API_URL = `${API_BASE_URL}/api/v1/superadmin/audit-logs`;
 
 export default function AuditLogs() {
   const [activeFilter, setActiveFilter] = useState('All');

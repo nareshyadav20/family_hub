@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { ArrowLeft, Save, X, User, Lock } from 'lucide-react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import API_BASE_URL from '../config/api';
 
 export default function AddMember() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function AddMember() {
   const mutation = useMutation({
     mutationFn: async ({ payload }) => {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com'}/api/v1/admin/members/add`, payload, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/admin/members/add`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success === false) {

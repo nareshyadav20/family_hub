@@ -4,10 +4,11 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, RefreshCw, LogOut 
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../../config/api';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const API_URL = window.location.hostname === 'localhost' ? import.meta.env.VITE_API_URL + '' : 'https://family-hub-z48l.onrender.com';
+const API_URL = API_BASE_URL;
 
 const getCategoryColor = (cat) => {
   if (!cat) return '#14B8A6';
