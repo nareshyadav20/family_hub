@@ -2,7 +2,7 @@
   {
     "id": "basic",
     "name": "Basic",
-    "dbName": "Free",
+    "dbName": "Basic",
     "price": "Free",
     "storage": "5 GB",
     "status": "Active"
