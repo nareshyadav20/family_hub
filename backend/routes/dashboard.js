@@ -336,6 +336,18 @@ router.put('/requests/:id', authenticateToken, async (req, res) => {
         tempPassword
       );
     }
+    
+    await prisma.familyFeed.create({
+      data: {
+        familyId: user.familyId,
+        type: 'NEW_MEMBER',
+        title: `Welcome New Family Member`,
+        description: `${user.firstName} ${user.lastName || ''} has just joined the family!`,
+        referenceId: user.id,
+        createdBy: req.user.userId,
+        visibility: 'PUBLIC'
+      }
+    });
 
     res.json({ success: true, data: user });
   } catch (error) {

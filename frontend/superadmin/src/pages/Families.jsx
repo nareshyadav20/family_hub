@@ -21,6 +21,7 @@ export default function Families() {
   const [formData, setFormData] = useState({
     familyName: '',
     familyCode: '',
+    customDomain: '',
     familyHead: '',
     adminName: '',
     adminMobile: '',
@@ -76,7 +77,7 @@ export default function Families() {
         fetchFamilies();
         // Reset form
         setFormData({
-          familyName: '', familyCode: '', familyHead: '',
+          familyName: '', familyCode: '', customDomain: '', familyHead: '',
           adminName: '', adminMobile: '', adminEmail: '', adminPassword: '',
           plan: 'Free', status: 'Active', address: '', city: '', state: '', country: ''
         });
@@ -269,6 +270,10 @@ export default function Families() {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Code (Auto-generated)</label>
                         <input type="text" disabled value={formData.familyCode} className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-slate-400 rounded-lg p-2 outline-none" placeholder="Leave empty to auto-generate" />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Root Domain (e.g. panga.com)</label>
+                        <input type="text" name="customDomain" value={formData.customDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
                       </div>
                       <div className="col-span-2">
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Head *</label>

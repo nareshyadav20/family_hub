@@ -10,7 +10,7 @@ const PLANS_FILE = path.join(__dirname, '../plans.json');
 
 // Create a new family & admin
 router.post('/families', async (req, res) => {
-  const { familyName, familyCode, familyHead, adminName, adminMobile, adminEmail, adminPassword, plan, status, address, city, state, country } = req.body;
+  const { familyName, familyCode, customDomain, familyHead, adminName, adminMobile, adminEmail, adminPassword, plan, status, address, city, state, country } = req.body;
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email: adminEmail } });
@@ -29,6 +29,7 @@ router.post('/families', async (req, res) => {
         data: {
           name: familyName,
           familyCode: code,
+          customDomain: customDomain || null,
           familyHead,
           plan: plan || 'Free',
           status: status || 'Active',
@@ -64,7 +65,7 @@ router.post('/families', async (req, res) => {
     // Send Brevo Email
     let emailSent = false;
     try {
-      const emailResult = await sendFamilyAdminEmail(adminName, adminEmail, familyName, result.family.familyCode, adminPassword);
+      const emailResult = await sendFamilyAdminEmail(adminName, adminEmail, familyName, result.family.familyCode, adminPassword, false, result.family.customDomain);
       if (emailResult.success) {
         emailSent = true;
       }
@@ -114,7 +115,8 @@ router.post('/families/resend-email', async (req, res) => {
       family.name,
       family.familyCode,
       newTempPassword,
-      true
+      true,
+      family.customDomain
     );
 
     if (emailResult.success) {

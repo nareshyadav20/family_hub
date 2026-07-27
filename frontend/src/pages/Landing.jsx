@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, Image as ImageIcon, Users, Calendar, MessageSquare, Heart, Phone, Mail, ArrowRight, MessageCircle, Eye, EyeOff, Lock, User, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
@@ -16,6 +16,56 @@ export default function Home() {
   const [errorMsg, setErrorMsg] = useState('');
   const [galleryTab, setGalleryTab] = useState('All');
 
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [timelineItems, setTimelineItems] = useState([]);
+  const [familyFeed, setFamilyFeed] = useState([]);
+  const [statistics, setStatistics] = useState({ members: 0, photos: 0, videos: 0, events: 0, announcements: 0 });
+  const [announcements, setAnnouncements] = useState([]);
+  const [familyData, setFamilyData] = useState(null);
+  const [familyLoading, setFamilyLoading] = useState(true);
+  useEffect(() => {
+    const fetchPublicData = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/public/home`);
+        const {
+          family, branding, feed, gallery, videos, events, livestreams, 
+          announcements, members, familyTree, posts, statistics
+        } = res.data;
+
+        if (family) setFamilyData(family);
+        if (feed) setFamilyFeed(feed);
+        if (statistics) setStatistics(statistics);
+        if (announcements) setAnnouncements(announcements);
+
+        if (gallery && gallery.length > 0) {
+          const mappedGallery = gallery.map(doc => ({
+            id: doc.id,
+            category: doc.category || 'Family',
+            src: doc.url,
+            title: doc.name
+          }));
+          setGalleryItems(mappedGallery);
+        }
+
+        if (events && events.length > 0) {
+          const mappedEvents = events.map(event => ({
+            year: new Date(event.eventDate).getFullYear(),
+            title: event.name,
+            src: event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80"
+          }));
+          mappedEvents.sort((a, b) => a.year - b.year);
+          setTimelineItems(mappedEvents);
+        }
+
+      } catch (err) {
+        console.log('Error fetching public home data for this domain.');
+      } finally {
+        setFamilyLoading(false);
+      }
+    };
+    fetchPublicData();
+  }, []);
+
   const scrollTimeline = (direction) => {
     if (timelineRef.current) {
       const scrollAmount = direction === 'left' ? -260 : 260;
@@ -23,7 +73,8 @@ export default function Home() {
     }
   };
 
-  const allGalleryItems = [
+  // Default states for when database has no content yet
+  const defaultGalleryItems = [
     { id: 1, category: 'Family', src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Reunion", span: "md:col-span-1 md:row-span-2 min-h-[240px]" },
     { id: 2, category: 'Events', src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=800&q=80", title: "Birthday Party", span: "md:col-span-2 h-[220px]" },
     { id: 3, category: 'Trips', src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=500&q=80", title: "Beach Vacation", span: "h-[220px]" },
@@ -32,9 +83,11 @@ export default function Home() {
     { id: 6, category: 'Events', src: "https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=500&q=80", title: "Holiday Celebration", span: "h-[220px]" },
   ];
 
+  const currentGallery = galleryItems.length > 0 ? galleryItems : defaultGalleryItems;
+
   const filteredGallery = galleryTab === 'All' 
-    ? allGalleryItems 
-    : allGalleryItems.filter(item => item.category === galleryTab);
+    ? currentGallery 
+    : currentGallery.filter(item => item.category === galleryTab);
 
   const scrollToSection = (e, id) => {
     e.preventDefault();
@@ -80,14 +133,22 @@ export default function Home() {
     "https://images.unsplash.com/photo-1529156069898-49953eb1b5e4?w=600&h=600&fit=crop",
   ];
 
+  if (familyLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C5CFC]"></div></div>;
+
+  const familyName = familyData?.name || "Family";
+  const heroDescription = familyData?.description || "Every Family Has A Story.";
+  const heroAbout = familyData?.about || "Connect. Celebrate. Cherish.\nAll in one beautiful space.";
+  const familyLogo = familyData?.logo || "/logo.png";
+  const themeColor = familyData?.themeColor || "#7C5CFC";
+
   return (
     <div className="min-h-screen bg-[#FDFDFF] text-[#111827] font-sans relative overflow-x-hidden selection:bg-purple-200">
 
       {/* ─── HEADER ─── */}
       <header className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex justify-between items-center relative z-30">
         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <img src="/logo.png" alt="FamilyHub" className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
-          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">Family<span className="text-[#7C5CFC]">Hub</span></span>
+          <img src={familyLogo} alt={familyName} className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
+          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">{familyName}<span className="text-[#7C5CFC]">Hub</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
           <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
@@ -115,13 +176,13 @@ export default function Home() {
             Your Family, All In One Place
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-[60px] font-black text-[#1F2430] leading-[1.1] tracking-tight">
-            Every Family<br/>Has A Story.
+            {heroDescription.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
           </h1>
           <h2 className="text-xl sm:text-2xl lg:text-[32px] font-semibold text-gray-400 leading-tight">
             Let's Preserve Yours.
           </h2>
           <p className="text-gray-500 text-[14px] sm:text-[16px] font-medium max-w-[400px] leading-relaxed">
-            Connect. Celebrate. Cherish.<br/>All in one beautiful space.
+            {heroAbout.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
           </p>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
             <a href="#login-section" onClick={(e) => scrollToSection(e, 'login-section')} className="bg-[#7C5CFC] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[16px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1">
@@ -185,6 +246,52 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ─── LATEST FEED (Facebook Style) ─── */}
+      <section id="feed" className="w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Latest from the Family</h2>
+          <p className="text-gray-400 text-sm font-semibold mt-2">Stay updated with our latest memories and announcements.</p>
+        </div>
+        
+        <div className="space-y-6">
+          {familyFeed.length > 0 ? (
+            familyFeed.map((item, index) => (
+              <div key={index} className="bg-white rounded-[24px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] font-bold">
+                      {item.type === 'EVENT' ? <Calendar size={18} /> : item.type === 'PHOTO' ? <ImageIcon size={18} /> : item.type === 'ANNOUNCEMENT' ? <MessageCircle size={18} /> : <User size={18} />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#1F2430] text-sm">{item.title}</p>
+                      <p className="text-xs text-gray-400 font-medium">
+                        {new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase px-2.5 py-1 bg-purple-50 text-[#7C5CFC] rounded-md">{item.type}</span>
+                </div>
+                
+                {item.description && (
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                )}
+                
+                {item.image && (
+                  <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gray-100 mt-2">
+                    <img src={item.image} alt="Feed" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+              <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">No recent activities found.</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -261,14 +368,14 @@ export default function Home() {
 
               {/* Timeline Items (Strictly locked to a straight line) */}
               <div className="flex justify-between items-start relative z-10">
-                {[
+                {(timelineItems.length > 0 ? timelineItems : [
                   { year: 2018, title: "Grand Reunion", src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80" },
                   { year: 2019, title: "Summer Trip", src: "https://images.unsplash.com/photo-1542037104857-ffbb0b9152fb?auto=format&fit=crop&w=300&q=80" },
                   { year: 2020, title: "Family House", src: "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=300&q=80" },
                   { year: 2021, title: "Celebration", src: "https://images.unsplash.com/photo-1581952976147-5a2d15560349?auto=format&fit=crop&w=300&q=80" },
                   { year: 2022, title: "Holiday Gathering", src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=300&q=80" },
                   { year: 2023, title: "New Generation", src: "https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=300&q=80" },
-                ].map((item, idx) => (
+                ]).map((item, idx) => (
                   <div key={idx} className="flex flex-col items-center group cursor-pointer w-20 sm:w-24 shrink-0">
                     {/* Fixed Height Photo Card */}
                     <div className="w-18 h-22 sm:w-20 sm:h-24 rounded-[16px] sm:rounded-[18px] overflow-hidden border-3 sm:border-4 border-white shadow-[0_8px_20px_rgba(124,92,252,0.18)] group-hover:-translate-y-2 group-hover:border-[#7C5CFC] transition-all duration-300 bg-purple-50 shrink-0">
@@ -377,13 +484,13 @@ export default function Home() {
             onClick={() => setGalleryTab('All')}
             className="bg-white border border-gray-200 text-gray-600 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-50 transition-all shadow-sm"
           >
-            View All ({allGalleryItems.length})
+            View All ({currentGallery.length})
           </button>
         </div>
 
         {/* Working Category Filter Buttons */}
         <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
-          {['All', 'Family', 'Events', 'Trips', 'Celebrations'].map((tag) => (
+          {['All', ...Array.from(new Set(currentGallery.map(item => item.category)))].map((tag) => (
             <button
               key={tag}
               onClick={() => setGalleryTab(tag)}

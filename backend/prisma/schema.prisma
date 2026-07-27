@@ -87,20 +87,40 @@ model User {
 }
 
 model Family {
-  id          String   @id @default(cuid())
-  name        String
-  familyCode  String?  @unique
-  familyHead  String?
-  plan        String?  @default("Free")
-  status      String?  @default("Active")
-  address     String?
-  city        String?
-  state       String?
-  country     String?
+  id              String   @id @default(cuid())
+  name            String
+  familyCode      String?  @unique
+  customDomain    String?  @unique
+  logo            String?
+  coverImage      String?
+  bannerImage     String?
+  themeColor      String?
+  primaryColor    String?
+  secondaryColor  String?
+  description     String?  @db.Text
+  about           String?  @db.Text
+  history         String?  @db.Text
+  contactEmail    String?
+  contactPhone    String?
+  facebook        String?
+  youtube         String?
+  instagram       String?
+  twitter         String?
+  linkedin        String?
+  website         String?
+  subscription    String?
+
+  familyHead      String?
+  plan            String?  @default("Free")
+  status          String?  @default("Active")
+  address         String?
+  city            String?
+  state           String?
+  country         String?
   
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   members User[]
   events          Event[]         @relation("FamilyEvents")
@@ -111,6 +131,7 @@ model Family {
   groups          Group[]         @relation("FamilyGroups")
   familyHistories FamilyHistory[] @relation("FamilyHistories")
   googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
+  feeds           FamilyFeed[]    @relation("FamilyFeeds")
 
   @@map("families")
 }
@@ -546,4 +567,27 @@ model Transaction {
   createdAt DateTime @default(now())
 
   @@map("transactions")
+}
+
+model FamilyFeed {
+  id          String   @id @default(cuid())
+  familyId    String
+  family      Family   @relation("FamilyFeeds", fields: [familyId], references: [id], onDelete: Cascade)
+  
+  type        String   // PHOTO, EVENT, VIDEO, LIVE_STREAM, ANNOUNCEMENT, MEMORY, DOCUMENT, NEW_MEMBER, STORY
+  title       String?  @db.Text
+  description String?  @db.Text
+  image       String?
+  video       String?
+  referenceId String?  // ID of the related record (e.g. eventId, documentId, announcementId)
+  
+  createdBy   String?  // userId who created this activity
+  visibility  String   @default("PUBLIC") // PUBLIC, PRIVATE, MEMBERS_ONLY
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([createdAt])
+  @@map("family_feeds")
 }

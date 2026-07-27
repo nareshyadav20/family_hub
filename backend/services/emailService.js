@@ -276,8 +276,9 @@ const processAllPendingQueue = async () => {
 
 setInterval(processAllPendingQueue, 15000); // 15 seconds
 
-const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCode, tempPassword, isResend = false) => {
-  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCode, tempPassword, isResend = false, customDomain = null) => {
+  const defaultBaseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const baseUrl = customDomain ? `https://${customDomain}` : defaultBaseUrl;
   const loginUrl = `${baseUrl}/login`;
   const subject = isResend ? 'Reminder: Welcome to FamilyHub OS' : 'Welcome to FamilyHub OS';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';
@@ -300,8 +301,9 @@ const sendFamilyAdminEmail = async (adminName, adminEmail, familyName, familyCod
   return await dispatchEmail(adminEmail, subject, 'family_admin_welcome', html);
 };
 
-const sendInvitationEmail = async (member, adminName, familyName, token, isResend = false) => {
-  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+const sendInvitationEmail = async (member, adminName, familyName, token, isResend = false, customDomain = null) => {
+  const defaultBaseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const baseUrl = customDomain ? `https://${customDomain}` : defaultBaseUrl;
   const inviteUrl = `${baseUrl}/login`;
   const memberName = member.firstName + (member.lastName ? ` ${member.lastName}` : '');
   const subject = isResend ? "Reminder: You're Invited to Join FamilyHub" : "You're Invited to Join FamilyHub";
@@ -323,8 +325,9 @@ const sendInvitationEmail = async (member, adminName, familyName, token, isResen
   return await dispatchEmail(member.email, subject, 'member_invitation', html);
 };
 
-const sendMemberCredentialsEmail = async (memberName, memberEmail, tempPassword, isResend = false) => {
-  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+const sendMemberCredentialsEmail = async (memberName, memberEmail, tempPassword, isResend = false, customDomain = null) => {
+  const defaultBaseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const baseUrl = customDomain ? `https://${customDomain}` : defaultBaseUrl;
   const loginUrl = `${baseUrl}/login`;
   const subject = isResend ? 'Reminder: Welcome to FamilyHub' : 'Welcome to FamilyHub';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';
@@ -345,8 +348,9 @@ const sendMemberCredentialsEmail = async (memberName, memberEmail, tempPassword,
   return await dispatchEmail(memberEmail, subject, 'member_welcome', html);
 };
 
-const sendPasswordResetEmail = async (memberName, memberEmail, resetToken, isResend = false) => {
-  const baseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+const sendPasswordResetEmail = async (memberName, memberEmail, resetToken, isResend = false, customDomain = null) => {
+  const defaultBaseUrl = process.env.APP_URL || 'https://family-hub-seven-ecru.vercel.app';
+  const baseUrl = customDomain ? `https://${customDomain}` : defaultBaseUrl;
   const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
   const subject = isResend ? 'Reminder: Password Reset Request' : 'Password Reset Request';
   const reminderText = isResend ? `<p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 20px;">This is a reminder sent on ${new Date().toLocaleString()}.</p>` : '';

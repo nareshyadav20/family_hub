@@ -44,6 +44,7 @@ const memberDashboardRouter = require('./routes/memberDashboard');
 const websiteRouter = require('./routes/website');
 const superadminRouter = require('./routes/superadmin');
 const googleCalendarRouter = require('./routes/googleCalendar');
+const publicRouter = require('./routes/publicRoutes');
 
 app.use(async (req, res, next) => {
   // Only apply to protected /api/ routes, excluding auth and superadmin
@@ -82,6 +83,7 @@ app.use('/api/v1/member/dashboard', memberDashboardRouter);
 app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/google', googleCalendarRouter);
+app.use('/api/public', publicRouter);
 
 app.get('/api/test-instant-email', async (req, res) => {
   try {
@@ -461,6 +463,8 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
      if (existing) {
         return res.status(200).json({ success: false, error: 'Email already exists' });
      }
+     
+     const family = await prisma.family.findUnique({ where: { id: familyId } });
 
      const hashedPassword = await bcrypt.hash(password, 10);
      const memberId = 'MEM-' + Math.floor(1000 + Math.random() * 9000);
@@ -495,7 +499,7 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
      if (!isDraft && email) {
         try {
            const memberName = firstName + (lastName?.trim() ? ' ' + lastName.trim() : '');
-           const emailResult = await sendMemberCredentialsEmail(memberName, email, password);
+           const emailResult = await sendMemberCredentialsEmail(memberName, email, password, false, family?.customDomain);
            
            if (!emailResult.success) {
                await prisma.user.update({
@@ -539,6 +543,8 @@ app.post('/api/v1/admin/members/invite', authenticateToken, async (req, res) => 
     if (existing) {
        return res.status(200).json({ success: false, error: 'This Phone Number or Email is already registered to a Family Member!' });
     }
+
+    const family = await prisma.family.findUnique({ where: { id: familyId } });
 
     const memberId = 'FH-' + Math.floor(1000 + Math.random() * 9000);
     const generatedToken = require('crypto').randomBytes(32).toString('hex');
@@ -586,8 +592,10 @@ app.post('/api/v1/admin/members/invite', authenticateToken, async (req, res) => 
        emailResult = await sendInvitationEmail(
            { email, firstName: firstName, lastName: lastName?.trim() || '' },
            'Admin', // the inviter
-           'FamilyHub', // the family
-           generatedToken
+           family?.name || 'FamilyHub', // the family
+           generatedToken,
+           false,
+           family?.customDomain
        );
        if (!emailResult.success) {
            emailStatus = 'EMAIL_FAILED';
@@ -690,9 +698,10 @@ app.post('/api/v1/admin/members/invite/resend', authenticateToken, async (req, r
        emailResult = await sendInvitationEmail(
            { email: user.email, firstName: user.firstName, lastName: user.lastName },
            'Admin',
-           'FamilyHub',
+           family?.name || 'FamilyHub',
            token,
-           true
+           true,
+           family?.customDomain
        );
        if (!emailResult.success) {
            emailStatus = 'EMAIL_FAILED';
@@ -888,6 +897,23 @@ app.put('/api/v1/documents/:id/status', async (req, res) => {
               familyId: doc.familyId
            }
         });
+        if (doc.visibility === 'PUBLIC') {
+           const isVideo = doc.type.toLowerCase().includes('video');
+           const feedType = isVideo ? 'VIDEO' : (doc.type.toLowerCase().includes('image') ? 'PHOTO' : 'DOCUMENT');
+           await prisma.familyFeed.create({
+             data: {
+               familyId: doc.familyId,
+               type: feedType,
+               title: doc.name,
+               description: '',
+               image: isVideo ? null : doc.url,
+               video: isVideo ? doc.url : null,
+               referenceId: doc.id,
+               createdBy: doc.uploaderId || 'Admin',
+               visibility: 'PUBLIC'
+             }
+           });
+        }
         io.emit('notification.created', notifVer);
      }
      
@@ -981,6 +1007,21 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
             }
          });
          io.emit('notification.created', newNotif);
+
+         if (visibility === 'Public' || visibility === 'PUBLIC') {
+           await prisma.familyFeed.create({
+             data: {
+               familyId,
+               type: 'EVENT',
+               title: name || 'Untitled Event',
+               description: description || '',
+               image: bannerImage || null,
+               referenceId: event.id,
+               createdBy: req.user.userId || 'Admin',
+               visibility: 'PUBLIC'
+             }
+           });
+         }
 
          // Auto-sync to Google Calendar
          try {

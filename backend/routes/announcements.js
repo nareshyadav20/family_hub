@@ -55,6 +55,20 @@ router.post('/', authenticateToken, async (req, res) => {
      });
      io.emit('notification.created', newNotif);
      
+     if (targetType === 'All Members') {
+       await prisma.familyFeed.create({
+         data: {
+           familyId,
+           type: 'ANNOUNCEMENT',
+           title,
+           description: message,
+           referenceId: announcement.id,
+           createdBy: authorId,
+           visibility: 'PUBLIC'
+         }
+       });
+     }
+     
      res.status(201).json(announcement);
   } catch (error) {
      console.error('Announcement Error:', error);
