@@ -105,6 +105,21 @@ router.post('/', async (req, res) => {
         const io = req.app.get('socketio');
         io.emit('history.created', { message: `New Family History Added: ${title}` });
         
+        if (visibility === 'Public' || visibility === 'PUBLIC') {
+            await prisma.familyFeed.create({
+                data: {
+                    familyId: familyId,
+                    type: 'STORY',
+                    title: title,
+                    description: description,
+                    image: fileUrl || null,
+                    referenceId: history.id,
+                    createdBy: req.user.userId,
+                    visibility: 'PUBLIC'
+                }
+            });
+        }
+        
         res.status(201).json(history);
     } catch(err) {
         console.error(err);

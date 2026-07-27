@@ -55,19 +55,38 @@ router.post('/', async (req, res) => {
         const familyId = req.user.familyId;
         if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
         
+        const visibility = req.body.visibility || 'PUBLIC';
+        
         const photo = await prisma.document.create({
             data: {
                name: fileName || `Photo_${Date.now()}`,
                type: fileType || 'image/jpeg',
                size: fileSize || '0MB',
-               category: category || 'Family',
+               category: category || 'Gallery',
                url: fileUrl,
                uploaderId: req.user.userId,
                familyId: familyId,
-               visibility: 'FAMILY',
+               visibility: visibility,
                status: 'VERIFIED'
             }
         });
+
+        if (visibility === 'PUBLIC') {
+            await prisma.familyFeed.create({
+                data: {
+                    familyId: familyId,
+                    type: (fileType && fileType.includes('video')) ? 'VIDEO' : 'PHOTO',
+                    title: (fileType && fileType.includes('video')) ? 'Video Uploaded' : 'Photo Uploaded',
+                    description: fileName || `New gallery item uploaded`,
+                    image: (fileType && !fileType.includes('video')) ? fileUrl : null,
+                    video: (fileType && fileType.includes('video')) ? fileUrl : null,
+                    referenceId: photo.id,
+                    createdBy: req.user.userId,
+                    visibility: 'PUBLIC'
+                }
+            });
+        }
+
         res.status(201).json(photo);
     } catch(err) {
         console.error(err);

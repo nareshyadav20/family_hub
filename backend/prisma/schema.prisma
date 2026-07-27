@@ -226,6 +226,7 @@ enum DocumentVisibility {
   PRIVATE
   FAMILY
   ADMIN_ONLY
+  PUBLIC
 }
 
 model Document {

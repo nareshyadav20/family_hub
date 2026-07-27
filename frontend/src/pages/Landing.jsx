@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, Image as ImageIcon, Users, Calendar, MessageSquare, Heart, Phone, Mail, ArrowRight, MessageCircle, Eye, EyeOff, Lock, User, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import '../landing.css';
 import API_BASE_URL from '../config/api';
@@ -16,55 +17,35 @@ export default function Home() {
   const [errorMsg, setErrorMsg] = useState('');
   const [galleryTab, setGalleryTab] = useState('All');
 
-  const [galleryItems, setGalleryItems] = useState([]);
-  const [timelineItems, setTimelineItems] = useState([]);
-  const [familyFeed, setFamilyFeed] = useState([]);
-  const [statistics, setStatistics] = useState({ members: 0, photos: 0, videos: 0, events: 0, announcements: 0 });
-  const [announcements, setAnnouncements] = useState([]);
-  const [familyData, setFamilyData] = useState(null);
-  const [familyLoading, setFamilyLoading] = useState(true);
-  useEffect(() => {
-    const fetchPublicData = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/public/home`);
-        const {
-          family, branding, feed, gallery, videos, events, livestreams, 
-          announcements, members, familyTree, posts, statistics
-        } = res.data;
+  const { data, isLoading: familyLoading } = useQuery({
+    queryKey: ['publicHomeData'],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/public/home`);
+      return res.data;
+    }
+  });
 
-        if (family) setFamilyData(family);
-        if (feed) setFamilyFeed(feed);
-        if (statistics) setStatistics(statistics);
-        if (announcements) setAnnouncements(announcements);
+  const familyData = data?.family || null;
+  const familyFeed = data?.feed || [];
+  const statistics = data?.statistics || { members: 0, photos: 0, videos: 0, events: 0, announcements: 0 };
+  const announcements = data?.announcements || [];
+  
+  const galleryItems = data?.gallery && data.gallery.length > 0 
+    ? data.gallery.map(doc => ({
+        id: doc.id,
+        category: doc.category || 'Family',
+        src: doc.url,
+        title: doc.name
+      })) 
+    : [];
 
-        if (gallery && gallery.length > 0) {
-          const mappedGallery = gallery.map(doc => ({
-            id: doc.id,
-            category: doc.category || 'Family',
-            src: doc.url,
-            title: doc.name
-          }));
-          setGalleryItems(mappedGallery);
-        }
-
-        if (events && events.length > 0) {
-          const mappedEvents = events.map(event => ({
-            year: new Date(event.eventDate).getFullYear(),
-            title: event.name,
-            src: event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80"
-          }));
-          mappedEvents.sort((a, b) => a.year - b.year);
-          setTimelineItems(mappedEvents);
-        }
-
-      } catch (err) {
-        console.log('Error fetching public home data for this domain.');
-      } finally {
-        setFamilyLoading(false);
-      }
-    };
-    fetchPublicData();
-  }, []);
+  const timelineItems = data?.events && data.events.length > 0 
+    ? data.events.map(event => ({
+        year: new Date(event.eventDate).getFullYear(),
+        title: event.name,
+        src: event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80"
+      })).sort((a, b) => a.year - b.year)
+    : [];
 
   const scrollTimeline = (direction) => {
     if (timelineRef.current) {
@@ -73,17 +54,7 @@ export default function Home() {
     }
   };
 
-  // Default states for when database has no content yet
-  const defaultGalleryItems = [
-    { id: 1, category: 'Family', src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Reunion", span: "md:col-span-1 md:row-span-2 min-h-[240px]" },
-    { id: 2, category: 'Events', src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=800&q=80", title: "Birthday Party", span: "md:col-span-2 h-[220px]" },
-    { id: 3, category: 'Trips', src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=500&q=80", title: "Beach Vacation", span: "h-[220px]" },
-    { id: 4, category: 'Celebrations', src: "https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=500&q=80", title: "Anniversary", span: "h-[220px]" },
-    { id: 5, category: 'Family', src: "https://images.unsplash.com/photo-1574027542338-98e75acfd385?auto=format&fit=crop&w=500&q=80", title: "Sunday Dinner", span: "h-[220px]" },
-    { id: 6, category: 'Events', src: "https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=500&q=80", title: "Holiday Celebration", span: "h-[220px]" },
-  ];
-
-  const currentGallery = galleryItems.length > 0 ? galleryItems : defaultGalleryItems;
+  const currentGallery = galleryItems;
 
   const filteredGallery = galleryTab === 'All' 
     ? currentGallery 
@@ -122,16 +93,15 @@ export default function Home() {
   };
 
   // Family gathering photos for hero mosaic
-  const familyPhotos = [
+  const defaultFamilyPhotos = [
     "https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&h=600&fit=crop",
     "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=600&h=600&fit=crop",
     "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1540479859555-17af45c78602?w=600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1574027542338-98e75acfd385?w=600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=600&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1529156069898-49953eb1b5e4?w=600&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600&fit=crop"
   ];
+  const familyPhotos = galleryItems.length >= 4 
+    ? galleryItems.slice(0, 4).map(i => i.src)
+    : defaultFamilyPhotos;
 
   if (familyLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C5CFC]"></div></div>;
 
@@ -148,7 +118,7 @@ export default function Home() {
       <header className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex justify-between items-center relative z-30">
         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
           <img src={familyLogo} alt={familyName} className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
-          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">{familyName}<span className="text-[#7C5CFC]">Hub</span></span>
+          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">{familyName.replace(/\s?Family$/i, '')}<span className="text-[#7C5CFC]">Hub</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
           <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
@@ -205,7 +175,7 @@ export default function Home() {
             </div>
             <div>
               <div className="flex text-amber-400 text-xs sm:text-sm">{'★★★★★'}</div>
-              <p className="text-gray-500 text-[11px] sm:text-[12px] font-semibold">Trusted by 500+ families</p>
+              <p className="text-gray-500 text-[11px] sm:text-[12px] font-semibold">{statistics.members > 0 ? `${statistics.members} Family Members` : 'Growing Family'}</p>
             </div>
           </div>
         </div>
@@ -231,7 +201,7 @@ export default function Home() {
 
             {/* Floating badge top-right */}
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-[#7C5CFC] text-white rounded-xl sm:rounded-2xl shadow-lg shadow-purple-500/25 px-3 py-2 sm:px-4 sm:py-2.5 z-20 border border-purple-400/30 animate-float-badge-top">
-              <p className="font-black text-[12px] sm:text-[13px]">10,000+</p>
+              <p className="font-black text-[12px] sm:text-[13px]">{statistics.photos + statistics.videos}</p>
               <p className="text-purple-200 text-[10px] sm:text-[11px] font-medium">Memories saved</p>
             </div>
 
@@ -241,8 +211,8 @@ export default function Home() {
                 <Heart size={14} className="text-[#7C5CFC]" fill="#7C5CFC" />
               </div>
               <div>
-                <p className="font-black text-[#1F2430] text-[12px] sm:text-[13px]">500+ Families</p>
-                <p className="text-gray-400 text-[10px] sm:text-[11px] font-medium">Connected globally</p>
+                <p className="font-black text-[#1F2430] text-[12px] sm:text-[13px]">{statistics.members} Members</p>
+                <p className="text-gray-400 text-[10px] sm:text-[11px] font-medium">Connected together</p>
               </div>
             </div>
           </div>
@@ -368,14 +338,7 @@ export default function Home() {
 
               {/* Timeline Items (Strictly locked to a straight line) */}
               <div className="flex justify-between items-start relative z-10">
-                {(timelineItems.length > 0 ? timelineItems : [
-                  { year: 2018, title: "Grand Reunion", src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80" },
-                  { year: 2019, title: "Summer Trip", src: "https://images.unsplash.com/photo-1542037104857-ffbb0b9152fb?auto=format&fit=crop&w=300&q=80" },
-                  { year: 2020, title: "Family House", src: "https://images.unsplash.com/photo-1576267423445-b2e0074d68a4?auto=format&fit=crop&w=300&q=80" },
-                  { year: 2021, title: "Celebration", src: "https://images.unsplash.com/photo-1581952976147-5a2d15560349?auto=format&fit=crop&w=300&q=80" },
-                  { year: 2022, title: "Holiday Gathering", src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=300&q=80" },
-                  { year: 2023, title: "New Generation", src: "https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=300&q=80" },
-                ]).map((item, idx) => (
+                {timelineItems.length > 0 ? timelineItems.map((item, idx) => (
                   <div key={idx} className="flex flex-col items-center group cursor-pointer w-20 sm:w-24 shrink-0">
                     {/* Fixed Height Photo Card */}
                     <div className="w-18 h-22 sm:w-20 sm:h-24 rounded-[16px] sm:rounded-[18px] overflow-hidden border-3 sm:border-4 border-white shadow-[0_8px_20px_rgba(124,92,252,0.18)] group-hover:-translate-y-2 group-hover:border-[#7C5CFC] transition-all duration-300 bg-purple-50 shrink-0">
@@ -402,7 +365,9 @@ export default function Home() {
                       {item.year}
                     </span>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-gray-400 text-sm font-medium w-full text-center mt-8">No events yet to display on timeline.</div>
+                )}
               </div>
             </div>
           </div>
@@ -436,8 +401,8 @@ export default function Home() {
                 <p className="text-xs font-bold text-gray-600 mt-1">Private & Encrypted</p>
               </div>
               <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">500+</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Global Families</p>
+                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.photos + statistics.videos}</p>
+                <p className="text-xs font-bold text-gray-600 mt-1">Memories Shared</p>
               </div>
             </div>
           </div>
@@ -506,31 +471,38 @@ export default function Home() {
         </div>
 
         {/* Dynamic Gallery Grid (1 col on small phones, 2 on tablet, 3 on desktop) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-h-[260px]">
-          {filteredGallery.map((item) => (
-            <div
-              key={item.id}
-              className="group relative rounded-[20px] sm:rounded-[24px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#7C5CFC]/40 transition-all duration-300 h-[220px] sm:h-[240px] bg-purple-50 cursor-pointer"
-            >
-              <img
-                src={item.src}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 sm:p-5">
-                <div>
-                  <span className="inline-block bg-[#7C5CFC] text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full mb-1">{item.category}</span>
-                  <h4 className="text-white font-bold text-[15px] sm:text-[16px]">{item.title}</h4>
+        {filteredGallery.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-h-[260px]">
+            {filteredGallery.map((item) => (
+              <div
+                key={item.id}
+                className="group relative rounded-[20px] sm:rounded-[24px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#7C5CFC]/40 transition-all duration-300 h-[220px] sm:h-[240px] bg-purple-50 cursor-pointer"
+              >
+                <img
+                  src={item.src}
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4 sm:p-5">
+                  <div>
+                    <span className="inline-block bg-[#7C5CFC] text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full mb-1">{item.category}</span>
+                    <h4 className="text-white font-bold text-[15px] sm:text-[16px]">{item.title}</h4>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+            <ImageIcon size={32} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-gray-500 font-medium">No gallery items found.</p>
+          </div>
+        )}
       </section>
 
       {/* ─── LOGIN SECTION (Mobile responsive clean style) ─── */}

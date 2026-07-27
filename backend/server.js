@@ -45,6 +45,7 @@ const websiteRouter = require('./routes/website');
 const superadminRouter = require('./routes/superadmin');
 const googleCalendarRouter = require('./routes/googleCalendar');
 const publicRouter = require('./routes/publicRoutes');
+app.use('/api/public', publicRouter);
 
 app.use(async (req, res, next) => {
   // Only apply to protected /api/ routes, excluding auth and superadmin
@@ -1012,7 +1013,7 @@ app.post('/api/v1/admin/events', authenticateToken, async (req, res) => {
            await prisma.familyFeed.create({
              data: {
                familyId,
-               type: 'EVENT',
+               type: liveStream ? 'LIVE_STREAM' : 'EVENT',
                title: name || 'Untitled Event',
                description: description || '',
                image: bannerImage || null,
