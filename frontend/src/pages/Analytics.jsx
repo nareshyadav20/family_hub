@@ -25,28 +25,28 @@ export default function Analytics() {
       <div className="space-y-6 pb-10 animate-pulse">
         {/* Header skeleton */}
         <div>
-          <div className="h-8 w-40 bg-slate-200 dark:bg-slate-700 rounded-xl mb-2" />
-          <div className="h-4 w-64 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+          <div className="h-8 w-40 bg-slate-200 rounded-xl mb-2" />
+          <div className="h-4 w-64 bg-slate-100 rounded-lg" />
         </div>
         {/* KPI skeletons */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           {[0,1,2,3].map(i => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4">
-              <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl flex-shrink-0" />
+            <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+              <div className="w-12 h-12 bg-slate-200 rounded-xl flex-shrink-0" />
               <div className="space-y-2 flex-1">
-                <div className="h-6 w-16 bg-slate-200 dark:bg-slate-700 rounded-lg" />
-                <div className="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
-                <div className="h-3 w-20 bg-slate-100 dark:bg-slate-800 rounded" />
+                <div className="h-6 w-16 bg-slate-200 rounded-lg" />
+                <div className="h-3 w-24 bg-slate-100 rounded" />
+                <div className="h-3 w-20 bg-slate-100 rounded" />
               </div>
             </div>
           ))}
         </div>
         {/* Chart skeletons */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-64" />
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-64" />
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-64" />
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-64" />
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 h-72" />
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-72" />
       </div>
     );
   }
@@ -54,28 +54,28 @@ export default function Analytics() {
   const { stats: fetchedStats = {}, memberGrowth = [], activityData = [], roleData = [] } = analyticsData || {};
 
   const stats = [
-    { label: 'Total Members', value: fetchedStats.totalMembers || 0, change: `${fetchedStats.membersChange >= 0 ? '+' : ''}${fetchedStats.membersChange || 0} this month`, up: fetchedStats.membersChange >= 0, icon: <Users size={20} />, color: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' },
-    { label: 'Events This Year', value: fetchedStats.eventsThisYear || 0, change: `${fetchedStats.eventsChange >= 0 ? '+' : ''}${fetchedStats.eventsChange || 0} this month`, up: fetchedStats.eventsChange >= 0, icon: <CalendarDays size={20} />, color: 'bg-purple-50 text-purple-600 dark:bg-purple-500/10' },
-    { label: 'Gallery Photos', value: fetchedStats.galleryPhotos || 0, change: `${fetchedStats.photosChange >= 0 ? '+' : ''}${fetchedStats.photosChange || 0} this month`, up: fetchedStats.photosChange >= 0, icon: <ImageIcon size={20} />, color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' },
-    { label: 'Messages Sent', value: fetchedStats.messagesSent || 0, change: `${fetchedStats.messagesChange >= 0 ? '+' : ''}${fetchedStats.messagesChange || 0} this month`, up: fetchedStats.messagesChange >= 0, icon: <MessageSquare size={20} />, color: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10' },
+    { label: 'Total Members', value: fetchedStats.totalMembers || 0, change: `${fetchedStats.membersChange >= 0 ? '+' : ''}${fetchedStats.membersChange || 0} this month`, up: fetchedStats.membersChange >= 0, icon: <Users size={20} />, color: 'bg-blue-50 text-blue-600 ' },
+    { label: 'Events This Year', value: fetchedStats.eventsThisYear || 0, change: `${fetchedStats.eventsChange >= 0 ? '+' : ''}${fetchedStats.eventsChange || 0} this month`, up: fetchedStats.eventsChange >= 0, icon: <CalendarDays size={20} />, color: 'bg-purple-50 text-purple-600 ' },
+    { label: 'Gallery Photos', value: fetchedStats.galleryPhotos || 0, change: `${fetchedStats.photosChange >= 0 ? '+' : ''}${fetchedStats.photosChange || 0} this month`, up: fetchedStats.photosChange >= 0, icon: <ImageIcon size={20} />, color: 'bg-emerald-50 text-emerald-600 ' },
+    { label: 'Messages Sent', value: fetchedStats.messagesSent || 0, change: `${fetchedStats.messagesChange >= 0 ? '+' : ''}${fetchedStats.messagesChange || 0} this month`, up: fetchedStats.messagesChange >= 0, icon: <MessageSquare size={20} />, color: 'bg-rose-50 text-rose-600 ' },
   ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Analytics</h1>
         <p className="text-slate-500 text-sm mt-1">Track your family's engagement and growth over time.</p>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map((s, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4">
+          <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${s.color}`}>{s.icon}</div>
             <div>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
+              <p className="text-2xl font-black text-slate-900 ">{s.value}</p>
               <p className="text-xs font-semibold text-slate-500 mt-0.5">{s.label}</p>
-              <p className={`text-[11px] font-bold mt-1 ${s.up ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>{s.change}</p>
+              <p className={`text-[11px] font-bold mt-1 ${s.up ? 'text-emerald-600 ' : 'text-red-500'}`}>{s.change}</p>
             </div>
           </div>
         ))}
@@ -83,8 +83,8 @@ export default function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Member Growth Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6">
-          <h3 className="font-bold text-slate-900 dark:text-white mb-6">Member Growth</h3>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <h3 className="font-bold text-slate-900 mb-6">Member Growth</h3>
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={memberGrowth} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
@@ -105,8 +105,8 @@ export default function Analytics() {
         </div>
 
         {/* Role Breakdown Pie */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6">
-          <h3 className="font-bold text-slate-900 dark:text-white mb-6">Member Roles</h3>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <h3 className="font-bold text-slate-900 mb-6">Member Roles</h3>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <RePieChart>
@@ -122,9 +122,9 @@ export default function Analytics() {
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: r.color }} />
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{r.name}</span>
+                  <span className="text-sm font-medium text-slate-600 ">{r.name}</span>
                 </div>
-                <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{r.value}</span>
+                <span className="text-sm font-bold text-slate-800 ">{r.value}</span>
               </div>
             ))}
           </div>
@@ -132,8 +132,8 @@ export default function Analytics() {
       </div>
 
       {/* Activity Chart */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6">
-        <h3 className="font-bold text-slate-900 dark:text-white mb-6">Platform Activity (Events, Photos, Messages)</h3>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <h3 className="font-bold text-slate-900 mb-6">Platform Activity (Events, Photos, Messages)</h3>
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <ReBarChart data={activityData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }} barSize={10} barCategoryGap="30%">

@@ -56,7 +56,7 @@ export default function FamilyGroups() {
         <>
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Groups</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Family Groups</h1>
               <p className="text-slate-500 text-sm mt-1">Manage all public and private family groups.</p>
             </div>
             <button onClick={goCreate} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-blue-500/30">
@@ -65,37 +65,37 @@ export default function FamilyGroups() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-             <div className="bg-white dark:bg-slate-900 border rounded-2xl p-5 shadow-sm">
+             <div className="bg-white border rounded-2xl p-5 shadow-sm">
                 <p className="text-slate-500 text-sm font-bold">Total Groups</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{groups.length}</h3>
+                <h3 className="text-2xl font-black text-slate-900 mt-1">{groups.length}</h3>
              </div>
-             <div className="bg-white dark:bg-slate-900 border rounded-2xl p-5 shadow-sm">
+             <div className="bg-white border rounded-2xl p-5 shadow-sm">
                 <p className="text-slate-500 text-sm font-bold">Private Groups</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{groups.filter(g => g.privacy === 'Private').length}</h3>
+                <h3 className="text-2xl font-black text-slate-900 mt-1">{groups.filter(g => g.privacy === 'Private').length}</h3>
              </div>
-             <div className="bg-white dark:bg-slate-900 border rounded-2xl p-5 shadow-sm">
+             <div className="bg-white border rounded-2xl p-5 shadow-sm">
                 <p className="text-slate-500 text-sm font-bold">Total Members</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{groups.reduce((acc, g) => acc + (g._count?.members || 0), 0)}</h3>
+                <h3 className="text-2xl font-black text-slate-900 mt-1">{groups.reduce((acc, g) => acc + (g._count?.members || 0), 0)}</h3>
              </div>
-             <div className="bg-white dark:bg-slate-900 border rounded-2xl p-5 shadow-sm">
+             <div className="bg-white border rounded-2xl p-5 shadow-sm">
                 <p className="text-slate-500 text-sm font-bold">Active Groups</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1">{groups.filter(g => g.status === 'Active').length}</h3>
+                <h3 className="text-2xl font-black text-slate-900 mt-1">{groups.filter(g => g.status === 'Active').length}</h3>
              </div>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
              <div className="relative w-full max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input type="text" placeholder="Search groups..." className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 shadow-sm" />
+                <input type="text" placeholder="Search groups..." className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 shadow-sm" />
              </div>
-             <button className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2 shadow-sm"><Filter size={16} /> Filter</button>
+             <button className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2 shadow-sm"><Filter size={16} /> Filter</button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
              {groups.length === 0 ? (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900">
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-white ">
                    <Users size={40} className="mx-auto text-blue-500 mb-3" />
-                   <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No groups created</h3>
+                   <h3 className="text-xl font-bold text-slate-800 mb-2">No groups created</h3>
                    <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create dedicated groups for branches of the family, specific events, or interest circles.</p>
                    <button onClick={goCreate} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md shadow-blue-500/30 flex items-center justify-center gap-2 transition-all mx-auto">
                       <Plus size={16} /> Create First Group
@@ -103,7 +103,7 @@ export default function FamilyGroups() {
                 </div>
              ) : (
                 groups.map(g => (
-                  <div key={g.id} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
+                  <div key={g.id} className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group">
                      <div className="h-28 bg-gradient-to-br from-blue-500 to-indigo-600 relative p-4 cursor-pointer" onClick={() => goDetails(g.id)}>
                         <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/20 backdrop-blur-md text-white text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1.5 border border-white/10">
                            {g.privacy === 'Private' ? <Lock size={10} /> : <Globe size={10} />}
@@ -111,16 +111,16 @@ export default function FamilyGroups() {
                         </div>
                      </div>
                      <div className="px-5 pb-5 relative -mt-8 flex-1 flex flex-col">
-                        <div className="w-16 h-16 bg-white dark:bg-slate-900 p-1 rounded-2xl shadow-sm">
-                           <div className="w-full h-full bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center font-black text-2xl text-blue-600">
+                        <div className="w-16 h-16 bg-white p-1 rounded-2xl shadow-sm">
+                           <div className="w-full h-full bg-slate-100 rounded-xl flex items-center justify-center font-black text-2xl text-blue-600">
                               {g.name.charAt(0)}
                            </div>
                         </div>
-                        <h3 className="text-lg font-bold mt-3 text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => goDetails(g.id)}>{g.name}</h3>
+                        <h3 className="text-lg font-bold mt-3 text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => goDetails(g.id)}>{g.name}</h3>
                         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1 mb-2">{g.category}</p>
                         <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 min-h-[40px]">{g.description || 'No description provided.'}</p>
                         
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100 ">
                            <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-slate-500">{g._count?.members || 0} Members</span>
                               <span className="text-slate-300">•</span>
@@ -140,8 +140,8 @@ export default function FamilyGroups() {
       )}
 
       {activeTab === 'create' && (
-         <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border shadow-sm overflow-hidden p-8">
-            <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white">Create New Group</h2>
+         <div className="max-w-3xl mx-auto bg-white rounded-3xl border shadow-sm overflow-hidden p-8">
+            <h2 className="text-2xl font-bold mb-6 text-slate-900 ">Create New Group</h2>
             <form onSubmit={e => {
                e.preventDefault();
                createMutation.mutate({
@@ -209,12 +209,12 @@ function GroupDetails({ groupId, onBack, token, socket }) {
    if (isLoading) return <div className="p-10 text-center font-bold text-slate-500">Loading details...</div>;
 
    return (
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border shadow-sm min-h-[600px] flex flex-col">
+      <div className="bg-white rounded-3xl border shadow-sm min-h-[600px] flex flex-col">
          <div className="p-6 border-b flex justify-between items-center bg-slate-50/50 rounded-t-3xl">
             <div className="flex items-center gap-4">
                <button onClick={onBack} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold">←</button>
                <div>
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{group.name}</h2>
+                  <h2 className="text-2xl font-bold text-slate-900 ">{group.name}</h2>
                   <p className="text-sm font-medium text-slate-500">{group.privacy} Group · {group._count?.members || 1} members</p>
                </div>
             </div>

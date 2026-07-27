@@ -108,15 +108,15 @@ export default function InviteMember() {
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen pb-32 animate-in fade-in duration-500">
+    <div className="bg-slate-50 min-h-screen pb-32 animate-in fade-in duration-500">
       
       {/* Page Header */}
       <div className="max-w-5xl mx-auto pt-8 px-6 lg:px-8">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors mb-6">
           <ArrowLeft size={16} /> Back to Members
         </button>
-        <div className="mb-8 border-b border-slate-200 dark:border-slate-800 pb-6">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Invite Family Member</h1>
+        <div className="mb-8 border-b border-slate-200 pb-6">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Invite Family Member</h1>
           <p className="text-slate-500 max-w-3xl leading-relaxed text-sm">
             Invite a family member to join your FamilyHub. They'll receive a secure invitation link to verify their mobile number, create their account, and complete their profile themselves.
           </p>
@@ -125,41 +125,41 @@ export default function InviteMember() {
         <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-10">
           
           {/* Section 1: Invitation Details */}
-          <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-6 md:p-8">
-             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8">
+             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 ">
                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><User size={20} /></div>
-               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Invitation Details</h2>
+               <h2 className="text-xl font-semibold text-slate-900 ">Invitation Details</h2>
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name *</label>
                   <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="e.g. Rahul Kumar" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Mobile Number *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mobile Number *</label>
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="+91 9876543210" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address *</label>
                   <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="email@example.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gender *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender *</label>
                   <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
                     <option value="">▼ Select Gender</option>
                     <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Relationship to Family *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Family *</label>
                   <select name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
                     <option value="">▼ Select Relationship</option>
                     {['Father','Mother','Son','Daughter','Brother','Sister','Husband','Wife','Grandfather','Grandmother','Uncle','Aunt','Cousin','Nephew','Niece','Friend','Other'].map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Family Branch *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Family Branch *</label>
                   <select name="familyBranch" value={formData.familyBranch} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
                     <option value="">▼ Select Branch</option>
                     <option value="Hyderabad Branch">Hyderabad Branch</option>
@@ -167,7 +167,7 @@ export default function InviteMember() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Role *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Role *</label>
                   <select name="role" value={formData.role} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
                     <option value="MEMBER">Member</option>
                     <option value="ADMIN">Family Admin</option>
@@ -177,10 +177,10 @@ export default function InviteMember() {
           </section>
 
           {/* Section 2: Family Placement */}
-          <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-6 md:p-8">
-             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 md:p-8">
+             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 ">
                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Users size={20} /></div>
-               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Family Placement</h2>
+               <h2 className="text-xl font-semibold text-slate-900 ">Family Placement</h2>
              </div>
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                <div className="space-y-5">
@@ -209,7 +209,7 @@ export default function InviteMember() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Section 3: Invitation Settings */}
-            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-6">
+            <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
                 <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Settings size={20} /></div>
                 <h2 className="text-lg font-semibold text-slate-900">Invitation Settings</h2>
@@ -253,7 +253,7 @@ export default function InviteMember() {
             </section>
 
             {/* Section 4: Invitation Preview */}
-            <section className="bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner overflow-hidden p-6 flex flex-col">
+            <section className="bg-slate-50 rounded-2xl border border-slate-200 shadow-inner overflow-hidden p-6 flex flex-col">
               <h2 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-6">Invitation Preview</h2>
               <div className="flex-1 bg-white rounded-xl shadow-lg border border-slate-100 p-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
                  <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 left-0"></div>
@@ -278,7 +278,7 @@ export default function InviteMember() {
           <div style={{ height: '80px' }}></div> {/* Spacer for sticky footer */}
           
           {/* Sticky Footer */}
-          <div className="fixed bottom-0 left-0 w-full bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 z-40 py-4 px-6 md:px-8 shadow-2xl">
+          <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-slate-200 z-40 py-4 px-6 md:px-8 shadow-2xl">
              <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-500 hidden md:block">Requires secure verification.</p>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
@@ -300,7 +300,7 @@ export default function InviteMember() {
       <AnimatePresence>
         {showSuccessDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+             <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }} className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
                 <div className="p-8 text-center relative">
                    <button onClick={() => setShowSuccessDialog(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full"><X size={20}/></button>
                    
@@ -351,9 +351,9 @@ export default function InviteMember() {
       <AnimatePresence>
         {showQrModal && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl relative max-w-lg w-full text-center">
-               <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20}/></button>
-               <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Scan to Join</h3>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white p-8 rounded-3xl shadow-2xl relative max-w-lg w-full text-center">
+               <button onClick={() => setShowQrModal(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 :bg-slate-800 rounded-full"><X size={20}/></button>
+               <h3 className="text-2xl font-bold text-slate-900 mb-2">Scan to Join</h3>
                <p className="text-slate-500 text-base mb-6">Scan this QR code with your phone's camera to directly access the family hub.</p>
                <div className="bg-white p-6 rounded-2xl shadow-inner border border-slate-100 inline-block mx-auto">
                   <QRCodeCanvas 

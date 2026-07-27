@@ -29,7 +29,7 @@ function Toggle({ checked, onChange }) {
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`w-12 h-6 rounded-full transition-all duration-300 relative flex-shrink-0 ${checked ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'}`}
+      className={`w-12 h-6 rounded-full transition-all duration-300 relative flex-shrink-0 ${checked ? 'bg-indigo-600' : 'bg-slate-200 '}`}
     >
       <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${checked ? 'left-6' : 'left-0.5'}`} />
     </button>
@@ -38,7 +38,7 @@ function Toggle({ checked, onChange }) {
 
 // ──────────────── Skeleton ────────────────
 function Skeleton({ className = '' }) {
-  return <div className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-xl ${className}`} />;
+  return <div className={`animate-pulse bg-slate-200 rounded-xl ${className}`} />;
 }
 
 export default function Settings() {
@@ -162,13 +162,13 @@ export default function Settings() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Settings</h1>
         <p className="text-sm text-slate-500 mt-1">Manage family preferences, notifications, security and profile.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start">
         {/* ── Sidebar nav ── */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 shadow-sm">
+        <div className="bg-white rounded-2xl p-3 border border-slate-100 shadow-sm">
           {sections.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -176,7 +176,7 @@ export default function Settings() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all mb-1 last:mb-0 ${
                 activeSection === id
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  : 'text-slate-600 hover:bg-slate-50 :bg-slate-800'
               }`}
             >
               <Icon size={18} />
@@ -187,12 +187,12 @@ export default function Settings() {
         </div>
 
         {/* ── Content panel ── */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="p-8">
             {/* ───── General / Family Info ───── */}
             {activeSection === 'general' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Family Information</h2>
+                <h2 className="text-xl font-bold text-slate-900 ">Family Information</h2>
                 {isLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}
@@ -207,12 +207,12 @@ export default function Settings() {
                       ['Country',     'country'],
                     ].map(([label, key]) => (
                       <div key={key}>
-                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
                         <input
                           type="text"
                           value={familyForm[key] || ''}
                           onChange={e => setFamilyForm(f => ({ ...f, [key]: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                         />
                       </div>
                     ))}
@@ -224,7 +224,7 @@ export default function Settings() {
             {/* ───── Notifications ───── */}
             {activeSection === 'notifications' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Notification Preferences</h2>
+                <h2 className="text-xl font-bold text-slate-900 ">Notification Preferences</h2>
                 {isLoading ? (
                   <div className="space-y-3">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
                 ) : (
@@ -237,10 +237,10 @@ export default function Settings() {
                       ['announcement_notifications', 'Announcements',              'Family-wide announcements',           '📢'],
                       ['whatsapp_notifications',     'WhatsApp Notifications',     'Alerts via WhatsApp (if configured)', '💬'],
                     ].map(([key, title, desc, emoji]) => (
-                      <div key={key} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <div key={key} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:bg-slate-50 :bg-slate-800/50 transition-colors">
                         <span className="text-2xl w-8 text-center">{emoji}</span>
                         <div className="flex-1">
-                          <div className="font-bold text-sm text-slate-900 dark:text-white">{title}</div>
+                          <div className="font-bold text-sm text-slate-900 ">{title}</div>
                           <div className="text-xs text-slate-400 mt-0.5">{desc}</div>
                         </div>
                         <Toggle checked={notifForm[key]} onChange={v => setNotifForm(n => ({ ...n, [key]: v }))} />
@@ -254,11 +254,11 @@ export default function Settings() {
             {/* ───── Appearance ───── */}
             {activeSection === 'appearance' && (
               <div className="space-y-8">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Appearance</h2>
+                <h2 className="text-xl font-bold text-slate-900 ">Appearance</h2>
 
                 {/* Theme */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Theme Mode</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-4">Theme Mode</label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-sm">
                     {[['Light', 'light', Sun], ['Dark', 'dark', Moon], ['System', 'System', SettingsIcon]].map(([label, val, Icon]) => (
                       <button
@@ -266,12 +266,12 @@ export default function Settings() {
                         onClick={() => setAppearForm(a => ({ ...a, theme: val }))}
                         className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
                           appearForm.theme === val
-                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                            ? 'border-indigo-500 bg-indigo-50 '
+                            : 'border-slate-200 hover:border-indigo-300'
                         }`}
                       >
                         <Icon size={24} className={appearForm.theme === val ? 'text-indigo-600' : 'text-slate-400'} />
-                        <span className={`text-sm font-bold ${appearForm.theme === val ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{label}</span>
+                        <span className={`text-sm font-bold ${appearForm.theme === val ? 'text-indigo-600' : 'text-slate-600 '}`}>{label}</span>
                       </button>
                     ))}
                   </div>
@@ -279,11 +279,11 @@ export default function Settings() {
 
                 {/* Language */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Language</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Language</label>
                   <select
                     value={appearForm.language}
                     onChange={e => setAppearForm(a => ({ ...a, language: e.target.value }))}
-                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   >
                     {['English', 'Hindi', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Marathi', 'Gujarati'].map(l => <option key={l}>{l}</option>)}
                   </select>
@@ -291,11 +291,11 @@ export default function Settings() {
 
                 {/* Timezone */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Timezone</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Timezone</label>
                   <select
                     value={appearForm.timezone}
                     onChange={e => setAppearForm(a => ({ ...a, timezone: e.target.value }))}
-                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   >
                     {['UTC', 'UTC+5:30 (IST)', 'UTC-5 (EST)', 'UTC-8 (PST)', 'UTC+1 (CET)', 'UTC+8 (SGT)'].map(t => <option key={t}>{t}</option>)}
                   </select>
@@ -306,7 +306,7 @@ export default function Settings() {
             {/* ───── Security ───── */}
             {activeSection === 'security' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Change Password</h2>
+                <h2 className="text-xl font-bold text-slate-900 ">Change Password</h2>
                 <div className="max-w-md space-y-4">
                   {[
                     ['Current Password', 'currentPassword'],
@@ -314,7 +314,7 @@ export default function Settings() {
                     ['Confirm Password', 'confirmPassword'],
                   ].map(([label, key]) => (
                     <div key={key}>
-                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{label}</label>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
                       <div className="relative">
                         <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
@@ -322,7 +322,7 @@ export default function Settings() {
                           value={pwForm[key]}
                           onChange={e => setPwForm(p => ({ ...p, [key]: e.target.value }))}
                           placeholder={`Enter ${label.toLowerCase()}`}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
                         />
                       </div>
                     </div>
@@ -335,7 +335,7 @@ export default function Settings() {
           </div>
 
           {/* ── Footer save bar ── */}
-          <div className="px-4 sm:px-8 py-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col sm:flex-row gap-3 items-center">
+          <div className="px-4 sm:px-8 py-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3 items-center">
             <button
               onClick={handleSave}
               disabled={isSaving || isLoading}
@@ -356,7 +356,7 @@ export default function Settings() {
                 }
                 if (activeSection === 'security') setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
               }}
-              className="px-6 py-2.5 rounded-xl font-semibold text-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+              className="px-6 py-2.5 rounded-xl font-semibold text-sm border border-slate-200 text-slate-600 hover:bg-slate-100 :bg-slate-800 transition-all"
             >
               Cancel
             </button>

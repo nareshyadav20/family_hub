@@ -69,7 +69,7 @@ export default function Events() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
          <div>
-           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Events</h1>
+           <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Family Events</h1>
            <p className="text-muted-foreground text-sm mt-1">Plan, manage, and celebrate together.</p>
          </div>
          <Button onClick={() => navigate('/admin/dashboard/events/create')} className="h-10 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 rounded-full px-6 whitespace-nowrap">
@@ -77,7 +77,7 @@ export default function Events() {
          </Button>
       </div>
       
-      <div className="flex gap-4 border-b border-slate-200 dark:border-slate-800 pb-px">
+      <div className="flex gap-4 border-b border-slate-200 pb-px">
          <button onClick={() => setActiveTab('upcoming')} className={`pb-3 border-b-2 font-bold px-2 transition-colors ${activeTab === 'upcoming' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Upcoming ({upcomingEvents.length})</button>
          <button onClick={() => setActiveTab('past')} className={`pb-3 border-b-2 font-medium px-2 transition-colors ${activeTab === 'past' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Past Events ({pastEvents.length})</button>
          <button onClick={() => setActiveTab('draft')} className={`pb-3 border-b-2 font-medium px-2 transition-colors ${activeTab === 'draft' ? 'border-indigo-600 text-indigo-600 font-bold' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Drafts ({draftEvents.length})</button>
@@ -86,12 +86,12 @@ export default function Events() {
       {isLoading ? (
          <div className="py-20 text-center font-bold text-slate-400">Loading Events...</div>
       ) : activeEvents.length === 0 ? (
-         <div className="py-16 text-center bg-indigo-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-indigo-200 dark:border-slate-700">
-            <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-500 shadow-sm">
+         <div className="py-16 text-center bg-indigo-50/50 rounded-3xl border border-dashed border-indigo-200 ">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-500 shadow-sm">
                <CalendarIcon size={32} />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No {activeTab} events found</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Create and schedule family gatherings, parties, or important reminders to keep everyone connected.</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">No {activeTab} events found</h3>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create and schedule family gatherings, parties, or important reminders to keep everyone connected.</p>
             <Button onClick={() => navigate('/admin/dashboard/events/create')} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30 rounded-full px-6">
                <Plus className="h-4 w-4 mr-2" /> Create Your First Event
             </Button>
@@ -104,8 +104,8 @@ export default function Events() {
              const day = dateObj.getDate();
              
              return (
-               <Card key={e.id} onClick={() => navigate(`/admin/dashboard/events/${e.id}`)} className="border-0 shadow-sm dark:shadow-none bg-white dark:bg-slate-900 group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
-                 <div className="h-40 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+               <Card key={e.id} onClick={() => navigate(`/admin/dashboard/events/${e.id}`)} className="border-0 shadow-sm bg-white group cursor-pointer hover:-translate-y-1 hover:shadow-xl transition-all duration-300 overflow-hidden rounded-2xl flex flex-col">
+                 <div className="h-40 w-full relative overflow-hidden bg-slate-100 flex items-center justify-center text-slate-300">
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10"></div>
                     {e.bannerImage ? (
                        <img src={e.bannerImage} alt={e.name} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out" />
@@ -113,9 +113,9 @@ export default function Events() {
                        <ImageIcon size={40} className="transform group-hover:scale-105 transition-transform duration-700 opacity-50" />
                     )}
                     
-                    <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md dark:bg-slate-900/95 rounded-xl p-2 shadow-lg text-center min-w-[55px] border border-white/50">
-                      <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{month}</div>
-                      <div className="text-2xl font-black text-slate-800 dark:text-white leading-none mt-0.5">{day}</div>
+                    <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-md rounded-xl p-2 shadow-lg text-center min-w-[55px] border border-white/50">
+                      <div className="text-[10px] font-black text-indigo-600 uppercase tracking-wider">{month}</div>
+                      <div className="text-2xl font-black text-slate-800 leading-none mt-0.5">{day}</div>
                     </div>
                     
                     <div className="absolute top-4 right-4 z-20">
@@ -127,15 +127,15 @@ export default function Events() {
                  
                  <CardContent className="p-6 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{e.name}</h3>
+                      <h3 className="text-xl font-bold mb-3 text-slate-800 line-clamp-1 group-hover:text-indigo-600 :text-indigo-400 transition-colors">{e.name}</h3>
                       
-                      <div className="space-y-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                      <div className="space-y-2.5 text-sm font-medium text-slate-600 ">
                         <div className="flex items-center gap-3"><Clock className="h-4 w-4 shrink-0 text-slate-400" /> {dateObj.toLocaleDateString()} at {e.startTime}</div>
                         <div className="flex items-center gap-3"><MapPin className="h-4 w-4 shrink-0 text-slate-400" /> <span className="truncate">{e.venue}, {e.city || e.address}</span></div>
                       </div>
                     </div>
                     
-                    <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
                        <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{e.familyBranch} Branch</span>
                        </div>
@@ -146,7 +146,7 @@ export default function Events() {
                            <Video className="w-3.5 h-3.5 mr-1.5" /> Watch Live
                          </Button>
                        )}
-                       <Button onClick={(ev) => handleDelete(ev, e.id)} variant="ghost" className="flex-1 bg-slate-50 dark:bg-slate-800 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 text-slate-500 rounded-lg h-9 text-xs font-bold shadow-none">
+                       <Button onClick={(ev) => handleDelete(ev, e.id)} variant="ghost" className="flex-1 bg-slate-50 hover:bg-red-50 hover:text-red-600 :bg-red-900/30 text-slate-500 rounded-lg h-9 text-xs font-bold shadow-none">
                          <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
                        </Button>
                     </div>

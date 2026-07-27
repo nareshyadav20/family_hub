@@ -79,95 +79,95 @@ export default function AddMember() {
   return (
     <div className="max-w-4xl mx-auto pb-20 animate-in fade-in duration-500 pt-8 px-6 lg:px-8">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 :bg-slate-800 rounded-full transition-colors text-slate-500">
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Add Family Member</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Create a family member record manually (e.g. children, elders). No invitation link will be generated.</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Add Family Member</h1>
+          <p className="text-sm text-slate-500 ">Create a family member record manually (e.g. children, elders). No invitation link will be generated.</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
         <form className="space-y-8" onSubmit={(e) => handleSubmit(e, false)}>
           
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <User size={18} className="text-blue-500" /> Basic Identification
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">First Name *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">First Name *</label>
                 <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. John" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Last Name *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Last Name *</label>
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Doe" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex justify-between">Email Address *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between">Email Address *</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="email@example.com" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Gender *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender *</label>
                 <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date of Birth (Optional)</label>
                 <input type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <Lock size={18} className="text-blue-500" /> Account Credentials
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password *</label>
                 <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Minimum 8 characters" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Confirm Password *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password *</label>
                 <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Type password again" />
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               Family Placement
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Relationship to Head *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Head *</label>
                 <input type="text" name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Son, Daughter, Ancestor" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Family Branch *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Family Branch *</label>
                 <select name="familyBranch" value={formData.familyBranch} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                    <option value="">Select Branch</option>
                    <option value="Main">Main Branch</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Father (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Father (Optional)</label>
                 <input type="text" name="fatherId" value={formData.fatherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Mother (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mother (Optional)</label>
                 <input type="text" name="motherId" value={formData.motherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Spouse (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Spouse (Optional)</label>
                 <input type="text" name="spouseId" value={formData.spouseId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status *</label>
                 <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                    <option value="ACTIVE">Active (Children/Elders)</option>
                    <option value="DECEASED">Deceased</option>
@@ -175,7 +175,7 @@ export default function AddMember() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Role *</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Role *</label>
                 <select name="role" value={formData.role} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                    <option value="MEMBER">Member</option>
                    <option value="ADMIN">Family Admin</option>
@@ -185,7 +185,7 @@ export default function AddMember() {
           </div>
           
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Admin Notes</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Admin Notes</label>
             <textarea name="notes" value={formData.notes} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 h-24" placeholder="Any internal notes..."></textarea>
           </div>
           

@@ -60,8 +60,8 @@ export default function EventDetails() {
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Events
       </button>
 
-      <div className="bg-white dark:bg-slate-900 rounded-[24px] shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
-        <div className="h-48 md:h-80 w-full relative bg-slate-100 dark:bg-slate-800">
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div className="h-48 md:h-80 w-full relative bg-slate-100 ">
           {event.bannerImage ? (
             <img src={event.bannerImage} alt={event.name} className="w-full h-full object-cover object-center" />
           ) : (
@@ -89,32 +89,32 @@ export default function EventDetails() {
         <div className="p-8 md:p-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white capitalize leading-tight">{event.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 capitalize leading-tight">{event.name}</h1>
               <div className="flex items-center gap-3 mt-3">
-                 <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider rounded-lg">{event.familyBranch} Branch</span>
-                 <span className="px-3 py-1 bg-yellow-50 dark:bg-yellow-900/40 text-yellow-600 font-bold text-xs uppercase tracking-wider rounded-lg">{event.visibility}</span>
+                 <span className="px-3 py-1 bg-blue-50 text-blue-600 font-bold text-xs uppercase tracking-wider rounded-lg">{event.familyBranch} Branch</span>
+                 <span className="px-3 py-1 bg-yellow-50 text-yellow-600 font-bold text-xs uppercase tracking-wider rounded-lg">{event.visibility}</span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 border-y border-slate-100 dark:border-slate-800 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 border-y border-slate-100 py-8">
             <div className="flex items-start gap-4">
-               <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-[#2563EB] shrink-0">
+               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-[#2563EB] shrink-0">
                   <Calendar size={20} />
                </div>
                <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Date</h3>
-                  <p className="font-bold text-slate-800 dark:text-slate-100">{formattedDate}</p>
+                  <p className="font-bold text-slate-800 ">{formattedDate}</p>
                </div>
             </div>
             
             <div className="flex items-start gap-4">
-               <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
                   <Clock size={20} />
                </div>
                <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Time</h3>
-                  <p className="font-bold text-slate-800 dark:text-slate-100">{event.startTime} {event.endTime ? `- ${event.endTime}` : ''}</p>
+                  <p className="font-bold text-slate-800 ">{event.startTime} {event.endTime ? `- ${event.endTime}` : ''}</p>
                </div>
             </div>
 
@@ -124,7 +124,7 @@ export default function EventDetails() {
                </div>
                <div>
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Location</h3>
-                  <p className="font-bold text-slate-800 dark:text-slate-100">{event.venue}</p>
+                  <p className="font-bold text-slate-800 ">{event.venue}</p>
                   <p className="text-sm font-medium text-slate-500 mt-0.5">{event.address}, {event.city}, {event.state}</p>
                </div>
             </div>
@@ -133,8 +133,8 @@ export default function EventDetails() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-8">
                <section>
-                 <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">About this Event</h2>
-                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-wrap">
+                 <h2 className="text-xl font-bold text-slate-900 mb-4">About this Event</h2>
+                 <p className="text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
                    {event.description}
                  </p>
                </section>
@@ -164,9 +164,9 @@ export default function EventDetails() {
                ) : (
                  event.liveStream && event.streamUrl ? (
                     isStreamEnded ? (
-                     <div className="mt-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-10 text-center flex flex-col items-center justify-center shadow-sm">
-                        <Video size={48} className="text-slate-300 dark:text-slate-700 mb-4" />
-                        <h2 className="text-xl font-bold text-slate-700 dark:text-white mb-2">Live Stream Ended</h2>
+                     <div className="mt-6 bg-slate-50 rounded-xl border border-slate-200 p-10 text-center flex flex-col items-center justify-center shadow-sm">
+                        <Video size={48} className="text-slate-300 mb-4" />
+                        <h2 className="text-xl font-bold text-slate-700 mb-2">Live Stream Ended</h2>
                         <p className="text-sm text-slate-500 font-medium max-w-md">The stream originally scheduled until {event.endTime} has automatically closed.</p>
                      </div>
                     ) : (
@@ -196,7 +196,7 @@ export default function EventDetails() {
                           </div>
                           
                           {event.liveChat && (
-                           <div className="w-full h-[400px] lg:h-auto overflow-hidden bg-white dark:bg-slate-950 border-l border-slate-800">
+                           <div className="w-full h-[400px] lg:h-auto overflow-hidden bg-white border-l border-slate-800">
                              <iframe
                                width="100%" height="100%"
                                src={`https://www.youtube.com/live_chat?v=${event.streamUrl.split('v=')[1]?.split('&')[0] || ''}&embed_domain=${window.location.hostname === 'localhost' ? 'localhost' : window.location.hostname}`}
@@ -214,16 +214,16 @@ export default function EventDetails() {
             <div className="space-y-6">
               {/* RSVP Card */}
               {event.rsvpEnabled && (
-                 <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-                   <h3 className="font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2"><Ticket size={18} className="text-[#2563EB]" /> RSVP Tracking</h3>
+                 <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 ">
+                   <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2"><Ticket size={18} className="text-[#2563EB]" /> RSVP Tracking</h3>
                    <div className="space-y-4">
                      {event.maxGuests && (
                         <div className="flex justify-between items-center text-sm">
                            <span className="text-slate-500 font-medium">Capacity</span>
-                           <span className="font-bold text-slate-800 dark:text-white">{event.maxGuests} Guests</span>
+                           <span className="font-bold text-slate-800 ">{event.maxGuests} Guests</span>
                         </div>
                      )}
-                     <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                     <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                        <div className="w-1/3 h-full bg-[#2563EB] rounded-full"></div>
                      </div>
                      <p className="text-xs text-center text-slate-500 font-medium mt-2">Waiting for responses...</p>

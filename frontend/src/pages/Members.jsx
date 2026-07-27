@@ -17,13 +17,13 @@ import API_BASE_URL from '../config/api';
 
 const getStatusBadge = (status) => {
    switch (status) {
-      case 'ACTIVE': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200';
-      case 'INVITATION_SENT': return 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200';
-      case 'EMAIL_FAILED': return 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200';
-      case 'PENDING_INVITE': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200';
-      case 'WAITING_APPROVAL': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 border-purple-200';
-      case 'INACTIVE': return 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400 border-slate-200';
-      case 'REJECTED': return 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border-rose-200';
+      case 'ACTIVE': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+      case 'INVITATION_SENT': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'EMAIL_FAILED': return 'bg-red-100 text-red-700 border-red-200';
+      case 'PENDING_INVITE': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'WAITING_APPROVAL': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'INACTIVE': return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'REJECTED': return 'bg-rose-100 text-rose-700 border-rose-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
    }
 };
@@ -186,16 +186,16 @@ export default function Members() {
          </div>
 
          {/* Search, Filters & Bulk Actions Toolbar */}
-         <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+         <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-4">
 
                {/* Search inputs */}
                <div className="flex items-center gap-3">
                   <div className="relative w-64 md:w-80">
                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, ID, email, or mobile..." className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
+                     <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, ID, email, or mobile..." className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
                   </div>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50">
                      <Filter size={16} /> Filters <ChevronDown size={14} className="opacity-50" />
                   </button>
                </div>
@@ -219,9 +219,9 @@ export default function Members() {
          </div>
 
          {/* Main Enterprise Data Table */}
-         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden overflow-x-auto">
+         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap responsive-table">
-               <thead className="text-xs text-slate-500 font-bold uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+               <thead className="text-xs text-slate-500 font-bold uppercase tracking-wider bg-slate-50 border-b border-slate-200 ">
                   <tr>
                      <th className="px-4 py-4 w-12 text-center hidden md:table-cell">
                         <input type="checkbox" onChange={(e) => setSelectedRows(e.target.checked ? liveMembers.map(m => m.id) : [])} checked={selectedRows.length > 0 && selectedRows.length === liveMembers.length} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
@@ -238,7 +238,7 @@ export default function Members() {
                      <th className="px-4 py-4 text-center">Actions</th>
                   </tr>
                </thead>
-               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+               <tbody className="divide-y divide-slate-100 ">
                   {isLoading ? (
                      <>
                         <TableRowSkeleton columns={11} />
@@ -251,10 +251,10 @@ export default function Members() {
                      <tr>
                         <td colSpan="11" className="text-center py-16">
                            <div className="flex flex-col items-center justify-center">
-                              <div className="w-16 h-16 bg-blue-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-blue-500">
+                              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-blue-500">
                                  <Users size={32} />
                               </div>
-                              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">No members found</h3>
+                              <h3 className="text-lg font-bold text-slate-800 mb-1">No members found</h3>
                               <p className="text-sm text-slate-500 max-w-sm mx-auto mb-4">Your family directory is empty. Start building your family network by adding or inviting members.</p>
                               <button onClick={() => navigate('/admin/dashboard/members/invite')} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all">
                                  <Mail size={16} /> Invite Your First Member
@@ -263,7 +263,7 @@ export default function Members() {
                         </td>
                      </tr>
                   ) : liveMembers.map((m) => (
-                     <tr key={m.id} className="hover:bg-blue-50/40 dark:hover:bg-slate-800/40 transition-colors group relative">
+                     <tr key={m.id} className="hover:bg-blue-50/40 :bg-slate-800/40 transition-colors group relative">
                         <td className="px-4 py-4 text-center hidden md:table-cell w-12">
                            <input type="checkbox" checked={selectedRows.includes(m.id)} onChange={() => setSelectedRows(prev => prev.includes(m.id) ? prev.filter(id => id !== m.id) : [...prev, m.id])} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
                         </td>
@@ -273,17 +273,17 @@ export default function Members() {
                                  {m.avatar ? <img src={m.avatar} alt="Profile" className="w-full h-full object-cover" /> : m.name.charAt(0)}
                               </div>
                               <div className="text-right md:text-left">
-                                 <div className="font-bold text-slate-900 dark:text-white text-sm">{m.name}</div>
+                                 <div className="font-bold text-slate-900 text-sm">{m.name}</div>
                                  <div className="text-[11px] font-mono text-slate-500 mt-0.5">{m.memId}</div>
                               </div>
                            </div>
                         </td>
                         <td data-label="Contact" className="px-4 py-4 w-full md:w-auto">
-                           <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 justify-end md:justify-start"><MessageCircle size={12} />{m.phone}</div>
+                           <div className="text-sm font-medium text-slate-700 flex items-center gap-1.5 justify-end md:justify-start"><MessageCircle size={12} />{m.phone}</div>
                            <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 justify-end md:justify-start">{m.email ? <><Mail size={12} /> {m.email}</> : <span className="text-slate-400 italic">No email</span>}</div>
                         </td>
                         <td data-label="Relationship" className="px-4 py-4 w-full md:w-auto">
-                           <span className="font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-xs">{m.relation}</span>
+                           <span className="font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md text-xs">{m.relation}</span>
                         </td>
                         <td data-label="Branch" className="px-4 py-4 w-full md:w-auto text-slate-600 text-sm font-medium">{m.branch}</td>
                         <td data-label="Generation" className="px-4 py-4 w-full md:w-auto md:text-center text-slate-500 font-mono font-bold text-xs"><span className="bg-slate-50/50 px-2 rounded">{m.gen}</span></td>
@@ -298,12 +298,12 @@ export default function Members() {
                         <td data-label="Profile" className="px-4 py-4 w-full md:w-40">
                            <div className="flex flex-col gap-1.5 items-end md:items-start w-full relative">
                               <div className="flex items-center gap-2 w-full md:w-auto">
-                                 <div className="w-full md:w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex-1 md:flex-none">
+                                 <div className="w-full md:w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden flex-1 md:flex-none">
                                     <div className={`h-full rounded-full ${m.progress === 100 ? 'bg-emerald-500' : m.progress >= 50 ? 'bg-blue-500' : 'bg-amber-500'}`} style={{ width: `${m.progress}%` }}></div>
                                  </div>
-                                 <span className={`text-[11px] font-bold w-9 text-right md:text-left ${m.progress === 100 ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'}`}>{m.progress}%</span>
+                                 <span className={`text-[11px] font-bold w-9 text-right md:text-left ${m.progress === 100 ? 'text-emerald-600' : 'text-slate-600 '}`}>{m.progress}%</span>
                               </div>
-                              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">{m.currentStep}</span>
+                              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 ">{m.currentStep}</span>
                            </div>
                         </td>
                         <td data-label="Last Active" className="px-4 py-4 w-full md:w-auto text-xs text-slate-500 font-medium">{m.lastActive}</td>
@@ -333,9 +333,9 @@ export default function Members() {
                   {/* Backdrop */}
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50" onClick={() => setActiveDrawer(null)} />
                   {/* Drawer */}
-                  <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed right-0 top-0 h-full w-[400px] bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col border-l border-slate-200 dark:border-slate-800">
-                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-                        <h2 className="font-bold text-slate-800 dark:text-white flex items-center gap-2"><UserCheck size={18} /> Member Profile</h2>
+                  <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed right-0 top-0 h-full w-[400px] bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200 ">
+                     <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 ">
+                        <h2 className="font-bold text-slate-800 flex items-center gap-2"><UserCheck size={18} /> Member Profile</h2>
                         <button onClick={() => setActiveDrawer(null)} className="p-2 hover:bg-slate-200 rounded-full text-slate-500"><X size={18} /></button>
                      </div>
 

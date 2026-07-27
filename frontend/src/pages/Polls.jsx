@@ -92,7 +92,7 @@ export default function Polls() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Polls</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Family Polls</h1>
           <p className="text-slate-500 text-sm mt-1">Gather opinions and make decisions together.</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-lg shadow-[#7C5CFC]/20 cursor-pointer">
@@ -103,11 +103,11 @@ export default function Polls() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {!isLoading && polls.length === 0 && (
             <div className="col-span-1 xl:col-span-2 py-16 text-center bg-[#FAF8FF] rounded-3xl border border-dashed border-[#E9E5F8] w-full mt-4">
-               <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-[#7C5CFC] shadow-sm">
+               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-[#7C5CFC] shadow-sm">
                   <BarChart2 size={32} />
                </div>
-               <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No polls available</h3>
-               <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-6">Gather family opinions and democratize decisions. Create a poll to see what everyone thinks.</p>
+               <h3 className="text-xl font-bold text-slate-800 mb-2">No polls available</h3>
+               <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Gather family opinions and democratize decisions. Create a poll to see what everyone thinks.</p>
                <button onClick={() => setShowModal(true)} className="px-6 py-2 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-semibold rounded-full shadow-md shadow-[#7C5CFC]/20 flex items-center justify-center gap-2 transition-all mx-auto">
                   <Plus size={16} /> Create Your First Poll
                </button>
@@ -140,19 +140,19 @@ export default function Polls() {
           const maxVotes = Math.max(...Object.values(optionCounts), 0);
           
           return (
-            <div key={poll.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 hover:shadow-md transition-shadow">
+            <div key={poll.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between gap-3 mb-5">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${pStatus === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${pStatus === 'active' ? 'bg-emerald-100 text-emerald-700 ' : 'bg-slate-100 text-slate-500 '}`}>
                       {pStatus === 'active' ? '🟢 Active' : '⚫ Closed'}
                     </span>
                     <span className="text-xs text-slate-400">Ends {new Date(poll.endDate).toLocaleDateString()}</span>
                   </div>
-                  <h3 className="font-bold text-slate-900 dark:text-white text-[15px] leading-snug">{poll.question}</h3>
+                  <h3 className="font-bold text-slate-900 text-[15px] leading-snug">{poll.question}</h3>
                   <p className="text-xs text-slate-400 mt-1">by {poll.author?.firstName || 'Admin'} · {totalVotes} votes</p>
                 </div>
-                <BarChart2 size={22} className="text-slate-300 dark:text-slate-700 shrink-0 mt-1" />
+                <BarChart2 size={22} className="text-slate-300 shrink-0 mt-1" />
               </div>
 
               <div className="space-y-3">
@@ -170,18 +170,18 @@ export default function Polls() {
                       onClick={() => !hasVotedLocal && pStatus === 'active' && setSelected(prev => ({ ...prev, [poll.id]: opt.id }))}
                       className={`relative rounded-xl overflow-hidden border transition-all cursor-pointer ${isSelected && !hasVotedLocal ? 'border-[#7C5CFC] shadow-sm shadow-[#7C5CFC]/20' : 'border-transparent'}`}
                     >
-                      <div className={`absolute inset-y-0 left-0 rounded-xl transition-all duration-500 ${isWinner ? 'bg-[#EEE8FF]' : 'bg-slate-50 dark:bg-slate-800/60'}`}
+                      <div className={`absolute inset-y-0 left-0 rounded-xl transition-all duration-500 ${isWinner ? 'bg-[#EEE8FF]' : 'bg-slate-50 '}`}
                         style={{ width: (hasVotedLocal || pStatus === 'closed') ? `${pct}%` : '0%' }}
                       />
                       <div className="relative flex items-center justify-between px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${isMyVote ? 'bg-[#7C5CFC] border-[#7C5CFC]' : isSelected ? 'border-[#7C5CFC]' : 'border-slate-300 dark:border-slate-600'}`}>
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${isMyVote ? 'bg-[#7C5CFC] border-[#7C5CFC]' : isSelected ? 'border-[#7C5CFC]' : 'border-slate-300 '}`}>
                             {isMyVote && <Check size={11} className="text-white" />}
                           </div>
-                          <span className={`text-sm font-semibold ${isWinner && (hasVotedLocal || pStatus === 'closed') ? 'text-[#7C5CFC] dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>{opt.text}</span>
+                          <span className={`text-sm font-semibold ${isWinner && (hasVotedLocal || pStatus === 'closed') ? 'text-[#7C5CFC] ' : 'text-slate-700 '}`}>{opt.text}</span>
                         </div>
                         {(hasVotedLocal || pStatus === 'closed') && (
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 ">
                             <span>{vCount} votes</span>
                             <span className={`${isWinner ? 'text-[#7C5CFC]' : ''}`}>{pct}%</span>
                           </div>
@@ -198,12 +198,12 @@ export default function Polls() {
                    localStorage.setItem(`voted_${poll.id}`, 'true');
                    localStorage.setItem(`voted_${poll.id}_opt`, selected[poll.id]);
                 }} disabled={selected[poll.id] === undefined || voteMutation.isPending}
-                  className={`w-full mt-4 py-2.5 rounded-xl text-sm font-bold transition-all ${selected[poll.id] !== undefined ? 'bg-[#7C5CFC] text-white hover:bg-[#6B49F6] shadow-md shadow-[#7C5CFC]/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}`}>
+                  className={`w-full mt-4 py-2.5 rounded-xl text-sm font-bold transition-all ${selected[poll.id] !== undefined ? 'bg-[#7C5CFC] text-white hover:bg-[#6B49F6] shadow-md shadow-[#7C5CFC]/20' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
                   {voteMutation.isPending ? 'Submitting...' : 'Submit Vote'}
                 </button>
               )}
               {hasVotedLocal && (
-                <p className="text-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-4">✓ You voted!</p>
+                <p className="text-center text-xs font-semibold text-emerald-600 mt-4">✓ You voted!</p>
               )}
             </div>
           );
@@ -212,8 +212,8 @@ export default function Polls() {
 
       {showModal && (
         <form onSubmit={handleCreate} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Create New Poll</h2>
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Create New Poll</h2>
               <div className="space-y-4">
                 <input required type="text" value={newPoll.question} onChange={e => setNewPoll({...newPoll, question: e.target.value})} placeholder="What is your question?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium" />
                 
@@ -235,7 +235,7 @@ export default function Polls() {
                   <button type="submit" disabled={createMutation.isPending} className="flex-1 disabled:opacity-50 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
                    {createMutation.isPending ? 'Creating...' : 'Create Poll'}
                  </button>
-                 <button type="button" onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button type="button" onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </form>

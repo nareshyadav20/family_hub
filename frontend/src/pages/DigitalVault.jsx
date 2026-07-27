@@ -25,7 +25,7 @@ export default function DigitalVault() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Digital Vault</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Digital Vault</h1>
           <p className="text-sm text-slate-500 mt-1">Securely store all important family documents and certificates.</p>
         </div>
         <button className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/30">
@@ -34,16 +34,16 @@ export default function DigitalVault() {
       </div>
 
       {/* Security badge */}
-      <div className="bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-500/10 dark:to-violet-500/10 rounded-2xl p-5 border border-indigo-100 dark:border-indigo-500/20 flex items-center gap-4">
+      <div className="bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl p-5 border border-indigo-100 flex items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/30">
           <Shield size={22} color="white" />
         </div>
         <div>
-          <div className="font-bold text-indigo-700 dark:text-indigo-400 text-sm mb-0.5">AES-256 Military-Grade Encryption</div>
-          <p className="text-sm text-indigo-600/70 dark:text-indigo-400/60">All documents are encrypted at rest and in transit. Only authorized family admins can access sensitive files.</p>
+          <div className="font-bold text-indigo-700 text-sm mb-0.5">AES-256 Military-Grade Encryption</div>
+          <p className="text-sm text-indigo-600/70 ">All documents are encrypted at rest and in transit. Only authorized family admins can access sensitive files.</p>
         </div>
         <div className="ml-auto text-right hidden sm:block">
-          <div className="text-2xl font-black text-indigo-700 dark:text-indigo-400">100%</div>
+          <div className="text-2xl font-black text-indigo-700 ">100%</div>
           <div className="text-xs text-indigo-500">Encrypted</div>
         </div>
       </div>
@@ -51,9 +51,9 @@ export default function DigitalVault() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[['📁', '6', 'Documents'], ['🔒', '4', 'Sensitive Files'], ['💾', '14.1 MB', 'Total Size'], ['📂', '5', 'Categories']].map(([emoji, val, label]) => (
-          <div key={label} className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm text-center">
+          <div key={label} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm text-center">
             <div className="text-3xl mb-3">{emoji}</div>
-            <div className="text-2xl font-black text-slate-900 dark:text-white">{val}</div>
+            <div className="text-2xl font-black text-slate-900 ">{val}</div>
             <div className="text-sm text-slate-500 mt-1">{label}</div>
           </div>
         ))}
@@ -63,11 +63,11 @@ export default function DigitalVault() {
       <div className="flex gap-4 flex-wrap items-center">
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40" />
         </div>
         <div className="flex gap-2 flex-wrap">
           {vaultCategories.map(cat => (
-            <button key={cat} onClick={() => setActiveType(cat)} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeType === cat ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+            <button key={cat} onClick={() => setActiveType(cat)} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeType === cat ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 :bg-slate-800'}`}>
               {cat}
             </button>
           ))}
@@ -75,18 +75,18 @@ export default function DigitalVault() {
       </div>
 
       {/* Documents table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm vault-table-container">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 grid grid-cols-[2fr_1fr_1fr_1fr_120px] gap-4">
+      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm vault-table-container">
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 grid grid-cols-[2fr_1fr_1fr_1fr_120px] gap-4">
           {['Document Name', 'Category', 'Size', 'Date Added', 'Actions'].map((h, i) => (
             <div key={h} className={`text-xs font-bold text-slate-400 uppercase tracking-wider ${i === 4 ? 'text-right' : ''}`}>{h}</div>
           ))}
         </div>
         {filtered.map((doc, i) => (
-          <div key={doc.id} className={`px-6 py-4 grid grid-cols-[2fr_1fr_1fr_1fr_120px] gap-4 items-center hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0`}>
+          <div key={doc.id} className={`px-6 py-4 grid grid-cols-[2fr_1fr_1fr_1fr_120px] gap-4 items-center hover:bg-slate-50 :bg-slate-800/40 transition-colors border-b border-slate-50 last:border-0`}>
             <div className="flex items-center gap-4">
               <div style={{ width: 44, height: 44, borderRadius: 12, background: `${doc.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{doc.icon}</div>
               <div>
-                <div className="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <div className="font-bold text-sm text-slate-800 flex items-center gap-2">
                   {doc.name}
                   {doc.sensitive && <Lock size={12} className="text-slate-400" />}
                 </div>
@@ -98,7 +98,7 @@ export default function DigitalVault() {
             <span className="text-sm text-slate-500">{doc.date}</span>
             <div className="flex gap-2 justify-end">
               {[Eye, Download].map((Icon, j) => (
-                <button key={j} className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:border-indigo-300 hover:text-indigo-600 flex items-center justify-center text-slate-400 transition-all">
+                <button key={j} className="w-8 h-8 rounded-lg border border-slate-200 bg-white hover:bg-indigo-50 :bg-indigo-500/10 hover:border-indigo-300 hover:text-indigo-600 flex items-center justify-center text-slate-400 transition-all">
                   <Icon size={14} />
                 </button>
               ))}

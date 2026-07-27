@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Check } from 'lucide-react';
+import { Lock, Check, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import api from '../services/api'; // Or use axios
@@ -12,6 +12,10 @@ export default function ChangePassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
+  
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   const validatePassword = (pwd) => {
@@ -117,24 +121,42 @@ export default function ChangePassword() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Current Password</label>
-              <input
-                required
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
+              <div className="mt-1 relative rounded-lg shadow-sm">
+                <input
+                  required
+                  type={showCurrent ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrent(!showCurrent)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700">New Password</label>
-              <input
-                required
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
+              <div className="mt-1 relative rounded-lg shadow-sm">
+                <input
+                  required
+                  type={showNew ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <ul className="mt-2 text-xs text-gray-500 space-y-1">
                 <li className={`flex items-center ${newPassword.length >= 8 ? 'text-green-600' : ''}`}><Check className="w-3 h-3 mr-1" /> Minimum 8 characters</li>
                 <li className={`flex items-center ${/[A-Z]/.test(newPassword) ? 'text-green-600' : ''}`}><Check className="w-3 h-3 mr-1" /> At least 1 uppercase letter</li>
@@ -146,13 +168,22 @@ export default function ChangePassword() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
-              <input
-                required
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
+              <div className="mt-1 relative rounded-lg shadow-sm">
+                <input
+                  required
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
 

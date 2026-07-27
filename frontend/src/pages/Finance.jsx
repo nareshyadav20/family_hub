@@ -3,10 +3,10 @@ import { DollarSign, TrendingUp, TrendingDown, Wallet, PiggyBank, CreditCard, Ar
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const accounts = [
-  { name: 'Family Trust Fund', balance: '$4,250,000', change: '+2.3%', type: 'Trust', icon: PiggyBank, iconColor: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10', up: true },
-  { name: 'Investment Portfolio', balance: '$3,120,000', change: '+5.1%', type: 'Investment', icon: TrendingUp, iconColor: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-500/10', up: true },
-  { name: 'Real Estate Holdings', balance: '$3,800,000', change: '+1.8%', type: 'Property', icon: Wallet, iconColor: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-500/10', up: true },
-  { name: 'Operating Account', balance: '$530,000', change: '-0.5%', type: 'Checking', icon: CreditCard, iconColor: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-500/10', up: false },
+  { name: 'Family Trust Fund', balance: '$4,250,000', change: '+2.3%', type: 'Trust', icon: PiggyBank, iconColor: 'text-blue-500', bg: 'bg-blue-50 ', up: true },
+  { name: 'Investment Portfolio', balance: '$3,120,000', change: '+5.1%', type: 'Investment', icon: TrendingUp, iconColor: 'text-emerald-500', bg: 'bg-emerald-50 ', up: true },
+  { name: 'Real Estate Holdings', balance: '$3,800,000', change: '+1.8%', type: 'Property', icon: Wallet, iconColor: 'text-violet-500', bg: 'bg-violet-50 ', up: true },
+  { name: 'Operating Account', balance: '$530,000', change: '-0.5%', type: 'Checking', icon: CreditCard, iconColor: 'text-orange-500', bg: 'bg-orange-50 ', up: false },
 ];
 
 const transactions = [
@@ -41,7 +41,7 @@ export default function Finance() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Finance</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Finance</h1>
           <p className="text-slate-500 text-sm mt-1">
             Total Family Net Worth: <span className="font-bold text-emerald-600">$11,700,000</span>
           </p>
@@ -54,7 +54,7 @@ export default function Finance() {
       {/* Account Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {accounts.map((acc, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+          <div key={i} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className={`w-11 h-11 rounded-xl ${acc.bg} flex items-center justify-center`}>
                 <acc.icon size={22} className={acc.iconColor} />
@@ -64,9 +64,9 @@ export default function Finance() {
                 {acc.change}
               </span>
             </div>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-white">{acc.balance}</h3>
+            <h3 className="text-2xl font-black text-slate-800 ">{acc.balance}</h3>
             <p className="text-xs text-slate-500 font-medium mt-1.5">{acc.name}</p>
-            <span className="inline-block mt-2 px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500">{acc.type}</span>
+            <span className="inline-block mt-2 px-2.5 py-0.5 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500">{acc.type}</span>
           </div>
         ))}
       </div>
@@ -75,23 +75,23 @@ export default function Finance() {
         {/* Transactions */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Recent Transactions</h3>
+            <h3 className="text-lg font-bold text-slate-800 ">Recent Transactions</h3>
             <div className="flex gap-2">
               {[['all', 'All'], ['income', 'Income'], ['expense', 'Expense']].map(([val, label]) => (
-                <button key={val} onClick={() => setTxFilter(val)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${txFilter === val ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>{label}</button>
+                <button key={val} onClick={() => setTxFilter(val)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${txFilter === val ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 :bg-slate-700'}`}>{label}</button>
               ))}
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
-            <div className="divide-y divide-slate-50 dark:divide-slate-800">
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+            <div className="divide-y divide-slate-50 ">
               {filteredTx.map(tx => (
-                <div key={tx.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer">
+                <div key={tx.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 :bg-slate-800/50 transition-colors cursor-pointer">
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.amount.startsWith('+') ? 'bg-emerald-50 dark:bg-emerald-500/10' : 'bg-red-50 dark:bg-red-500/10'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.amount.startsWith('+') ? 'bg-emerald-50 ' : 'bg-red-50 '}`}>
                       {tx.amount.startsWith('+') ? <ArrowUpRight size={18} className="text-emerald-500" /> : <ArrowDownRight size={18} className="text-red-500" />}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white">{tx.desc}</p>
+                      <p className="text-sm font-bold text-slate-800 ">{tx.desc}</p>
                       <p className="text-[11px] text-slate-500">{tx.date} &middot; {tx.category}</p>
                     </div>
                   </div>
@@ -106,8 +106,8 @@ export default function Finance() {
         </div>
 
         {/* Chart */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
-          <h3 className="text-base font-bold text-slate-800 dark:text-white mb-5">Monthly Cash Flow</h3>
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+          <h3 className="text-base font-bold text-slate-800 mb-5">Monthly Cash Flow</h3>
           <div className="h-52">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} barSize={14} barGap={4}>
@@ -130,9 +130,9 @@ export default function Finance() {
           </div>
 
           {/* Summary */}
-          <div className="mt-5 pt-5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
+          <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3">
             {[['Total Income', '+$157,000', 'text-emerald-600'], ['Total Expense', '-$62,900', 'text-red-500']].map(([label, val, cls]) => (
-              <div key={label} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-center">
+              <div key={label} className="bg-slate-50 rounded-xl p-3 text-center">
                 <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">{label}</div>
                 <div className={`text-lg font-black ${cls}`}>{val}</div>
               </div>

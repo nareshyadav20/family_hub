@@ -160,27 +160,27 @@ export default function Notifications() {
         )}
 
         {!isLoading && filtered.length > 0 && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-6 mt-4">
+          <div className="flex items-center justify-between border-t border-slate-200 pt-6 mt-4">
             <div className="text-sm font-medium text-slate-500">
-              Showing <span className="text-slate-700 dark:text-slate-300 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-slate-700 dark:text-slate-300 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-slate-700 dark:text-slate-300 font-bold">{filtered.length}</span>
+              Showing <span className="text-slate-700 font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-slate-700 font-bold">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of <span className="text-slate-700 font-bold">{filtered.length}</span>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 :bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
-                <ChevronLeft size={18} className="text-slate-600 dark:text-slate-400" />
+                <ChevronLeft size={18} className="text-slate-600 " />
               </button>
-              <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
+              <div className="text-sm font-bold text-slate-700 ">
                 {currentPage} <span className="text-slate-400 font-medium">/</span> {totalPages}
               </div>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 disabled:opacity-50 hover:bg-slate-50 :bg-slate-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
-                <ChevronRight size={18} className="text-slate-600 dark:text-slate-400" />
+                <ChevronRight size={18} className="text-slate-600 " />
               </button>
             </div>
           </div>

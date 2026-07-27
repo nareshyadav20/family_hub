@@ -55,14 +55,14 @@ export default function AIAssistant() {
           <Sparkles size={22} className="text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">AI Assistant</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">AI Assistant</h1>
           <p className="text-slate-500 text-sm">Powered by FamilyHub Intelligence</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 items-start">
         {/* Chat */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col" style={{ height: 580 }}>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col" style={{ height: 580 }}>
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : ''}`}>
@@ -71,7 +71,7 @@ export default function AIAssistant() {
                     <Bot size={15} className="text-white" />
                   </div>
                 )}
-                <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-md'}`}>
+                <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-slate-50 text-slate-800 rounded-bl-md'}`}>
                   {m.text}
                 </div>
                 {m.role === 'user' && (
@@ -86,7 +86,7 @@ export default function AIAssistant() {
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
                   <Bot size={15} className="text-white" />
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-1">
+                <div className="bg-slate-50 px-4 py-3 rounded-2xl rounded-bl-md flex items-center gap-1">
                   {[0, 1, 2].map(i => (
                     <div key={i} className="w-2 h-2 bg-slate-400 rounded-full" style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
                   ))}
@@ -96,13 +96,13 @@ export default function AIAssistant() {
 
           </div>
 
-          <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex gap-3">
+          <div className="p-4 border-t border-slate-100 flex gap-3">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && send()}
               placeholder="Ask me anything about your family..."
-              className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 transition-all"
+              className="flex-1 px-4 py-2.5 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 transition-all"
             />
             <button
               onClick={() => send()}
@@ -115,8 +115,8 @@ export default function AIAssistant() {
         </div>
 
         {/* Suggestions panel */}
-        <div className="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm">
-          <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-4 flex items-center gap-2">
+        <div className="hidden lg:block bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+          <h3 className="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
             <Lightbulb size={16} className="text-amber-500" /> Suggested Questions
           </h3>
           <div className="space-y-2">
@@ -124,16 +124,16 @@ export default function AIAssistant() {
               <button
                 key={i}
                 onClick={() => send(s)}
-                className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 text-sm font-medium text-slate-600 dark:text-slate-400 transition-all border border-transparent hover:border-indigo-100 dark:hover:border-indigo-500/20"
+                className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 hover:bg-indigo-50 :bg-indigo-500/10 hover:text-indigo-600 text-sm font-medium text-slate-600 transition-all border border-transparent hover:border-indigo-100 :border-indigo-500/20"
               >
                 {s}
               </button>
             ))}
           </div>
 
-          <div className="mt-6 p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/10 rounded-xl border border-violet-100 dark:border-violet-500/20">
-            <div className="text-xs font-bold text-violet-700 dark:text-violet-400 mb-1">AI Capabilities</div>
-            <ul className="text-xs text-violet-600/70 dark:text-violet-400/60 space-y-1">
+          <div className="mt-6 p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-100 ">
+            <div className="text-xs font-bold text-violet-700 mb-1">AI Capabilities</div>
+            <ul className="text-xs text-violet-600/70 space-y-1">
               <li>• Member insights & stats</li>
               <li>• Event recommendations</li>
               <li>• Finance summaries</li>

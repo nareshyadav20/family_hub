@@ -177,7 +177,7 @@ export default function Calendar() {
     <div className="space-y-6 animate-in fade-in duration-500 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Family Calendar</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Family Calendar</h1>
           <p className="text-sm text-slate-500 mt-1">Track birthdays, anniversaries, and family events.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -214,27 +214,27 @@ export default function Calendar() {
       {/* Legend */}
       <div className="flex gap-6 flex-wrap">
         {[['#F59E0B', 'Birthdays & Anniversaries'], ['#4F46E5', 'Meetings'], ['#14B8A6', 'Events']].map(([color, label]) => (
-          <div key={label} className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+          <div key={label} className="flex items-center gap-2 text-sm font-medium text-slate-600 ">
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} />
             {label}
           </div>
         ))}
       </div>
 
-      <div className="calendar-wrapper bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
+      <div className="calendar-wrapper bg-white rounded-3xl shadow-sm border border-slate-100 overflow-x-auto">
         {/* Calendar header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 dark:border-slate-800 sticky left-0">
-          <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 sticky left-0">
+          <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-slate-100 :bg-slate-800 transition-colors text-slate-500">
             <ChevronLeft size={20} />
           </button>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{MONTHS[month]} {year}</h2>
-          <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500">
+          <h2 className="text-xl font-bold text-slate-900 ">{MONTHS[month]} {year}</h2>
+          <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-slate-100 :bg-slate-800 transition-colors text-slate-500">
             <ChevronRight size={20} />
           </button>
         </div>
 
         {/* Day headers */}
-        <div className="calendar-grid-header grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
+        <div className="calendar-grid-header grid grid-cols-7 border-b border-slate-100 ">
           {DAYS.map(day => (
             <div key={day} className="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">{day}</div>
           ))}
@@ -243,14 +243,14 @@ export default function Calendar() {
         {/* Days grid */}
         <div className="calendar-grid-body grid grid-cols-7">
           {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-50 dark:border-slate-800/50" />
+            <div key={`empty-${i}`} className="h-20 border-b border-r border-slate-50 " />
           ))}
           {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
             const dayEvents = getEventsForDay(day);
             const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
             return (
-              <div key={day} className={`h-20 p-1.5 border-b border-r border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group`}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold mb-1.5 transition-all ${isToday ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-slate-700 dark:text-slate-300 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600'}`}>{day}</div>
+              <div key={day} className={`h-20 p-1.5 border-b border-r border-slate-50 hover:bg-slate-50 :bg-slate-800/30 transition-colors cursor-pointer group`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold mb-1.5 transition-all ${isToday ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'text-slate-700 group-hover:bg-indigo-50 :bg-indigo-500/10 group-hover:text-indigo-600'}`}>{day}</div>
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((ev, idx) => (
                     <div key={idx} style={{ background: `${ev.color}18`, borderLeft: `3px solid ${ev.color}`, color: ev.color, padding: '2px 6px', borderRadius: '0 4px 4px 0', fontSize: 11, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -268,14 +268,14 @@ export default function Calendar() {
       </div>
 
       {/* Upcoming events list */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Upcoming in {MONTHS[month]}</h3>
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 ">
+        <h3 className="text-lg font-bold text-slate-900 mb-4">Upcoming in {MONTHS[month]}</h3>
         <div className="space-y-3">
           {events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).map((ev, i) => (
-            <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 :bg-slate-800 transition-colors">
               <div style={{ width: 4, height: 40, borderRadius: 2, background: ev.color, flexShrink: 0 }} />
               <div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white">{ev.title}</div>
+                <div className="font-bold text-sm text-slate-900 ">{ev.title}</div>
                 <div className="text-xs text-slate-500">{new Date(ev.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
               </div>
               <div className="ml-auto">
@@ -285,10 +285,10 @@ export default function Calendar() {
           ))}
           {events.filter(e => e.date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length === 0 && (
              <div className="flex flex-col items-center justify-center py-10">
-                <div className="w-12 h-12 bg-indigo-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3 text-indigo-500">
+                <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-3 text-indigo-500">
                    <span className="text-[24px]">📅</span>
                 </div>
-                <h4 className="font-bold text-slate-800 dark:text-white mb-1">No upcoming events</h4>
+                <h4 className="font-bold text-slate-800 mb-1">No upcoming events</h4>
                 <p className="text-xs text-slate-500">Your schedule for this month is clear.</p>
              </div>
           )}
@@ -297,8 +297,8 @@ export default function Calendar() {
 
       {showEventModal && (
         <form onSubmit={handleCreateEvent} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add Calendar Event</h2>
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Add Calendar Event</h2>
               
               <div className="space-y-4">
                 <div>
@@ -311,7 +311,7 @@ export default function Calendar() {
                    </select>
                 </div>
                 
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-2 border-t border-slate-100 ">
                    <p className="text-xs font-bold text-slate-500 mb-2">Date & Time</p>
                    <div className="flex gap-3">
                       <input required type="date" value={newEvent.eventDate} onChange={e => setNewEvent({...newEvent, eventDate: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
@@ -324,7 +324,7 @@ export default function Calendar() {
                  <button type="submit" disabled={createEventMutation.isPending} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-indigo-500/20">
                     {createEventMutation.isPending ? 'Saving...' : 'Save Event'}
                  </button>
-                 <button type="button" onClick={() => setShowEventModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button type="button" onClick={() => setShowEventModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </form>

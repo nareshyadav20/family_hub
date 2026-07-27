@@ -27,7 +27,11 @@ router.get('/', async (req, res) => {
         if (!familyId) return res.json([]);
         
         const photos = await prisma.document.findMany({
-            where: { familyId, type: { startsWith: 'image/' }, visibility: 'FAMILY' }, // Using visibility FAMILY to distinguish gallery photos
+            where: { 
+                familyId, 
+                type: { startsWith: 'image/' }, 
+                visibility: { in: ['PUBLIC', 'FAMILY'] } 
+            },
             include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
             orderBy: { createdAt: 'desc' }
         });
