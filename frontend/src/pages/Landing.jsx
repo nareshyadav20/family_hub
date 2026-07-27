@@ -118,7 +118,7 @@ export default function Home() {
       <header className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex justify-between items-center relative z-30">
         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
           <img src={familyLogo} alt={familyName} className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
-          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">{familyName.replace(/\s?Family$/i, '')}<span className="text-[#7C5CFC]">Hub</span></span>
+          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">Family<span className="text-[#7C5CFC]">Hub</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
           <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
