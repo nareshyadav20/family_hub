@@ -3,12 +3,15 @@ const prisma = new PrismaClient();
 
 const resolveFamilyByDomain = async (req, res, next) => {
   try {
-    // Determine hostname from Origin, Referer, or Host (in that order)
+    // Determine hostname from explicitly passed query param (for local testing), Origin, Referer, or Host (in that order)
     let hostname = '';
+    const explicitDomain = req.query.domain;
     const origin = req.headers.origin;
     const referer = req.headers.referer;
 
-    if (origin) {
+    if (explicitDomain) {
+      hostname = explicitDomain;
+    } else if (origin) {
       hostname = new URL(origin).hostname;
     } else if (referer) {
       hostname = new URL(referer).hostname;
@@ -20,6 +23,12 @@ const resolveFamilyByDomain = async (req, res, next) => {
 
     // Normalize hostname by removing www.
     hostname = hostname.replace(/^www\./, '');
+
+    console.log('\n[MULTI-TENANT DEBUG]');
+    console.log('Incoming Origin:', origin);
+    console.log('Incoming Referer:', referer);
+    console.log('Incoming Host:', req.headers.host);
+    console.log('Resolved Hostname:', hostname);
 
     let family = await prisma.family.findUnique({
       where: {
@@ -39,8 +48,13 @@ const resolveFamilyByDomain = async (req, res, next) => {
     }
 
     if (!family) {
+      console.log('Resolved Family: NOT FOUND');
       return res.status(404).json({ error: 'Family Not Found' });
     }
+
+    console.log('Resolved Family:', family.name);
+    console.log('Resolved FamilyId:', family.id);
+    console.log('----------------------\n');
 
     // Attach family info to request
     req.family = family;

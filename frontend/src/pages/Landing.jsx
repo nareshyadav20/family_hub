@@ -20,10 +20,15 @@ export default function Home() {
   
   const queryClient = useQueryClient();
 
+  // Extract ?domain= from the URL for local testing of multi-tenancy
+  const searchParams = new URLSearchParams(window.location.search);
+  const explicitDomain = searchParams.get('domain');
+
   const { data, isLoading: familyLoading } = useQuery({
-    queryKey: ['publicHomeData'],
+    queryKey: ['publicHomeData', explicitDomain],
     queryFn: async () => {
-      const res = await axios.get(`${API_BASE_URL}/api/public/home`);
+      const url = `${API_BASE_URL}/api/public/home${explicitDomain ? `?domain=${explicitDomain}` : ''}`;
+      const res = await axios.get(url);
       return res.data;
     }
   });
