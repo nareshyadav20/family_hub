@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { sendMemberCredentialsEmail } = require('../services/emailService');
+const { emitPublicUpdate } = require('../utils/socketEmit');
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -348,6 +349,7 @@ router.put('/requests/:id', authenticateToken, async (req, res) => {
         visibility: 'PUBLIC'
       }
     });
+    emitPublicUpdate(req, user.familyId);
 
     res.json({ success: true, data: user });
   } catch (error) {

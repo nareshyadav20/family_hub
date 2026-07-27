@@ -3,6 +3,7 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
+const { emitPublicUpdate } = require('../utils/socketEmit');
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -67,6 +68,7 @@ router.post('/', authenticateToken, async (req, res) => {
            visibility: 'PUBLIC'
          }
        });
+       emitPublicUpdate(req, familyId);
      }
      
      res.status(201).json(announcement);

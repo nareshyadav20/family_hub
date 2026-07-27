@@ -3,6 +3,7 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
+const { emitPublicUpdate } = require('../utils/socketEmit');
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -205,6 +206,7 @@ router.post('/:id/posts', async (req, res) => {
       });
       const io = req.app.get('socketio');
       io.emit(`group.${req.params.id}.post_created`, post);
+      emitPublicUpdate(req, familyId);
       res.status(201).json(post);
    } catch(e) { res.status(500).json({ error: 'Failed to create post' }); }
 });

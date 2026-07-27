@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Play, Image as ImageIcon, Users, Calendar, MessageSquare, Heart, Phone, Mail, ArrowRight, MessageCircle, Eye, EyeOff, Lock, User, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import io from 'socket.io-client';
 import '../landing.css';
 import API_BASE_URL from '../config/api';
 
@@ -16,6 +17,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [galleryTab, setGalleryTab] = useState('All');
+  
+  const queryClient = useQueryClient();
 
   const { data, isLoading: familyLoading } = useQuery({
     queryKey: ['publicHomeData'],
@@ -29,7 +32,28 @@ export default function Home() {
   const familyFeed = data?.feed || [];
   const statistics = data?.statistics || { members: 0, photos: 0, videos: 0, events: 0, announcements: 0 };
   const announcements = data?.announcements || [];
+  const videos = data?.videos || [];
+  const livestreams = data?.livestreams || [];
+  const members = data?.members || [];
+  const familyTree = data?.familyTree || [];
+  const posts = data?.posts || [];
   
+  // Setup Socket Connection for Real-Time Updates
+  useEffect(() => {
+    if (familyData?.id) {
+      const socket = io(API_BASE_URL);
+      socket.emit('joinFamilyRoom', familyData.id);
+      
+      socket.on('publicContentUpdated', () => {
+        queryClient.invalidateQueries(['publicHomeData']);
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [familyData?.id, queryClient]);
+
   const galleryItems = data?.gallery && data.gallery.length > 0 
     ? data.gallery.map(doc => ({
         id: doc.id,
@@ -501,6 +525,130 @@ export default function Home() {
           <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
             <ImageIcon size={32} className="mx-auto text-gray-300 mb-3" />
             <p className="text-gray-500 font-medium">No gallery items found.</p>
+          </div>
+        )}
+      </section>
+
+      {/* ─── VIDEOS SECTION ─── */}
+      <section id="videos" className="w-full bg-[#F3F4F6] py-12 sm:py-20 border-t border-gray-200">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="mb-8">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Family Videos</h2>
+            <p className="text-gray-500 font-medium mt-2">Relive our favorite moments captured on video.</p>
+          </div>
+          {videos.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map(video => (
+                <div key={video.id} className="bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                  <div className="relative h-[220px] bg-gray-900 group cursor-pointer">
+                    <video src={video.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center group-hover:bg-[#7C5CFC] group-hover:text-white transition-all">
+                        <Play size={24} className="ml-1" fill="currentColor" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-bold text-[#1F2430]">{video.name}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center bg-white rounded-2xl py-10 shadow-sm border border-gray-100">
+              <Play size={32} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">No videos found.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ─── LIVE STREAMS SECTION ─── */}
+      <section id="livestreams" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+          <h2 className="text-2xl font-black text-[#1F2430]">Active Live Streams</h2>
+        </div>
+        {livestreams.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {livestreams.map(stream => (
+              <div key={stream.id} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
+                  <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
+                </div>
+                <button className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
+                  Join Stream
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center bg-gray-50 rounded-2xl py-8 border border-gray-100">
+            <p className="text-gray-500 font-medium">No active live streams at the moment.</p>
+          </div>
+        )}
+      </section>
+
+      {/* ─── ANNOUNCEMENTS SECTION ─── */}
+      <section id="announcements" className="w-full bg-[#FAF8FF] py-12 sm:py-16 border-y border-[#E9E5F8]">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-[#1F2430] tracking-tight">Family Announcements</h2>
+          </div>
+          <div className="space-y-4">
+            {announcements.length > 0 ? announcements.map(ann => (
+              <div key={ann.id} className="bg-white border border-purple-100 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                    <MessageCircle size={18} className="text-[#7C5CFC]" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#1F2430] text-lg">{ann.title}</h4>
+                    <p className="text-gray-600 mt-1">{ann.message}</p>
+                    <p className="text-xs text-gray-400 mt-3 font-semibold">
+                      {new Date(ann.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 font-medium">No recent announcements.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── LATEST MEMBERS & FAMILY TREE PREVIEW ─── */}
+      <section id="members" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-20">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Meet the Family</h2>
+          <p className="text-gray-500 font-medium mt-2">Connecting generations and celebrating our roots.</p>
+        </div>
+        
+        {members.length > 0 ? (
+          <div className="flex flex-wrap justify-center gap-6">
+            {members.slice(0, 10).map(member => (
+              <div key={member.id} className="flex flex-col items-center group cursor-pointer">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden group-hover:scale-110 transition-transform duration-300">
+                  <img 
+                    src={member.avatar || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=200&q=80"} 
+                    alt={member.firstName} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <h4 className="mt-3 font-bold text-[#1F2430] text-sm sm:text-base">{member.firstName} {member.lastName}</h4>
+                <span className="text-xs font-semibold text-[#7C5CFC] bg-purple-50 px-2 py-0.5 rounded-full mt-1">
+                  {member.role === 'SUPER_ADMIN' || member.role === 'ADMIN' ? 'Admin' : 'Member'}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500 font-medium">No members found.</p>
           </div>
         )}
       </section>

@@ -1,6 +1,7 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
+const { emitPublicUpdate } = require('../utils/socketEmit');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -118,6 +119,7 @@ router.post('/', async (req, res) => {
                     visibility: 'PUBLIC'
                 }
             });
+            emitPublicUpdate(req, familyId);
         }
         
         res.status(201).json(history);

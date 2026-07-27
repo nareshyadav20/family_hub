@@ -110,6 +110,10 @@ app.get('/api/test-instant-email', async (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('New client connected to Real-Time Socket:', socket.id);
+  socket.on('joinFamilyRoom', (familyId) => {
+    socket.join(`family_${familyId}`);
+    console.log(`Socket ${socket.id} joined room family_${familyId}`);
+  });
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
 });
 
