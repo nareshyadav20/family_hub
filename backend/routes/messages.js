@@ -1,0 +1,184 @@
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const router = express.Router();
+
+const uploadDir = path.join(__dirname, '../uploads/messages');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+const prisma = new PrismaClient();
+
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch(e) {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+};
+
+router.use(authMiddleware);
+
+// Get conversations list (latest message per user)
+router.get('/conversations', async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const familyId = req.user.familyId;
+    if (!familyId) return res.json([]);
+    
+    const contacts = await prisma.user.findMany({
+        where: { id: { not: userId }, familyId },
+        select: { id: true, firstName: true, lastName: true, avatar: true }
+    });
+    
+    const conversations = [];
+    for (const contact of contacts) {
+        const lastMsg = await prisma.message.findFirst({
+            where: {
+                OR: [
+                    { senderId: userId, receiverId: contact.id },
+                    { senderId: contact.id, receiverId: userId }
+                ]
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        
+        conversations.push({
+            id: contact.id,
+            name: `${contact.firstName} ${contact.lastName}`.trim(),
+            initials: contact.firstName.charAt(0) + (contact.lastName ? contact.lastName.charAt(0) : ''),
+            avatar: contact.avatar,
+            color: 'bg-indigo-500',
+            lastMsg: lastMsg ? lastMsg.text : 'Click to start chatting',
+            time: lastMsg ? lastMsg.createdAt : null,
+            unread: 0,
+            online: true 
+        });
+    }
+    
+    // Sort by latest message
+    conversations.sort((a, b) => {
+        if (!a.time) return 1;
+        if (!b.time) return -1;
+        return new Date(b.time) - new Date(a.time);
+    });
+    
+    res.json(conversations);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Upload attachment endpoint
+router.post('/upload', upload.single('attachment'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  const fileUrl = `${req.protocol}://${req.get('host')}/uploads/messages/${req.file.filename}`;
+  res.json({ fileUrl, fileName: req.file.originalname });
+});
+
+// Get messages for a specific user
+router.get('/:contactId', async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const familyId = req.user.familyId;
+    const { contactId } = req.params;
+    
+    const contactCheck = await prisma.user.findUnique({ where: { id: contactId, familyId }});
+    if (!contactCheck) return res.status(403).json({ error: 'Not permitted' });
+
+    const messages = await prisma.message.findMany({
+        where: {
+            OR: [
+                { senderId: userId, receiverId: contactId },
+                { senderId: contactId, receiverId: userId }
+            ]
+        },
+        orderBy: { createdAt: 'asc' }
+    });
+    
+    res.json(messages.map(m => ({
+        id: m.id,
+        sender: m.senderId === userId ? 'me' : 'them',
+        text: m.text,
+        fileUrl: m.fileUrl,
+        fileName: m.fileName,
+        time: m.createdAt,
+        mine: m.senderId === userId
+    })));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Send a message
+router.post('/', async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const familyId = req.user.familyId;
+    const { receiverId, text, fileUrl, fileName } = req.body;
+    
+    const receiverCheck = await prisma.user.findUnique({ where: { id: receiverId, familyId }});
+    if (!receiverCheck) return res.status(403).json({ error: 'Receiver not in your family' });
+
+    const message = await prisma.message.create({
+        data: {
+            senderId: userId,
+            receiverId,
+            text: text || '',
+            fileUrl,
+            fileName
+        }
+    });
+
+    const io = req.app.get('socketio');
+    io.emit(`message.new.${receiverId}`, {
+        id: message.id,
+        sender: 'them',
+        senderId: userId,
+        text: message.text,
+        fileUrl: message.fileUrl,
+        fileName: message.fileName,
+        time: message.createdAt,
+        mine: false
+    });
+    
+    res.json({
+        id: message.id,
+        sender: 'me',
+        text: message.text,
+        fileUrl: message.fileUrl,
+        fileName: message.fileName,
+        time: message.createdAt,
+        mine: true
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+module.exports = router;

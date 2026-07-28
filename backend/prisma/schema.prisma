@@ -1,0 +1,594 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MEMBER
+}
+
+enum MemberStatus {
+  PENDING_INVITE
+  INVITATION_SENT
+  EMAIL_FAILED
+  OTP_VERIFIED
+  PROFILE_INCOMPLETE
+  ACTIVE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+model User {
+  id              String   @id @default(cuid())
+  memberId        String?  @unique
+  firstName       String
+  lastName        String
+  email           String?  @unique
+  phone           String?  @unique
+  password        String?  
+  role            Role     @default(MEMBER)
+  familyId        String?
+  gender          String?
+  relationship    String?
+  familyBranch    String?
+  fatherId        String?
+  motherId        String?
+  spouseId        String?
+  notes           String?
+  status          MemberStatus @default(ACTIVE)
+  
+  avatar          String?
+  isActive        Boolean  @default(true)
+  profileCompletion Int @default(25)
+  currentProfileStep String @default("Basic Information")
+  isProfileCompleted Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  isTemporaryPassword Boolean @default(false)
+  mustChangePassword  Boolean @default(false)
+
+  brevoErrorCode    String?
+  brevoErrorMessage String?
+  lastEmailAttempt  DateTime?
+
+  family          Family?  @relation(fields: [familyId], references: [id])
+  memberProfile   MemberProfile?
+  memberSettings  MemberSettings?
+  invitation      Invitation?
+  documents       Document[]
+  announcements   Announcement[]
+  polls           Poll[] @relation("UserPolls")
+  
+  groupMembers    GroupMember[]
+  groupMessages   GroupMessage[]
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  familyHistories FamilyHistory[]
+  googleCalendar  GoogleCalendarConnection?
+
+  groupPosts      GroupPost[]
+  groupComments   GroupPostComment[]
+  groupLikes      GroupPostLike[]
+
+  @@index([familyId])
+  @@map("users")
+}
+
+model Family {
+  id              String   @id @default(cuid())
+  name            String
+  familyCode      String?  @unique
+  customDomain    String?  @unique
+  logo            String?
+  coverImage      String?
+  bannerImage     String?
+  themeColor      String?
+  primaryColor    String?
+  secondaryColor  String?
+  description     String?  @db.Text
+  about           String?  @db.Text
+  history         String?  @db.Text
+  contactEmail    String?
+  contactPhone    String?
+  facebook        String?
+  youtube         String?
+  instagram       String?
+  twitter         String?
+  linkedin        String?
+  website         String?
+  subscription    String?
+
+  familyHead      String?
+  plan            String?  @default("Free")
+  status          String?  @default("Active")
+  address         String?
+  city            String?
+  state           String?
+  country         String?
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members User[]
+  events          Event[]         @relation("FamilyEvents")
+  documents       Document[]      @relation("FamilyDocuments")
+  announcements   Announcement[]  @relation("FamilyAnnouncements")
+  polls           Poll[]          @relation("FamilyPolls")
+  notifications   Notification[]  @relation("FamilyNotifications")
+  groups          Group[]         @relation("FamilyGroups")
+  familyHistories FamilyHistory[] @relation("FamilyHistories")
+  googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
+  feeds           FamilyFeed[]    @relation("FamilyFeeds")
+
+  @@map("families")
+}
+
+model MemberProfile {
+  id              String @id @default(cuid())
+  userId          String @unique
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  dob             DateTime?
+  bloodGroup      String?
+  address         String?
+  education       String?
+  occupation      String?
+  company         String?
+  biography       String?
+  socialLinks     Json?
+  emergency       Json?
+  documents       Json?
+  privacySettings Json?
+
+  currentStage      Int @default(1)
+  profileCompletion Int @default(0)
+}
+
+model Invitation {
+  id        String       @id @default(cuid())
+  userId    String       @unique
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String       @unique
+  otp       String?      
+  expiresAt DateTime
+  status    InviteStatus @default(PENDING)
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  eventId         String?  @unique
+  name            String
+  category        String
+  description     String
+  bannerImage     String?
+  eventDate       DateTime
+  startTime       String
+  endTime         String?
+  venue           String
+  address         String
+  city            String
+  state           String
+  country         String
+  googleMapsUrl   String?
+  organizerId     String
+  familyId        String?
+  family          Family?  @relation("FamilyEvents", fields: [familyId], references: [id], onDelete: Cascade)
+  familyBranch    String
+  visibility      String   @default("Private")
+  inviteType      String   @default("All Members")
+  invitedMembers  Json?
+  rsvpEnabled     Boolean  @default(false)
+  maxGuests       Int?
+  rsvpDeadline    DateTime?
+  liveStream      Boolean  @default(false)
+  streamVisibility String?
+  streamingPlatform String?
+  streamId        String?  @unique
+  streamLink      String?
+  streamStatus    String   @default("OFFLINE")
+  liveChat        Boolean  @default(false)
+  recordEvent     Boolean  @default(false)
+  recordedUrl     String?
+  allowPhotos     Boolean  @default(true)
+  allowComments   Boolean  @default(true)
+  reminders       Json?    
+  status          String   @default("Draft")
+
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([familyId])
+  @@index([eventDate])
+  @@map("events")
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  FAMILY
+  ADMIN_ONLY
+  PUBLIC
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  size        String
+  category    String
+  url         String
+  status      DocumentStatus @default(PENDING)
+  visibility  DocumentVisibility @default(PRIVATE)
+  
+  uploaderId  String
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  
+  familyId    String?
+  family      Family?  @relation("FamilyDocuments", fields: [familyId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([createdAt])
+  @@map("documents")
+}
+
+model MemberSettings {
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  profile_photo              String?
+  display_name               String?
+  username                   String?  @unique
+  email                      String?
+  mobile                     String?
+  
+  theme                      String   @default("System")
+  language                   String   @default("English")
+  timezone                   String   @default("UTC")
+  
+  show_mobile                Boolean  @default(false)
+  show_email                 Boolean  @default(false)
+  show_dob                   Boolean  @default(false)
+  show_address               Boolean  @default(false)
+  show_public_profile        Boolean  @default(true)
+  allow_direct_messages      Boolean  @default(true)
+  
+  email_notifications        Boolean  @default(true)
+  whatsapp_notifications     Boolean  @default(true)
+  push_notifications         Boolean  @default(true)
+  birthday_notifications     Boolean  @default(true)
+  event_notifications        Boolean  @default(true)
+  announcement_notifications Boolean  @default(true)
+  
+  two_factor_enabled         Boolean  @default(false)
+  updated_at                 DateTime @updatedAt
+
+  @@map("member_settings")
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  targetType  String   @default("All Members")
+  pinned      Boolean  @default(false)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  familyId    String?
+  family      Family?  @relation("FamilyAnnouncements", fields: [familyId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([createdAt])
+  @@map("announcements")
+}
+
+model Poll {
+  id          String   @id @default(cuid())
+  question    String
+  options     Json     // store array of strings or objects [{id, text}]
+  votes       Json     // store key/value map { "userId": optionId }
+  endDate     DateTime
+  authorId    String
+  author      User     @relation("UserPolls", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  familyId    String?
+  family      Family?  @relation("FamilyPolls", fields: [familyId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("polls")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        String   @default("system") // e.g., 'event', 'member', 'alert'
+  targetType  String   @default("All") // 'All', 'Admin', or specific userId
+  isRead      Boolean  @default(false)
+  
+  familyId    String?
+  family      Family?  @relation("FamilyNotifications", fields: [familyId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  
+  @@index([familyId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model Group {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  category        String   @default("Immediate Family")
+  coverImage      String?
+  icon            String?
+  privacy         String   @default("Private")
+  status          String   @default("Active")
+  
+  allowInvites    Boolean  @default(true)
+  allowPosts      Boolean  @default(true)
+  allowFiles      Boolean  @default(true)
+  allowPhotos     Boolean  @default(true)
+  allowVideos     Boolean  @default(true)
+  allowPolls      Boolean  @default(true)
+  welcomeMessage  String?
+  
+  ownerId         String
+  familyId        String?
+  family          Family?  @relation("FamilyGroups", fields: [familyId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  members         GroupMember[]
+  messages        GroupMessage[]
+  
+  posts           GroupPost[]
+  
+  @@index([familyId])
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   @default("Member") // 'Admin' or 'Member'
+  status    String   @default("Active") // 'Active', 'Muted'
+  isMuted   Boolean  @default(false)
+  
+  joinedAt  DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  type      String   @default("Text") // Text, Image, Video, File
+  content   String
+  fileUrl   String?
+  fileName  String?
+  
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([createdAt])
+  @@map("group_messages")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  text        String
+  fileUrl     String?
+  fileName    String?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model FamilyHistory {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?  @db.Text
+  category      String
+  eventDate     DateTime
+  location      String?
+  visibility    String   @default("Family Only")
+  status        String   @default("Published")
+  thumbnailUrl  String?
+  addedById     String
+  addedBy       User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
+  
+  familyId      String?
+  family        Family?  @relation("FamilyHistories", fields: [familyId], references: [id], onDelete: Cascade)
+
+  relatedMembers Json?    
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([familyId])
+  @@map("family_history")
+}
+
+model GoogleCalendarConnection {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId     String?
+  family       Family?  @relation("FamilyGoogleCalendar", fields: [familyId], references: [id], onDelete: Cascade)
+  googleEmail  String
+  accessToken  String
+  refreshToken String?
+  expiryDate   BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("google_calendar_connections")
+}
+
+model GroupPost {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  content     String   @db.Text
+  attachments Json?    // URLs for images, documents, etc.
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  comments    GroupPostComment[]
+  likes       GroupPostLike[]
+
+  @@map("group_posts")
+}
+
+model GroupPostComment {
+  id          String   @id @default(cuid())
+  postId      String
+  post        GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  content     String    @db.Text
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("group_post_comments")
+}
+
+model GroupPostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+
+  @@unique([postId, userId])
+  @@map("group_post_likes")
+}
+
+model EmailQueue {
+  id           String   @id @default(cuid())
+  recipient    String
+  subject      String
+  template     String?
+  payload      Json?
+  status       String   @default("PENDING")
+  attempts     Int      @default(0)
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@map("email_queue")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      String
+  action    String
+  module    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  family    String
+  subject   String
+  priority  String   @default("Medium")
+  status    String   @default("Open")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("support_tickets")
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  family    String
+  plan      String
+  amount    Float
+  status    String   @default("Paid")
+  createdAt DateTime @default(now())
+
+  @@map("transactions")
+}
+
+model FamilyFeed {
+  id          String   @id @default(cuid())
+  familyId    String
+  family      Family   @relation("FamilyFeeds", fields: [familyId], references: [id], onDelete: Cascade)
+  
+  type        String   // PHOTO, EVENT, VIDEO, LIVE_STREAM, ANNOUNCEMENT, MEMORY, DOCUMENT, NEW_MEMBER, STORY
+  title       String?  @db.Text
+  description String?  @db.Text
+  image       String?
+  video       String?
+  referenceId String?  // ID of the related record (e.g. eventId, documentId, announcementId)
+  
+  createdBy   String?  // userId who created this activity
+  visibility  String   @default("PUBLIC") // PUBLIC, PRIVATE, MEMBERS_ONLY
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([createdAt])
+  @@map("family_feeds")
+}
