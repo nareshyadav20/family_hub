@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const FRONTEND_DIR = path.join(__dirname, 'frontend/src');
-const SUPERADMIN_DIR = path.join(__dirname, 'frontend/superadmin/src');
+const FRONTEND_DIR = path.join(__dirname, '../src');
+const SUPERADMIN_DIR = path.join(__dirname, '../superadmin/src');
 
 // 1. Create config/api.js in both places
 const apiConfigContent = `const API_BASE_URL = (

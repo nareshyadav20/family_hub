@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const FRONTEND_DIR = path.join(__dirname, 'frontend/src');
-const SUPERADMIN_DIR = path.join(__dirname, 'frontend/superadmin/src');
+const FRONTEND_DIR = path.join(__dirname, '../src');
+const SUPERADMIN_DIR = path.join(__dirname, '../superadmin/src');
 
 function fixQuotes(dir) {
     const files = fs.readdirSync(dir, { withFileTypes: true });
