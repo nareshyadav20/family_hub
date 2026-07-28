@@ -26,7 +26,7 @@ const getHome = async (req, res) => {
         take: 50
       }),
       prisma.document.findMany({
-        where: { familyId, category: 'Gallery', visibility: 'PUBLIC' },
+        where: { familyId, type: { contains: 'image' }, visibility: 'PUBLIC' },
         orderBy: { createdAt: 'desc' },
         take: 20
       }),
@@ -41,12 +41,12 @@ const getHome = async (req, res) => {
         take: 10
       }),
       prisma.event.findMany({
-        where: { familyId, liveStream: true, streamStatus: 'LIVE' },
+        where: { familyId, liveStream: true },
         orderBy: { eventDate: 'desc' },
         take: 5
       }),
       prisma.announcement.findMany({
-        where: { familyId, targetType: 'All Members' }, // Adjust if announcements have specific public visibility
+        where: { familyId },
         orderBy: { createdAt: 'desc' },
         take: 5
       }),
@@ -99,36 +99,34 @@ const getHome = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching public home data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal server error fetching home data' });
   }
 };
 
 const getFamily = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
-    const family = req.family;
+    const family = await prisma.family.findUnique({
+      where: { id: req.familyId },
+      include: { members: { select: { id: true, firstName: true, lastName: true, avatar: true, role: true } } }
+    });
+    if (!family) return res.status(404).json({ error: 'Family not found' });
     res.json(family);
   } catch (error) {
-    console.error('Error fetching public family data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 const getGallery = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
-    const documents = await prisma.document.findMany({
-      where: {
-        familyId: req.familyId,
-        category: 'Gallery', // Assuming gallery items are in Document model with category 'Gallery' or similar
-        // Adjust the query based on how photos are actually stored
-      },
+    const gallery = await prisma.document.findMany({
+      where: { familyId: req.familyId, type: { contains: 'image' }, visibility: 'PUBLIC' },
       orderBy: { createdAt: 'desc' }
     });
-    res.json(documents);
+    res.json(gallery);
   } catch (error) {
-    console.error('Error fetching public gallery data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -136,16 +134,12 @@ const getVideos = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const videos = await prisma.document.findMany({
-      where: {
-        familyId: req.familyId,
-        type: { contains: 'video' }, // Assuming videos are stored here
-      },
+      where: { familyId: req.familyId, type: { contains: 'video' }, visibility: 'PUBLIC' },
       orderBy: { createdAt: 'desc' }
     });
     res.json(videos);
   } catch (error) {
-    console.error('Error fetching public videos:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -153,16 +147,12 @@ const getEvents = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const events = await prisma.event.findMany({
-      where: {
-        familyId: req.familyId,
-        visibility: 'Public', // You might want only public events on landing page
-      },
+      where: { familyId: req.familyId, visibility: 'Public' },
       orderBy: { eventDate: 'desc' }
     });
     res.json(events);
   } catch (error) {
-    console.error('Error fetching public events:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -170,44 +160,12 @@ const getLiveStreams = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const streams = await prisma.event.findMany({
-      where: {
-        familyId: req.familyId,
-        liveStream: true,
-        streamStatus: 'LIVE', // Or similar logic
-      },
+      where: { familyId: req.familyId, liveStream: true },
       orderBy: { eventDate: 'desc' }
     });
     res.json(streams);
   } catch (error) {
-    console.error('Error fetching public live streams:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-const getPosts = async (req, res) => {
-  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
-  try {
-    // Assuming posts are group posts that might be public? Or announcements?
-    // Instruction says: Return only Latest Posts WHERE familyId=req.familyId
-    // Will pull from group posts mapped to family groups for now.
-    const posts = await prisma.groupPost.findMany({
-      where: {
-        group: {
-          familyId: req.familyId
-        }
-      },
-      include: {
-        author: {
-          select: { firstName: true, lastName: true, avatar: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 10
-    });
-    res.json(posts);
-  } catch (error) {
-    console.error('Error fetching public posts:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -215,38 +173,28 @@ const getAnnouncements = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const announcements = await prisma.announcement.findMany({
-      where: {
-        familyId: req.familyId
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 10
+      where: { familyId: req.familyId },
+      orderBy: { createdAt: 'desc' }
     });
     res.json(announcements);
   } catch (error) {
-    console.error('Error fetching public announcements:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
 const getFamilyTree = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
-    const members = await prisma.user.findMany({
+    const tree = await prisma.user.findMany({
       where: { familyId: req.familyId },
       select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        avatar: true,
-        fatherId: true,
-        motherId: true,
-        spouseId: true
+        id: true, firstName: true, lastName: true, avatar: true,
+        fatherId: true, motherId: true, spouseId: true
       }
     });
-    res.json(members);
+    res.json(tree);
   } catch (error) {
-    console.error('Error fetching public family tree:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -254,27 +202,26 @@ const getMembers = async (req, res) => {
   if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const members = await prisma.user.findMany({
-      where: {
-        familyId: req.familyId,
-        // we might filter by some featured flag, for now return limited active members
-        isActive: true
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        avatar: true,
-        role: true,
-        memberProfile: {
-          select: { biography: true, occupation: true }
-        }
-      },
-      take: 10
+      where: { familyId: req.familyId, isActive: true },
+      select: { id: true, firstName: true, lastName: true, avatar: true, role: true }
     });
     res.json(members);
   } catch (error) {
-    console.error('Error fetching public members:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const getPosts = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
+  try {
+    const posts = await prisma.groupPost.findMany({
+      where: { group: { familyId: req.familyId } },
+      include: { author: { select: { firstName: true, lastName: true, avatar: true } } },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
   }
 };
 
@@ -285,8 +232,8 @@ module.exports = {
   getVideos,
   getEvents,
   getLiveStreams,
-  getPosts,
   getAnnouncements,
   getFamilyTree,
-  getMembers
+  getMembers,
+  getPosts
 };
