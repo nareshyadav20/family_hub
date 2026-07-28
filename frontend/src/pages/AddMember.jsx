@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, X, User, Lock } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Lock, Eye, EyeOff } from 'lucide-react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import API_BASE_URL from '../config/api';
@@ -10,6 +10,8 @@ import API_BASE_URL from '../config/api';
 export default function AddMember() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -106,7 +108,7 @@ export default function AddMember() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between">Email Address *</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="email@example.com" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} autoComplete="new-email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="email@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender *</label>
@@ -129,11 +131,47 @@ export default function AddMember() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password *</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Minimum 8 characters" />
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                    style={{ WebkitTextSecurity: showPassword ? 'none' : 'disc' }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="Minimum 8 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password *</label>
-                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Type password again" />
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                    style={{ WebkitTextSecurity: showConfirmPassword ? 'none' : 'disc' }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    placeholder="Type password again"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

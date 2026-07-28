@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon } from 'lucide-react';
+import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon, Pencil } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GridSkeleton } from '../components/loaders/SkeletonLoaders';
@@ -16,6 +16,12 @@ export default function Gallery() {
   const [uploadCategory, setUploadCategory] = useState(uploadTags[0]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadPreview, setUploadPreview] = useState(null);
+  const [description, setDescription] = useState('');
+  
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState(null);
+  const [editCategory, setEditCategory] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -39,10 +45,25 @@ export default function Gallery() {
           return res.data;
       },
       onSuccess: () => {
-          queryClient.invalidateQueries(['gallery']);
+          queryClient.invalidateQueries({ queryKey: ['gallery'] });
           setShowModal(false);
           setSelectedFile(null);
           setUploadPreview(null);
+          setDescription('');
+      }
+  });
+
+  const editMutation = useMutation({
+      mutationFn: async ({ id, payload }) => {
+          const res = await axios.put(`${API_URL}/gallery/${id}`, payload, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['gallery'] });
+          setShowEditModal(false);
+          setEditingPhoto(null);
       }
   });
 
@@ -54,7 +75,7 @@ export default function Gallery() {
           return res.data;
       },
       onSuccess: () => {
-          queryClient.invalidateQueries(['gallery']);
+          queryClient.invalidateQueries({ queryKey: ['gallery'] });
       }
   });
 
@@ -91,7 +112,8 @@ export default function Gallery() {
           fileUrl: uploadPreview, 
           fileName: selectedFile.name,
           fileSize: (selectedFile.size / (1024*1024)).toFixed(2) + 'MB',
-          fileType: selectedFile.type
+          fileType: selectedFile.type,
+          description: description
       });
   };
 
@@ -126,11 +148,11 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* Masonry Grid */}
-      <div className="columns-2 md:columns-3 xl:columns-4 gap-4 space-y-4">
+      {/* Regular Grid (All photos same size) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {isLoading && <div className="col-span-full"><GridSkeleton count={8} /></div>}
         {filtered.map(photo => (
-          <div key={photo.id} className="break-inside-avoid relative rounded-2xl overflow-hidden group cursor-pointer bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-500" style={{ height: photo.h }}>
+          <div key={photo.id} className="relative rounded-2xl overflow-hidden group cursor-pointer bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 aspect-square">
             <img src={photo.url} loading="lazy" alt="family" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
@@ -139,10 +161,32 @@ export default function Gallery() {
               <span className="text-[10px] font-bold bg-black/40 backdrop-blur-md text-white px-2 py-1 rounded-full border border-white/10">{photo.tag}</span>
             </div>
 
-            {/* Admin Delete btn */}
-            <button onClick={(e) => { e.stopPropagation(); if(window.confirm('Delete photo?')) deleteMutation.mutate(photo.id); }} className="absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/70 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-              <Trash2 size={14} />
-            </button>
+            {/* Admin Actions (Edit & Delete) */}
+            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setEditingPhoto(photo); 
+                  setEditCategory(photo.tag); 
+                  setEditDescription(photo.description || ''); 
+                  setShowEditModal(true); 
+                }} 
+                className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/75 hover:text-blue-400 transition-colors"
+                title="Edit photo info"
+              >
+                <Pencil size={14} />
+              </button>
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if(window.confirm('Delete photo?')) deleteMutation.mutate(photo.id); 
+                }} 
+                className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white/75 hover:text-red-400 transition-colors"
+                title="Delete photo"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
 
             {/* Bottom actions */}
             <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between translate-y-2 group-hover:translate-y-0">
@@ -194,6 +238,16 @@ export default function Gallery() {
                  </select>
               </div>
 
+              <div className="mb-4">
+                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Caption / Comment</label>
+                 <textarea 
+                    value={description} 
+                    onChange={e => setDescription(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 h-20 resize-none"
+                    placeholder="Add a caption or comment to this photo..."
+                 />
+              </div>
+
               <label className="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50 cursor-pointer hover:bg-slate-100 :bg-slate-800 transition-colors w-full relative">
                  <input type="file" accept="image/jpeg, image/png" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                  
@@ -216,7 +270,49 @@ export default function Gallery() {
                  <button onClick={handleUpload} disabled={uploadMutation.isPending || !selectedFile} className="flex-1 bg-[#7C5CFC] hover:bg-[#6B49F6] disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
                     {uploadMutation.isPending ? 'Uploading...' : 'Upload Now'}
                  </button>
-                 <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); setDescription(''); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Edit Photo Info</h2>
+              
+              <div className="mb-4">
+                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Category</label>
+                 <select 
+                    value={editCategory} 
+                    onChange={e => setEditCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20"
+                 >
+                    {uploadTags.map(tag => (
+                       <option key={tag} value={tag}>{tag}</option>
+                    ))}
+                 </select>
+              </div>
+
+              <div className="mb-4">
+                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Caption / Comment</label>
+                 <textarea 
+                    value={editDescription} 
+                    onChange={e => setEditDescription(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 h-20 resize-none"
+                    placeholder="Add a caption or comment to this photo..."
+                 />
+              </div>
+
+              <div className="mt-5 flex gap-3">
+                 <button 
+                    onClick={() => editMutation.mutate({ id: editingPhoto.id, payload: { category: editCategory, description: editDescription } })} 
+                    disabled={editMutation.isPending} 
+                    className="flex-1 bg-[#7C5CFC] hover:bg-[#6B49F6] disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20"
+                 >
+                    {editMutation.isPending ? 'Saving...' : 'Save Changes'}
+                 </button>
+                 <button onClick={() => { setShowEditModal(false); setEditingPhoto(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </div>

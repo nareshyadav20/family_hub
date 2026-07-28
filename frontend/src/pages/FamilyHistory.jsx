@@ -17,10 +17,18 @@ export default function FamilyHistory() {
   const [visibility, setVisibility] = useState('Family Only');
   const [status, setStatus] = useState('Published');
   const [fileBase64, setFileBase64] = useState(null);
+
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeYear, setActiveYear] = useState('All');
+  const [activeBranch, setActiveBranch] = useState('All');
+  
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   
   const token = localStorage.getItem('token');
   const API_URL = `${API_BASE_URL}/api/v1`;
-
+  
   const { data: historyData = [], isLoading } = useQuery({
       queryKey: ['familyHistory'],
       queryFn: async () => {
@@ -72,7 +80,7 @@ export default function FamilyHistory() {
           setShowAddModal(false);
           setTitle(''); setCategory(''); setDate(''); setDesc(''); setRelated(''); 
           setFileBase64(null); setVisibility('Family Only'); setStatus('Published');
-          queryClient.invalidateQueries(['familyHistory']);
+          queryClient.invalidateQueries({ queryKey: ['familyHistory'] });
       }
   });
 
@@ -91,9 +99,16 @@ export default function FamilyHistory() {
       }
   };
 
-  const filtered = historyData.filter(d => 
-     (search === '' || d.title.toLowerCase().includes(search.toLowerCase()))
-  );
+  const years = ['All', ...new Set(historyData.map(h => h.year))].sort((a, b) => b - a);
+  const branches = ['All', 'Main'];
+
+  const filtered = historyData.filter(d => {
+     const matchesSearch = search === '' || d.title.toLowerCase().includes(search.toLowerCase()) || d.subtitle.toLowerCase().includes(search.toLowerCase());
+     const matchesCategory = activeCategory === 'All' || d.category === activeCategory;
+     const matchesYear = activeYear === 'All' || d.year === activeYear;
+     const matchesBranch = activeBranch === 'All' || true;
+     return matchesSearch && matchesCategory && matchesYear && matchesBranch;
+  });
   
   const totalEvents = historyData.length;
   const eventsThisYear = historyData.filter(h => h.year === new Date().getFullYear().toString()).length;
@@ -163,19 +178,84 @@ export default function FamilyHistory() {
               className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all placeholder:font-medium"
             />
           </div>
-          <div className="flex gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
-             <button className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 :bg-slate-800 transition-colors">
-               <LayoutGrid size={16} className="text-slate-400" /> All Categories <ChevronDown size={14} className="text-slate-400 ml-2" />
-             </button>
-             <button className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 :bg-slate-800 transition-colors">
-               <Calendar size={16} className="text-slate-400" /> All Years <ChevronDown size={14} className="text-slate-400 ml-2" />
-             </button>
-             <button className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 :bg-slate-800 transition-colors">
-               <img src="https://ui-avatars.com/api/?name=B&background=e2e8f0&color=64748b" className="w-4 h-4 rounded-full" alt="branch" /> All Branches <ChevronDown size={14} className="text-slate-400 ml-2" />
-             </button>
+          <div className="flex gap-3 w-full sm:w-auto overflow-visible pb-2 sm:pb-0 hide-scrollbar">
+             {/* Category Filter */}
+             <div className="relative z-30">
+                <button 
+                  onClick={() => { setShowCategoryDropdown(!showCategoryDropdown); setShowYearDropdown(false); setShowBranchDropdown(false); }}
+                  className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 transition-colors"
+                >
+                  <LayoutGrid size={16} className="text-slate-400" /> 
+                  {activeCategory === 'All' ? 'All Categories' : activeCategory} 
+                  <ChevronDown size={14} className="text-slate-400 ml-2" />
+                </button>
+                {showCategoryDropdown && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {['All', 'Birth', 'Marriage', 'Education', 'Reunion', 'Property', 'Achievement'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { setActiveCategory(cat); setShowCategoryDropdown(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 transition-colors ${activeCategory === cat ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-700'}`}
+                      >
+                        {cat === 'All' ? 'All Categories' : cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+             </div>
+
+             {/* Year Filter */}
+             <div className="relative z-30">
+                <button 
+                  onClick={() => { setShowYearDropdown(!showYearDropdown); setShowCategoryDropdown(false); setShowBranchDropdown(false); }}
+                  className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 transition-colors"
+                >
+                  <Calendar size={16} className="text-slate-400" /> 
+                  {activeYear === 'All' ? 'All Years' : activeYear} 
+                  <ChevronDown size={14} className="text-slate-400 ml-2" />
+                </button>
+                {showYearDropdown && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200">
+                    {years.map(yr => (
+                      <button
+                        key={yr}
+                        onClick={() => { setActiveYear(yr); setShowYearDropdown(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 transition-colors ${activeYear === yr ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-700'}`}
+                      >
+                        {yr === 'All' ? 'All Years' : yr}
+                      </button>
+                    ))}
+                  </div>
+                )}
+             </div>
+
+             {/* Branch Filter */}
+             <div className="relative z-30">
+                <button 
+                  onClick={() => { setShowBranchDropdown(!showBranchDropdown); setShowCategoryDropdown(false); setShowYearDropdown(false); }}
+                  className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 whitespace-nowrap shrink-0 hover:bg-slate-50 transition-colors"
+                >
+                  <img src="https://ui-avatars.com/api/?name=B&background=e2e8f0&color=64748b" className="w-4 h-4 rounded-full" alt="branch" /> 
+                  {activeBranch === 'All' ? 'All Branches' : `${activeBranch} Branch`} 
+                  <ChevronDown size={14} className="text-slate-400 ml-2" />
+                </button>
+                {showBranchDropdown && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {branches.map(br => (
+                      <button
+                        key={br}
+                        onClick={() => { setActiveBranch(br); setShowBranchDropdown(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 transition-colors ${activeBranch === br ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-700'}`}
+                      >
+                        {br === 'All' ? 'All Branches' : `${br} Branch`}
+                      </button>
+                    ))}
+                  </div>
+                )}
+             </div>
           </div>
         </div>
-        <button onClick={() => setSearch('')} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:text-slate-900 :text-white transition-colors shrink-0">
+        <button onClick={() => { setSearch(''); setActiveCategory('All'); setActiveYear('All'); setActiveBranch('All'); }} className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors shrink-0">
            <RefreshCw size={16} /> Clear Filters
         </button>
       </div>
