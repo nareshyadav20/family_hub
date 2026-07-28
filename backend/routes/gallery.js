@@ -45,7 +45,8 @@ router.get('/', async (req, res) => {
             uploader: `${p.uploader.firstName} ${p.uploader.lastName}`.trim(),
             avatar: p.uploader.avatar || `https://i.pravatar.cc/150?u=${p.uploaderId}`,
             tag: p.category || 'Reunion',
-            year: new Date(p.createdAt).getFullYear().toString()
+            year: new Date(p.createdAt).getFullYear().toString(),
+            description: p.name
         })));
     } catch(err) {
         console.error(err);
@@ -56,7 +57,7 @@ router.get('/', async (req, res) => {
 // POST /api/v1/gallery
 router.post('/', async (req, res) => {
     try {
-        const { category, fileUrl, fileName, fileSize, fileType } = req.body;
+        const { category, fileUrl, fileName, fileSize, fileType, description } = req.body;
         const familyId = req.user.familyId;
         if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
         
@@ -82,7 +83,7 @@ router.post('/', async (req, res) => {
                     familyId: familyId,
                     type: (fileType && fileType.includes('video')) ? 'VIDEO' : 'PHOTO',
                     title: (fileType && fileType.includes('video')) ? 'Video Uploaded' : 'Photo Uploaded',
-                    description: fileName || `New gallery item uploaded`,
+                    description: description || fileName || `New gallery item uploaded`,
                     image: (fileType && !fileType.includes('video')) ? fileUrl : null,
                     video: (fileType && fileType.includes('video')) ? fileUrl : null,
                     referenceId: photo.id,
@@ -95,6 +96,34 @@ router.post('/', async (req, res) => {
         }
 
         res.status(201).json(photo);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// PUT /api/v1/gallery/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const familyId = req.user.familyId;
+        const { category, description } = req.body;
+        
+        const updatedPhoto = await prisma.document.update({
+            where: { id: req.params.id, familyId },
+            data: {
+                category: category,
+                name: description
+            }
+        });
+
+        await prisma.familyFeed.updateMany({
+            where: { referenceId: req.params.id, familyId },
+            data: {
+                description: description
+            }
+        });
+        
+        res.json(updatedPhoto);
     } catch(err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
