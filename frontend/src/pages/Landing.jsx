@@ -582,7 +582,15 @@ export default function Home() {
                   <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
                   <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
                 </div>
-                <button className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
+                <button 
+                  onClick={() => {
+                    if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
+                      window.open(`/live/${stream.streamId}`, '_blank');
+                    } else {
+                      navigate('/login');
+                    }
+                  }}
+                  className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
                   Join Stream
                 </button>
               </div>
