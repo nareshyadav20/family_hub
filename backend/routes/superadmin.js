@@ -545,9 +545,14 @@ router.get('/revenue', async (req, res) => {
     }
 
     const summary = { today: todaysRevenue, thisMonth: monthlyRevenue, thisYear: yearlyRevenue, pending: pendingRevenue };
-    const chartData = [
-      { name: 'May', revenue: 0 }, { name: 'Jun', revenue: 0 }, { name: 'Jul', revenue: 0 }, { name: 'Aug', revenue: monthlyRevenue }
-    ];
+    const chartData = [];
+    for(let i=3; i>=0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const mName = d.toLocaleString('default', { month: 'short' });
+      const rev = transactions.filter(t => new Date(t.createdAt).getMonth() === d.getMonth() && t.status === 'Paid').reduce((s, t) => s + t.amount, 0);
+      chartData.push({ name: mName, revenue: rev });
+    }
 
     res.json({ success: true, data: { transactions, summary, chartData } });
   } catch(error) {
