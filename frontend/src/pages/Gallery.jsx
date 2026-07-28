@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon, Pencil } from 'lucide-react';
+import { Heart, MessageCircle, Upload, Grid3X3, LayoutGrid, Search, Trash2, Download, Image as ImageIcon, Pencil, X } from 'lucide-react';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GridSkeleton } from '../components/loaders/SkeletonLoaders';
@@ -22,6 +22,8 @@ export default function Gallery() {
   const [editingPhoto, setEditingPhoto] = useState(null);
   const [editCategory, setEditCategory] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editFile, setEditFile] = useState(null);
+  const [editPreview, setEditPreview] = useState(null);
 
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
@@ -64,6 +66,8 @@ export default function Gallery() {
           queryClient.invalidateQueries({ queryKey: ['gallery'] });
           setShowEditModal(false);
           setEditingPhoto(null);
+          setEditFile(null);
+          setEditPreview(null);
       }
   });
 
@@ -97,6 +101,22 @@ export default function Gallery() {
           const reader = new FileReader();
           reader.onloadend = () => {
               setUploadPreview(reader.result);
+          };
+          reader.readAsDataURL(file);
+      }
+  };
+
+  const handleEditFileChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+              alert('File size exceeds 5MB limit.');
+              return;
+          }
+          setEditFile(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              setEditPreview(reader.result);
           };
           reader.readAsDataURL(file);
       }
@@ -191,7 +211,13 @@ export default function Gallery() {
             {/* Bottom actions */}
             <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between translate-y-2 group-hover:translate-y-0">
               <div className="flex items-center gap-2">
-                <img src={photo.avatar} className="w-7 h-7 rounded-full border border-white/30" alt="" />
+                {photo.avatar && !photo.avatar.includes('pravatar.cc') ? (
+                  <img src={photo.avatar} className="w-7 h-7 rounded-full border border-white/30 object-cover" alt="" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full border border-white/30 bg-[#7C5CFC] text-white flex items-center justify-center text-[10px] font-bold uppercase shrink-0">
+                     {photo.uploader?.charAt(0) || 'U'}
+                  </div>
+                )}
                 <span className="text-white text-xs font-semibold truncate w-16">{photo.uploader}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -223,6 +249,12 @@ export default function Gallery() {
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <button 
+                 onClick={() => { setShowModal(false); setSelectedFile(null); setUploadPreview(null); setDescription(''); }} 
+                 className="absolute top-4 right-4 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                 <X size={20} />
+              </button>
               <h2 className="text-xl font-bold text-slate-900 mb-4">Upload Photos</h2>
               
               <div className="mb-4">
@@ -279,6 +311,12 @@ export default function Gallery() {
       {showEditModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <button 
+                 onClick={() => { setShowEditModal(false); setEditingPhoto(null); setEditFile(null); setEditPreview(null); }} 
+                 className="absolute top-4 right-4 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                 <X size={20} />
+              </button>
               <h2 className="text-xl font-bold text-slate-900 mb-4">Edit Photo Info</h2>
               
               <div className="mb-4">
@@ -304,15 +342,40 @@ export default function Gallery() {
                  />
               </div>
 
+              <div className="mb-4">
+                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Replace Photo (Optional)</label>
+                 <label className="border-2 border-dashed border-slate-300 rounded-xl p-4 flex flex-col items-center justify-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors w-full relative">
+                    <input type="file" accept="image/jpeg, image/png" onChange={handleEditFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <div className="text-center">
+                       <img src={editPreview || editingPhoto?.url} alt="Preview" className="w-16 h-16 object-cover rounded-lg mx-auto mb-1.5 shadow-md" />
+                       <span className="text-xs font-bold text-slate-500 block">
+                          {editFile ? editFile.name : "Click to select a different photo"}
+                       </span>
+                    </div>
+                 </label>
+              </div>
+
               <div className="mt-5 flex gap-3">
                  <button 
-                    onClick={() => editMutation.mutate({ id: editingPhoto.id, payload: { category: editCategory, description: editDescription } })} 
+                    onClick={() => {
+                        const payload = {
+                            category: editCategory,
+                            description: editDescription
+                        };
+                        if (editPreview) {
+                            payload.fileUrl = editPreview;
+                            payload.fileName = editFile.name;
+                            payload.fileSize = (editFile.size / (1024*1024)).toFixed(2) + 'MB';
+                            payload.fileType = editFile.type;
+                        }
+                        editMutation.mutate({ id: editingPhoto.id, payload });
+                    }} 
                     disabled={editMutation.isPending} 
                     className="flex-1 bg-[#7C5CFC] hover:bg-[#6B49F6] disabled:opacity-50 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20"
                  >
                     {editMutation.isPending ? 'Saving...' : 'Save Changes'}
                  </button>
-                 <button onClick={() => { setShowEditModal(false); setEditingPhoto(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                 <button onClick={() => { setShowEditModal(false); setEditingPhoto(null); setEditFile(null); setEditPreview(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </div>

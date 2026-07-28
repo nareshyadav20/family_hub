@@ -12,6 +12,8 @@ export default function Announcements() {
   const token = localStorage.getItem('token');
   const [expanded, setExpanded] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   
   const [newAnnouncement, setNewAnnouncement] = useState({
      title: '',
@@ -46,10 +48,53 @@ export default function Announcements() {
      onError: () => toast.error("Failed to publish announcement")
   });
 
+  const deleteMutation = useMutation({
+     mutationFn: async (id) => {
+        await axios.delete(`${API_URL}/admin/announcements/${id}`, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+     },
+     onSuccess: () => {
+        toast.success("Announcement deleted");
+        queryClient.invalidateQueries(['announcements']);
+     },
+     onError: () => toast.error("Failed to delete announcement")
+  });
+
+  const updateMutation = useMutation({
+     mutationFn: async ({ id, payload }) => {
+        const res = await axios.put(`${API_URL}/admin/announcements/${id}`, payload, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        return res.data;
+     },
+     onSuccess: () => {
+        toast.success("Announcement updated!");
+        setShowEditModal(false);
+        setEditingAnnouncement(null);
+        queryClient.invalidateQueries(['announcements']);
+     },
+     onError: () => toast.error("Failed to update announcement")
+  });
+
   const handleSubmit = (e) => {
      e.preventDefault();
      if (!newAnnouncement.title || !newAnnouncement.message) return toast.error("Title and Message required");
      createMutation.mutate(newAnnouncement);
+  };
+
+  const handleEditSubmit = (e) => {
+     e.preventDefault();
+     if (!editingAnnouncement.title || !editingAnnouncement.message) return toast.error("Title and Message required");
+     updateMutation.mutate({
+        id: editingAnnouncement.id,
+        payload: {
+           title: editingAnnouncement.title,
+           message: editingAnnouncement.message,
+           targetType: editingAnnouncement.targetType,
+           pinned: editingAnnouncement.pinned
+        }
+     });
   };
 
   return (
@@ -105,8 +150,25 @@ export default function Announcements() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button className="p-2 rounded-lg hover:bg-slate-100 :bg-slate-800 text-slate-400 hover:text-blue-600 transition-colors"><Edit2 size={15} /></button>
-                  <button className="p-2 rounded-lg hover:bg-red-50 :bg-red-900/20 text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={15} /></button>
+                  <button 
+                    onClick={() => {
+                       setEditingAnnouncement(ann);
+                       setShowEditModal(true);
+                    }}
+                    className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors"
+                  >
+                    <Edit2 size={15} />
+                  </button>
+                  <button 
+                    onClick={() => {
+                       if (window.confirm("Delete this announcement?")) {
+                          deleteMutation.mutate(ann.id);
+                       }
+                    }}
+                    className="p-2 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 size={15} />
+                  </button>
                 </div>
               </div>
 
@@ -147,6 +209,34 @@ export default function Announcements() {
                     {createMutation.isPending ? 'Publishing...' : 'Publish'}
                  </button>
                  <button type="button" onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
+        </form>
+      )}
+
+      {showEditModal && editingAnnouncement && (
+        <form onSubmit={handleEditSubmit} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <h2 className="text-xl font-bold text-slate-900 mb-4">Edit Announcement</h2>
+              <div className="space-y-4">
+                <input required type="text" value={editingAnnouncement.title} onChange={e => setEditingAnnouncement({...editingAnnouncement, title: e.target.value})} placeholder="Announcement Title" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium" />
+                <textarea required value={editingAnnouncement.message} onChange={e => setEditingAnnouncement({...editingAnnouncement, message: e.target.value})} rows="4" placeholder="Write your message here..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium resize-none"></textarea>
+                <div className="flex items-center justify-between">
+                   <select value={editingAnnouncement.targetType} onChange={e => setEditingAnnouncement({...editingAnnouncement, targetType: e.target.value})} className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium w-1/2">
+                      <option value="All Members">All Members</option>
+                      <option value="Admins Only">Admins Only</option>
+                   </select>
+                   <label className="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer">
+                      <input type="checkbox" checked={editingAnnouncement.pinned} onChange={e => setEditingAnnouncement({...editingAnnouncement, pinned: e.target.checked})} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300" />
+                      Pin to Top
+                   </label>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                 <button type="submit" disabled={updateMutation.isPending} className="flex-1 disabled:opacity-50 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-blue-500/20">
+                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                 </button>
+                 <button type="button" onClick={() => { setShowEditModal(false); setEditingAnnouncement(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </form>

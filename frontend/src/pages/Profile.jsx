@@ -368,10 +368,12 @@ export default function Profile() {
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">{label}</label>
                   <div className="relative">
                     <input
-                      type={showPw ? 'text' : 'password'}
+                      type="text"
                       value={pwForm[key]}
                       onChange={e => setPwForm(p => ({ ...p, [key]: e.target.value }))}
                       placeholder={`Enter ${label.toLowerCase()}`}
+                      autoComplete="new-password"
+                      style={{ WebkitTextSecurity: showPw ? 'none' : 'disc' }}
                       className="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all"
                     />
                     {key === 'newPassword' && (

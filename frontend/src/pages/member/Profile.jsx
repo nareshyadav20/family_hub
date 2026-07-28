@@ -95,7 +95,7 @@ export default function Profile() {
         <div className="px-8 pb-8">
           <div className="flex flex-col sm:flex-row sm:items-end gap-6 mb-6">
               <div className="relative shrink-0 -mt-16 sm:-mt-20">
-                <div className="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg bg-blue-900 flex items-center justify-center text-4xl text-white font-bold overflow-hidden">
+                <div className="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg bg-[#7C5CFC] flex items-center justify-center text-4xl text-white font-bold overflow-hidden uppercase">
                    {user?.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : user?.firstName?.charAt(0)}
                 </div>
                 <input type="file" hidden ref={fileInputRef} onChange={handleAvatarUpload} accept="image/*" />

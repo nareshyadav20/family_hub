@@ -106,21 +106,34 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const familyId = req.user.familyId;
-        const { category, description } = req.body;
+        const { category, description, fileUrl, fileName, fileSize, fileType } = req.body;
+        
+        const updateData = {
+            category: category,
+            name: description || fileName
+        };
+
+        if (fileUrl) {
+            updateData.url = fileUrl;
+            if (fileType) updateData.type = fileType;
+            if (fileSize) updateData.size = fileSize;
+        }
         
         const updatedPhoto = await prisma.document.update({
             where: { id: req.params.id, familyId },
-            data: {
-                category: category,
-                name: description
-            }
+            data: updateData
         });
+
+        const feedUpdateData = {
+            description: description || fileName
+        };
+        if (fileUrl) {
+            feedUpdateData.image = fileUrl;
+        }
 
         await prisma.familyFeed.updateMany({
             where: { referenceId: req.params.id, familyId },
-            data: {
-                description: description
-            }
+            data: feedUpdateData
         });
         
         res.json(updatedPhoto);

@@ -125,9 +125,15 @@ export default function Gallery() {
               
               <div className="absolute left-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full border-2 border-white/50 overflow-hidden bg-slate-200">
-                    <img src={item.avatar} alt="uploader" className="w-full h-full object-cover" />
-                  </div>
+                  {item.avatar && !item.avatar.includes('pravatar.cc') ? (
+                    <div className="w-8 h-8 rounded-full border-2 border-white/50 overflow-hidden bg-slate-200">
+                      <img src={item.avatar} alt="uploader" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border-2 border-white/50 bg-[#7C5CFC] text-white flex items-center justify-center text-[10px] font-bold uppercase shrink-0">
+                       {item.uploader?.charAt(0) || 'U'}
+                    </div>
+                  )}
                   <span className="text-white text-xs font-semibold truncate max-w-[80px]">{item.uploader}</span>
                 </div>
               </div>

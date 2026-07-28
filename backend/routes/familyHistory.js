@@ -129,4 +129,68 @@ router.post('/', async (req, res) => {
     }
 });
 
+// PUT /api/v1/family-history/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const familyId = req.user.familyId;
+        const { title, category, eventDate, description, related, visibility, status, fileUrl } = req.body;
+        
+        let relatedArr = [];
+        if (related) {
+           relatedArr = [`https://ui-avatars.com/api/?name=${encodeURIComponent(related)}&background=random&color=fff`];
+        }
+
+        const updateData = {
+            title,
+            category,
+            eventDate: eventDate ? new Date(eventDate) : undefined,
+            description,
+            visibility,
+            status,
+        };
+        if (fileUrl) {
+            updateData.thumbnailUrl = fileUrl;
+        }
+        if (related) {
+            updateData.relatedMembers = relatedArr;
+        }
+
+        const updatedHistory = await prisma.familyHistory.update({
+            where: { id: req.params.id, familyId },
+            data: updateData
+        });
+
+        await prisma.familyFeed.updateMany({
+            where: { referenceId: req.params.id, familyId },
+            data: {
+                title: title,
+                description: description,
+                image: fileUrl || undefined
+            }
+        });
+
+        res.json(updatedHistory);
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// DELETE /api/v1/family-history/:id
+router.delete('/:id', async (req, res) => {
+    try {
+        const familyId = req.user.familyId;
+        await prisma.familyHistory.delete({
+            where: { id: req.params.id, familyId }
+        });
+        await prisma.familyFeed.deleteMany({
+            where: { referenceId: req.params.id, familyId }
+        });
+        res.json({ success: true });
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 module.exports = router;
