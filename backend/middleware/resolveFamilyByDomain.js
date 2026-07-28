@@ -36,16 +36,6 @@ const resolveFamilyByDomain = async (req, res, next) => {
       },
     });
 
-    if (!family && (hostname === 'localhost' || hostname === '127.0.0.1')) {
-      // Developer fallback: default to battula.in on localhost
-      family = await prisma.family.findUnique({
-        where: { customDomain: 'battula.in' }
-      });
-      // If for some reason battula.in isn't found, fallback to first
-      if (!family) {
-        family = await prisma.family.findFirst();
-      }
-    }
 
     if (!family) {
       console.log('Resolved Family: NOT FOUND');

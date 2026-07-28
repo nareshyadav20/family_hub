@@ -4,6 +4,9 @@ const prisma = new PrismaClient();
 const getHome = async (req, res) => {
   try {
     const familyId = req.familyId;
+    if (!familyId) {
+      return res.status(400).json({ error: 'Family ID is required' });
+    }
     
     // Fetch all related entities in parallel
     const [
@@ -101,6 +104,7 @@ const getHome = async (req, res) => {
 };
 
 const getFamily = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const family = req.family;
     res.json(family);
@@ -111,6 +115,7 @@ const getFamily = async (req, res) => {
 };
 
 const getGallery = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const documents = await prisma.document.findMany({
       where: {
@@ -128,6 +133,7 @@ const getGallery = async (req, res) => {
 };
 
 const getVideos = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const videos = await prisma.document.findMany({
       where: {
@@ -144,6 +150,7 @@ const getVideos = async (req, res) => {
 };
 
 const getEvents = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const events = await prisma.event.findMany({
       where: {
@@ -160,6 +167,7 @@ const getEvents = async (req, res) => {
 };
 
 const getLiveStreams = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const streams = await prisma.event.findMany({
       where: {
@@ -177,6 +185,7 @@ const getLiveStreams = async (req, res) => {
 };
 
 const getPosts = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     // Assuming posts are group posts that might be public? Or announcements?
     // Instruction says: Return only Latest Posts WHERE familyId=req.familyId
@@ -203,6 +212,7 @@ const getPosts = async (req, res) => {
 };
 
 const getAnnouncements = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const announcements = await prisma.announcement.findMany({
       where: {
@@ -219,6 +229,7 @@ const getAnnouncements = async (req, res) => {
 };
 
 const getFamilyTree = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const members = await prisma.user.findMany({
       where: { familyId: req.familyId },
@@ -240,6 +251,7 @@ const getFamilyTree = async (req, res) => {
 };
 
 const getMembers = async (req, res) => {
+  if (!req.familyId) return res.status(400).json({ error: 'Family ID is required' });
   try {
     const members = await prisma.user.findMany({
       where: {
