@@ -447,6 +447,52 @@ app.delete('/api/v1/admin/members/bulk', authenticateToken, async (req, res) => 
     res.status(500).json({ error: 'Server error during deletion' });
   }
 });
+
+// Single Delete Member Endpoint (Admin)
+app.delete('/api/v1/admin/members/:id', authenticateToken, async (req, res) => {
+  try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+    await prisma.user.delete({
+      where: { id: req.params.id, familyId }
+    });
+
+    res.json({ success: true, message: 'Member deleted' });
+  } catch (err) {
+    console.error('Delete member error:', err);
+    res.status(500).json({ error: 'Failed to delete member' });
+  }
+});
+
+// Single Update Member Endpoint (Admin)
+app.put('/api/v1/admin/members/:id', authenticateToken, async (req, res) => {
+  try {
+    const familyId = req.user.familyId;
+    if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+    const { firstName, lastName, email, phone, role, familyBranch, relationship } = req.body;
+
+    const updated = await prisma.user.update({
+      where: { id: req.params.id, familyId },
+      data: {
+        firstName,
+        lastName,
+        email,
+        phone,
+        role,
+        familyBranch,
+        relationship
+      }
+    });
+
+    res.json({ success: true, member: updated });
+  } catch (err) {
+    console.error('Update member error:', err);
+    res.status(500).json({ error: 'Failed to update member' });
+  }
+});
+
 // Manual Add Member Endpoint (No Invite)
 app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
   const familyId = req.user.familyId;

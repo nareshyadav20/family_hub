@@ -107,4 +107,58 @@ router.post('/:id/vote', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/v1/admin/polls/:id (Edit)
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+     const { question, options, endDate } = req.body;
+     const familyId = req.user.familyId;
+
+     const existingPoll = await prisma.poll.findFirst({ where: { id: req.params.id, familyId } });
+     if (!existingPoll) return res.status(404).json({ error: 'Poll not found' });
+
+     let formattedOptions = existingPoll.options;
+     if (options && options.length >= 2) {
+        formattedOptions = options.map((opt, i) => ({ id: i + 1, text: opt }));
+     }
+
+     const updated = await prisma.poll.update({
+        where: { id: req.params.id, familyId },
+        data: {
+           question: question || undefined,
+           options: formattedOptions,
+           endDate: endDate ? new Date(endDate) : undefined
+        },
+        include: {
+           author: { select: { firstName: true, lastName: true, avatar: true } }
+        }
+     });
+
+     const io = req.app.get('socketio');
+     io.emit('poll.updated', updated);
+
+     res.json(updated);
+  } catch (error) {
+     console.error('Poll Update Error:', error);
+     res.status(500).json({ error: 'Failed to update poll' });
+  }
+});
+
+// DELETE /api/v1/admin/polls/:id (Delete)
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+     const familyId = req.user.familyId;
+     await prisma.poll.delete({
+        where: { id: req.params.id, familyId }
+     });
+     
+     const io = req.app.get('socketio');
+     io.emit('poll.updated', { id: req.params.id, deleted: true });
+
+     res.json({ success: true });
+  } catch (error) {
+     console.error('Poll Delete Error:', error);
+     res.status(500).json({ error: 'Failed to delete poll' });
+  }
+});
+
 module.exports = router;

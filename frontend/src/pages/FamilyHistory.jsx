@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Plus, Calendar, Image as ImageIcon, FileText, Search, LayoutGrid, ChevronDown, RefreshCw, Eye, MoreVertical, ChevronLeft, ChevronRight, X, Upload, UserPlus } from 'lucide-react';
+import { BookOpen, Plus, Calendar, Image as ImageIcon, FileText, Search, LayoutGrid, ChevronDown, RefreshCw, Eye, MoreVertical, ChevronLeft, ChevronRight, X, Upload, UserPlus, Edit2, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import API_BASE_URL from '../config/api';
@@ -25,6 +25,21 @@ export default function FamilyHistory() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
+
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedHistory, setSelectedHistory] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingHistory, setEditingHistory] = useState(null);
+  const [activeActionId, setActiveActionId] = useState(null);
+
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editRelated, setEditRelated] = useState('');
+  const [editVisibility, setEditVisibility] = useState('Family Only');
+  const [editStatus, setEditStatus] = useState('Published');
+  const [editFileBase64, setEditFileBase64] = useState(null);
   
   const token = localStorage.getItem('token');
   const API_URL = `${API_BASE_URL}/api/v1`;
@@ -80,6 +95,32 @@ export default function FamilyHistory() {
           setShowAddModal(false);
           setTitle(''); setCategory(''); setDate(''); setDesc(''); setRelated(''); 
           setFileBase64(null); setVisibility('Family Only'); setStatus('Published');
+          queryClient.invalidateQueries({ queryKey: ['familyHistory'] });
+      }
+  });
+
+  const deleteHistoryMutation = useMutation({
+      mutationFn: async (id) => {
+          const res = await axios.delete(`${API_URL}/family-history/${id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['familyHistory'] });
+      }
+  });
+
+  const updateHistoryMutation = useMutation({
+      mutationFn: async ({ id, payload }) => {
+          const res = await axios.put(`${API_URL}/family-history/${id}`, payload, {
+              headers: { Authorization: `Bearer ${token}` }
+          });
+          return res.data;
+      },
+      onSuccess: () => {
+          setShowEditModal(false);
+          setEditingHistory(null);
           queryClient.invalidateQueries({ queryKey: ['familyHistory'] });
       }
   });
@@ -299,9 +340,46 @@ export default function FamilyHistory() {
                             <h3 className="text-lg font-bold text-slate-900 truncate leading-tight">{item.title}</h3>
                             <p className="text-sm text-slate-500 font-medium line-clamp-2 mt-1">{item.subtitle}</p>
                          </div>
-                         <div className="flex items-center gap-2 shrink-0 md:flex-col md:items-end">
-                            <span className="text-sm font-bold text-slate-700 ">{item.date}</span>
-                            <span className="text-xs font-semibold text-slate-400">{item.location}</span>
+                         
+                         <div className="flex items-center gap-1.5 shrink-0">
+                            <button 
+                               onClick={(e) => { e.stopPropagation(); setSelectedHistory(item); setShowViewModal(true); }}
+                               className="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors"
+                               title="View Details"
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <button 
+                               onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingHistory(item);
+                                  setEditTitle(item.title);
+                                  setEditCategory(item.category);
+                                  setEditDate(item.date ? new Date(item.date).toISOString().split('T')[0] : '');
+                                  setEditDesc(item.subtitle);
+                                  setEditRelated('');
+                                  setEditVisibility(item.visibility || 'Family Only');
+                                  setEditStatus(item.status || 'Published');
+                                  setEditFileBase64(item.thumbnail);
+                                  setShowEditModal(true);
+                               }}
+                               className="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors"
+                               title="Edit Event"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                               onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Delete this history event?')) {
+                                      deleteHistoryMutation.mutate(item.id);
+                                  }
+                               }}
+                               className="w-8 h-8 rounded-lg bg-slate-50 text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors"
+                               title="Delete Event"
+                            >
+                              <Trash2 size={14} />
+                            </button>
                          </div>
                       </div>
 
@@ -325,13 +403,10 @@ export default function FamilyHistory() {
                             </div>
                          </div>
                          
-                         <div className="flex items-center gap-1.5 shrink-0">
-                            <button className="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-200 :bg-slate-700 flex items-center justify-center transition-colors">
-                              <Eye size={14} />
-                            </button>
-                            <button className="w-8 h-8 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-200 :bg-slate-700 flex items-center justify-center transition-colors">
-                              <MoreVertical size={14} />
-                            </button>
+                         <div className="flex items-center gap-2 shrink-0 text-right">
+                            <span className="text-sm font-bold text-slate-700">{item.date}</span>
+                            <span className="text-slate-300">•</span>
+                            <span className="text-xs font-semibold text-slate-400">{item.location}</span>
                          </div>
                       </div>
                    </div>
@@ -528,6 +603,210 @@ export default function FamilyHistory() {
                   className="px-8 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold transition-all shadow-md shadow-indigo-600/20 ml-2"
                >
                  {uploadHistory.isPending ? 'Publishing...' : 'Publish'}
+               </button>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
+      {showViewModal && selectedHistory && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center p-4 sm:p-6 overflow-y-auto w-full">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl relative my-auto animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+                <BookOpen size={18} className="text-indigo-600" /> History Event Details
+              </h2>
+              <button 
+                onClick={() => { setShowViewModal(false); setSelectedHistory(null); }}
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-500 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {selectedHistory.thumbnail && (
+                <div className="w-full h-44 rounded-2xl overflow-hidden shadow-sm">
+                  <img src={selectedHistory.thumbnail} alt={selectedHistory.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                 <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${selectedHistory.catColor}`}>
+                   {selectedHistory.category}
+                 </span>
+                 <span className="inline-flex px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold">
+                   {selectedHistory.status}
+                 </span>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-black text-slate-900">{selectedHistory.title}</h3>
+                <p className="text-xs font-semibold text-indigo-600 mt-1">{selectedHistory.date} • {selectedHistory.location}</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100">
+                <p className="text-slate-600 text-sm leading-relaxed font-medium whitespace-pre-wrap">{selectedHistory.subtitle}</p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <span>Added by: <strong className="text-slate-600">{selectedHistory.addedBy}</strong></span>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button 
+                onClick={() => { setShowViewModal(false); setSelectedHistory(null); }}
+                className="px-5 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && editingHistory && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center p-4 sm:p-6 overflow-y-auto w-full">
+          <div className="bg-white rounded-3xl w-full max-w-4xl shadow-2xl relative my-auto animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center rounded-t-3xl bg-slate-50/50">
+              <h2 className="text-xl font-black text-slate-900 flex items-center gap-3">
+                <BookOpen size={22} className="text-indigo-600" /> Edit Family History
+              </h2>
+              <button 
+                onClick={() => { setShowEditModal(false); setEditingHistory(null); }}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-slate-300 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              
+              {/* Left Column */}
+              <div className="space-y-8">
+                 <div>
+                    <h3 className="text-sm font-black uppercase text-indigo-600 mb-5 tracking-wider">Basic Information</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">History Title <span className="text-rose-500">*</span></label>
+                        <input type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="e.g. Ancestral Home Built" className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-sm font-bold text-slate-700 mb-1.5">Category <span className="text-rose-500">*</span></label>
+                           <select value={editCategory} onChange={e => setEditCategory(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-800">
+                             <option value="">Select Category</option>
+                             <option value="Birth">Birth</option>
+                             <option value="Marriage">Marriage</option>
+                             <option value="Education">Education</option>
+                             <option value="Reunion">Reunion</option>
+                             <option value="Property">Property</option>
+                             <option value="Achievement">Achievement</option>
+                           </select>
+                         </div>
+                         <div>
+                           <label className="block text-sm font-bold text-slate-700 mb-1.5">Event Date <span className="text-rose-500">*</span></label>
+                           <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-800" />
+                         </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Description <span className="text-rose-500">*</span></label>
+                        <textarea value={editDesc} onChange={e => setEditDesc(e.target.value)} rows={4} placeholder="Describe the history event in detail..." className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"></textarea>
+                      </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-8 h-full flex flex-col justify-between">
+                <div>
+                   <h3 className="text-sm font-black uppercase text-indigo-600 mb-5 tracking-wider">Related Member</h3>
+                   <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                      <input type="text" value={editRelated} onChange={e => setEditRelated(e.target.value)} placeholder="Search Member..." className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                   </div>
+                </div>
+
+                <div>
+                   <h3 className="text-sm font-black uppercase text-indigo-600 mb-5 tracking-wider">Photo (Optional)</h3>
+                   <label className="border-2 border-dashed border-slate-300 rounded-2xl h-[120px] flex flex-col items-center justify-center bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors w-full relative overflow-hidden">
+                      <input type="file" accept="image/*" onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setEditFileBase64(reader.result);
+                              reader.readAsDataURL(file);
+                          }
+                      }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      {editFileBase64 ? (
+                         <div className="absolute inset-0">
+                           <img src={editFileBase64} alt="Thumb" className="w-full h-full object-cover" />
+                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center font-bold text-white opacity-0 hover:opacity-100 transition-opacity text-sm">Change Image</div>
+                         </div>
+                      ) : (
+                         <>
+                           <Upload size={28} className="text-indigo-500 mb-2" />
+                           <span className="text-sm font-bold text-slate-700">Upload Image</span>
+                         </>
+                      )}
+                   </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-black uppercase text-indigo-600 mb-3 tracking-wider">Visibility</h3>
+                    <select value={editVisibility} onChange={e => setEditVisibility(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-700">
+                       <option value="Family Only">Family Only</option>
+                       <option value="Public">Public</option>
+                       <option value="Private">Private</option>
+                    </select>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase text-indigo-600 mb-3 tracking-wider">Status</h3>
+                    <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-emerald-50 text-emerald-700 text-sm font-bold flex focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+                       <option value="Published">Published</option>
+                       <option value="Draft">Draft</option>
+                       <option value="Archived">Archived</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+            
+            {/* Footer Buttons */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+               <button 
+                  onClick={() => { setShowEditModal(false); setEditingHistory(null); }}
+                  className="px-6 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors shadow-sm"
+               >
+                 Cancel
+               </button>
+               <button 
+                  onClick={() => updateHistoryMutation.mutate({
+                     id: editingHistory.id,
+                     payload: {
+                        title: editTitle,
+                        category: editCategory,
+                        eventDate: editDate,
+                        description: editDesc,
+                        related: editRelated,
+                        visibility: editVisibility,
+                        status: editStatus,
+                        fileUrl: editFileBase64
+                     }
+                  })}
+                  disabled={updateHistoryMutation.isPending || !editTitle || !editCategory || !editDate}
+                  className="px-8 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold transition-all shadow-md shadow-indigo-600/20 ml-2"
+               >
+                 {updateHistoryMutation.isPending ? 'Saving...' : 'Save Changes'}
                </button>
             </div>
             

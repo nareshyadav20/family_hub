@@ -192,8 +192,12 @@ export default function MainLayout({ navItems, bottomNav }) {
                {/* Dynamic Auth Header */}
                <div className="relative pl-1 md:pl-3 lg:border-l border-[#E9E5F8]">
                   <button onClick={() => setShowAvatarMenu(!showAvatarMenu)} className="flex items-center gap-2 md:gap-3 cursor-pointer outline-none hover:opacity-90 transition-opacity p-1">
-                     <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white shadow-md relative shrink-0">
-                        <img src={activeUser.avatar || activeUser.avatarUrl || "https://i.pravatar.cc/150?u=4242"} className="w-full h-full object-cover" alt="Profile" />
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-white shadow-md relative shrink-0 flex items-center justify-center bg-[#7C5CFC] text-white font-bold text-[11px] lg:text-[13px] capitalize overflow-hidden">
+                        {activeUser.avatar || activeUser.avatarUrl ? (
+                           <img src={activeUser.avatar || activeUser.avatarUrl} className="w-full h-full object-cover" alt="Profile" />
+                        ) : (
+                           <span className="flex items-center justify-center w-full h-full text-center leading-none select-none tracking-tight">{activeUser.firstName?.[0] || ''}{activeUser.lastName?.[0] || ''}</span>
+                        )}
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#2EB67D] border-2 border-white rounded-full"></span>
                      </div>
                      <div className="hidden sm:flex flex-col items-start leading-[1.2]">

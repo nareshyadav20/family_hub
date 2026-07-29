@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Metrics are computed dynamically based on live API data
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
@@ -49,6 +49,51 @@ export default function Members() {
    const [selectedRows, setSelectedRows] = useState([]);
    const [activeDrawer, setActiveDrawer] = useState(null); // holds member object
    const queryClient = useQueryClient();
+
+   const [showEditModal, setShowEditModal] = useState(false);
+   const [editingMember, setEditingMember] = useState(null);
+   const [editForm, setEditForm] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      role: 'MEMBER',
+      familyBranch: 'Main',
+      relationship: 'Member'
+   });
+
+   const deleteMutation = useMutation({
+      mutationFn: async (id) => {
+         await axios.delete(`${API_BASE_URL}/api/v1/admin/members/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+         });
+      },
+      onSuccess: () => {
+         toast.success('Member deleted successfully');
+         queryClient.invalidateQueries(['members']);
+      },
+      onError: (err) => {
+         toast.error(err.response?.data?.error || 'Failed to delete member');
+      }
+   });
+
+   const updateMutation = useMutation({
+      mutationFn: async ({ id, payload }) => {
+         const res = await axios.put(`${API_BASE_URL}/api/v1/admin/members/${id}`, payload, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+         });
+         return res.data;
+      },
+      onSuccess: () => {
+         toast.success('Member updated successfully');
+         setShowEditModal(false);
+         setEditingMember(null);
+         queryClient.invalidateQueries(['members']);
+      },
+      onError: (err) => {
+         toast.error(err.response?.data?.error || 'Failed to update member');
+      }
+   });
 
    const handleResendInvite = async (memberId) => {
       try {
@@ -312,11 +357,38 @@ export default function Members() {
                               <button className="p-2 md:p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors mr-1" title="View Profile" onClick={() => handleRowClick(m)}>
                                  <Search size={16} />
                               </button>
-                              <button className="p-2 md:p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors mr-1" title="Edit">
+                              <button 
+                                 onClick={(e) => {
+                                    e.stopPropagation();
+                                    const raw = rawMembers.find(rm => rm.id === m.id) || {};
+                                    setEditingMember(raw);
+                                    setEditForm({
+                                       firstName: raw.firstName || '',
+                                       lastName: raw.lastName || '',
+                                       email: raw.email || '',
+                                       phone: raw.phone || '',
+                                       role: raw.role || 'MEMBER',
+                                       familyBranch: raw.familyBranch || 'Main',
+                                       relationship: raw.relationship || 'Member'
+                                    });
+                                    setShowEditModal(true);
+                                 }}
+                                 className="p-2 md:p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors mr-1" 
+                                 title="Edit"
+                              >
                                  <Edit2 size={16} />
                               </button>
-                              <button className="p-2 md:p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors" title="More actions">
-                                 <MoreHorizontal size={16} />
+                              <button 
+                                 onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm("Are you sure you want to delete this member?")) {
+                                       deleteMutation.mutate(m.id);
+                                    }
+                                 }}
+                                 className="p-2 md:p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" 
+                                 title="Delete"
+                              >
+                                 <Trash2 size={16} />
                               </button>
                            </div>
                         </td>
@@ -367,12 +439,41 @@ export default function Members() {
                         <div className="space-y-4">
                            <h4 className="text-xs text-slate-400 uppercase font-bold tracking-wider border-t border-slate-100 pt-4">Quick Actions</h4>
                            <div className="grid grid-cols-2 gap-2">
-                              <button className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><Edit2 size={14} /> Edit</button>
+                              <button 
+                                 onClick={() => {
+                                    const raw = rawMembers.find(rm => rm.id === activeDrawer.id) || {};
+                                    setEditingMember(raw);
+                                    setEditForm({
+                                       firstName: raw.firstName || '',
+                                       lastName: raw.lastName || '',
+                                       email: raw.email || '',
+                                       phone: raw.phone || '',
+                                       role: raw.role || 'MEMBER',
+                                       familyBranch: raw.familyBranch || 'Main',
+                                       relationship: raw.relationship || 'Member'
+                                    });
+                                    setShowEditModal(true);
+                                    setActiveDrawer(null);
+                                 }}
+                                 className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"
+                              >
+                                 <Edit2 size={14} /> Edit
+                              </button>
                               {['INVITATION_SENT', 'EMAIL_FAILED'].includes(activeDrawer.status) && (
                                  <button onClick={() => handleResendInvite(activeDrawer.id)} className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><Mail size={14} /> Resend Invite</button>
                               )}
                               <button className="p-2 border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg flex justify-center items-center gap-2"><FamilyIcon size={14} /> View Tree</button>
-                              <button className="p-2 border border-rose-200 text-sm font-bold text-rose-700 hover:bg-rose-50 rounded-lg flex justify-center items-center gap-2"><ShieldAlert size={14} /> Deactivate</button>
+                              <button 
+                                 onClick={() => {
+                                    if (window.confirm("Are you sure you want to delete this member?")) {
+                                       deleteMutation.mutate(activeDrawer.id);
+                                       setActiveDrawer(null);
+                                    }
+                                 }}
+                                 className="p-2 border border-rose-200 text-sm font-bold text-rose-700 hover:bg-rose-50 rounded-lg flex justify-center items-center gap-2"
+                              >
+                                 <ShieldAlert size={14} /> Delete
+                              </button>
                            </div>
                         </div>
                      </div>
@@ -380,6 +481,77 @@ export default function Members() {
                </>
             )}
          </AnimatePresence>
+
+         {showEditModal && editingMember && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+               <form 
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     updateMutation.mutate({ id: editingMember.id, payload: editForm });
+                  }} 
+                  className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative"
+               >
+                  <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                     <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <Edit2 size={20} className="text-[#7C5CFC]" /> Edit Family Member
+                     </h2>
+                     <button type="button" onClick={() => { setShowEditModal(false); setEditingMember(null); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors">
+                        <X size={16} />
+                     </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">First Name *</label>
+                           <input required type="text" value={editForm.firstName} onChange={e => setEditForm({...editForm, firstName: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Last Name</label>
+                           <input type="text" value={editForm.lastName} onChange={e => setEditForm({...editForm, lastName: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        </div>
+                     </div>
+                     
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Email Address</label>
+                           <input type="email" value={editForm.email} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Phone Number</label>
+                           <input type="text" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Role</label>
+                           <select value={editForm.role} onChange={e => setEditForm({...editForm, role: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30">
+                              <option value="MEMBER">Family Member</option>
+                              <option value="ADMIN">Family Admin</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Relationship</label>
+                           <input type="text" value={editForm.relationship} onChange={e => setEditForm({...editForm, relationship: e.target.value})} placeholder="e.g. Son, Daughter, Spouse" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        </div>
+                     </div>
+
+                     <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Family Branch</label>
+                        <input type="text" value={editForm.familyBranch} onChange={e => setEditForm({...editForm, familyBranch: e.target.value})} placeholder="e.g. North, South, West" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                     </div>
+                  </div>
+                  
+                  <div className="mt-6 flex gap-3">
+                     <button type="submit" disabled={updateMutation.isPending} className="flex-1 disabled:opacity-50 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
+                        {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                     </button>
+                     <button type="button" onClick={() => { setShowEditModal(false); setEditingMember(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+                  </div>
+               </form>
+            </div>
+         )}
       </div>
    );
 }

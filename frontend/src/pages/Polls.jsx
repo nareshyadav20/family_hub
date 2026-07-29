@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart2, Plus, Check } from 'lucide-react';
+import { BarChart2, Plus, Check, Edit2, Trash2, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -15,7 +15,18 @@ export default function Polls() {
 
   const [selected, setSelected] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPoll, setEditingPoll] = useState(null);
+  
   const [newPoll, setNewPoll] = useState({
+     question: '',
+     endDate: '',
+     opt1: '',
+     opt2: '',
+     opt3: ''
+  });
+
+  const [editPollData, setEditPollData] = useState({
      question: '',
      endDate: '',
      opt1: '',
@@ -70,9 +81,54 @@ export default function Polls() {
      }
   });
 
+  const deleteMutation = useMutation({
+     mutationFn: async (id) => {
+        await axios.delete(`${API_URL}/admin/polls/${id}`, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+     },
+     onSuccess: () => {
+        toast.success("Poll deleted!");
+        queryClient.invalidateQueries(['polls']);
+     },
+     onError: () => toast.error("Failed to delete poll")
+  });
+
+  const updateMutation = useMutation({
+     mutationFn: async ({ id, payload }) => {
+        const res = await axios.put(`${API_URL}/admin/polls/${id}`, payload, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        return res.data;
+     },
+     onSuccess: () => {
+        toast.success("Poll updated!");
+        setShowEditModal(false);
+        setEditingPoll(null);
+        queryClient.invalidateQueries(['polls']);
+     },
+     onError: () => toast.error("Failed to update poll")
+  });
+
   const handleVote = (pollId) => {
     if (!selected[pollId]) return;
     voteMutation.mutate({ pollId, optionId: selected[pollId] });
+  };
+
+  const handleEdit = (e) => {
+     e.preventDefault();
+     const options = [editPollData.opt1, editPollData.opt2, editPollData.opt3].filter(Boolean);
+     if (options.length < 2) return toast.error("At least 2 options are required.");
+     if (!editPollData.question) return toast.error("Question is required.");
+     
+     updateMutation.mutate({
+        id: editingPoll.id,
+        payload: {
+           question: editPollData.question,
+           options,
+           endDate: editPollData.endDate
+        }
+     });
   };
 
   const handleCreate = (e) => {
@@ -152,7 +208,39 @@ export default function Polls() {
                   <h3 className="font-bold text-slate-900 text-[15px] leading-snug">{poll.question}</h3>
                   <p className="text-xs text-slate-400 mt-1">by {poll.author?.firstName || 'Admin'} · {totalVotes} votes</p>
                 </div>
-                <BarChart2 size={22} className="text-slate-300 shrink-0 mt-1" />
+                <div className="flex items-center gap-1.5 shrink-0 mt-1">
+                  <button 
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingPoll(poll);
+                        setEditPollData({
+                           question: poll.question,
+                           endDate: poll.endDate ? new Date(poll.endDate).toISOString().split('T')[0] : '',
+                           opt1: poll.options[0]?.text || '',
+                           opt2: poll.options[1]?.text || '',
+                           opt3: poll.options[2]?.text || ''
+                        });
+                        setShowEditModal(true);
+                     }}
+                     className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-[#7C5CFC] transition-colors"
+                     title="Edit Poll"
+                  >
+                     <Edit2 size={15} />
+                  </button>
+                  <button 
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm("Delete this poll?")) {
+                           deleteMutation.mutate(poll.id);
+                        }
+                     }}
+                     className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                     title="Delete Poll"
+                  >
+                     <Trash2 size={15} />
+                  </button>
+                  <BarChart2 size={22} className="text-slate-300 shrink-0 ml-1" />
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -213,7 +301,12 @@ export default function Polls() {
       {showModal && (
         <form onSubmit={handleCreate} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
-              <h2 className="text-xl font-bold text-slate-900 mb-4">Create New Poll</h2>
+              <div className="flex justify-between items-center mb-4">
+                 <h2 className="text-xl font-bold text-slate-900">Create New Poll</h2>
+                 <button type="button" onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors">
+                    <X size={16} />
+                 </button>
+              </div>
               <div className="space-y-4">
                 <input required type="text" value={newPoll.question} onChange={e => setNewPoll({...newPoll, question: e.target.value})} placeholder="What is your question?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium" />
                 
@@ -233,9 +326,45 @@ export default function Polls() {
               </div>
               <div className="mt-6 flex gap-3">
                   <button type="submit" disabled={createMutation.isPending} className="flex-1 disabled:opacity-50 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
-                   {createMutation.isPending ? 'Creating...' : 'Create Poll'}
+                    {createMutation.isPending ? 'Creating...' : 'Create Poll'}
                  </button>
                  <button type="button" onClick={() => setShowModal(false)} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
+              </div>
+           </div>
+        </form>
+      )}
+
+      {showEditModal && editingPoll && (
+        <form onSubmit={handleEdit} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+           <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 p-6 relative">
+              <div className="flex justify-between items-center mb-4">
+                 <h2 className="text-xl font-bold text-slate-900">Edit Family Poll</h2>
+                 <button type="button" onClick={() => { setShowEditModal(false); setEditingPoll(null); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors">
+                    <X size={16} />
+                 </button>
+              </div>
+              <div className="space-y-4">
+                <input required type="text" value={editPollData.question} onChange={e => setEditPollData({...editPollData, question: e.target.value})} placeholder="What is your question?" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium" />
+                
+                <div className="space-y-2">
+                   <p className="text-xs font-bold text-slate-500 ml-1">Options</p>
+                   <input required type="text" value={editPollData.opt1} onChange={e => setEditPollData({...editPollData, opt1: e.target.value})} placeholder="Option 1" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   <input required type="text" value={editPollData.opt2} onChange={e => setEditPollData({...editPollData, opt2: e.target.value})} placeholder="Option 2" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   <input type="text" value={editPollData.opt3} onChange={e => setEditPollData({...editPollData, opt3: e.target.value})} placeholder="Option 3 (Optional)" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                </div>
+                
+                <div className="flex gap-4">
+                   <div className="flex-1">
+                      <p className="text-xs font-bold text-slate-500 ml-1 mb-1">End Date</p>
+                      <input required type="date" value={editPollData.endDate} onChange={e => setEditPollData({...editPollData, endDate: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium" />
+                   </div>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                  <button type="submit" disabled={updateMutation.isPending} className="flex-1 disabled:opacity-50 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-md shadow-[#7C5CFC]/20">
+                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                 </button>
+                 <button type="button" onClick={() => { setShowEditModal(false); setEditingPoll(null); }} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 py-3 rounded-xl font-bold text-sm transition-colors">Cancel</button>
               </div>
            </div>
         </form>

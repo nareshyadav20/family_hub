@@ -101,4 +101,55 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/v1/admin/announcements/:id
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+     const { title, message, targetType, pinned } = req.body;
+     const familyId = req.user.familyId;
+     
+     const updated = await prisma.announcement.update({
+        where: { id: req.params.id, familyId },
+        data: {
+           title,
+           message,
+           targetType,
+           pinned: !!pinned
+        },
+        include: {
+           author: { select: { firstName: true, lastName: true, avatar: true } }
+        }
+     });
+
+     await prisma.familyFeed.updateMany({
+        where: { referenceId: req.params.id, familyId },
+        data: {
+           title,
+           description: message
+        }
+     });
+
+     res.json(updated);
+  } catch (error) {
+     console.error('Announcement Edit Error:', error);
+     res.status(500).json({ error: 'Failed to update announcement' });
+  }
+});
+
+// DELETE /api/v1/admin/announcements/:id
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+     const familyId = req.user.familyId;
+     await prisma.announcement.delete({
+        where: { id: req.params.id, familyId }
+     });
+     await prisma.familyFeed.deleteMany({
+        where: { referenceId: req.params.id, familyId }
+     });
+     res.json({ success: true });
+  } catch (error) {
+     console.error('Announcement Delete Error:', error);
+     res.status(500).json({ error: 'Failed to delete announcement' });
+  }
+});
+
 module.exports = router;
