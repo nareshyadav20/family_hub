@@ -27,18 +27,25 @@ router.get('/', async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Stats
-        const totalMembers = await prisma.user.count({ where: { familyId, status: 'ACTIVE' } });
-        const myPhotos = await prisma.document.count({ where: { familyId, type: { startsWith: 'image/' }, uploaderId: userId } });
-
-        // Upcoming Events
+        // Run independent queries concurrently
         const nextMonth = new Date(today);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        const upcomingEventsRaw = await prisma.event.findMany({
-            where: { familyId, eventDate: { gte: today } },
-            orderBy: { eventDate: 'asc' },
-            take: 3
-        });
+
+        const [
+            totalMembers, myPhotos, eventsThisMonth, newMessagesCount,
+            upcomingEventsRaw, allProfiles, galleries, histories
+        ] = await Promise.all([
+            prisma.user.count({ where: { familyId, status: 'ACTIVE' } }),
+            prisma.document.count({ where: { familyId, type: { startsWith: 'image/' }, uploaderId: userId } }),
+            prisma.event.count({ where: { familyId, eventDate: { gte: today, lt: nextMonth } } }),
+            prisma.message.count({ where: { receiverId: userId, sender: { familyId }, isRead: false } }),
+            
+            prisma.event.findMany({ where: { familyId, eventDate: { gte: today } }, orderBy: { eventDate: 'asc' }, take: 3 }),
+            prisma.memberProfile.findMany({ where: { user: { familyId }, dob: { not: null } }, include: { user: { select: { firstName: true, lastName: true, avatar: true } } } }),
+            
+            prisma.document.findMany({ where: { familyId, type: { startsWith: 'image/' }, visibility: { in: ['FAMILY', 'PUBLIC'] } }, include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } }, orderBy: { createdAt: 'desc' }, take: 5 }),
+            prisma.familyHistory.findMany({ where: { familyId }, include: { addedBy: { select: { firstName: true, lastName: true, avatar: true } } }, orderBy: { createdAt: 'desc' }, take: 5 })
+        ]);
 
         const upcomingEvents = upcomingEventsRaw.map(e => ({
             title: e.name,
@@ -47,16 +54,7 @@ router.get('/', async (req, res) => {
             color: '#4F46E5'
         }));
 
-        const eventsThisMonth = await prisma.event.count({
-            where: { familyId, eventDate: { gte: today, lt: nextMonth } }
-        });
-
         // Birthdays (Scan profiles)
-        const allProfiles = await prisma.memberProfile.findMany({
-            where: { user: { familyId }, dob: { not: null } },
-            include: { user: { select: { firstName: true, lastName: true, avatar: true } } }
-        });
-
         let upcomingBirthdays = [];
         allProfiles.forEach(p => {
             if (p.dob) {
@@ -86,12 +84,6 @@ router.get('/', async (req, res) => {
         // Feed (Combine Gallery & Family History)
         let feedPosts = [];
 
-        const galleries = await prisma.document.findMany({
-            where: { familyId, type: { startsWith: 'image/' }, visibility: { in: ['FAMILY', 'PUBLIC'] } },
-            include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
-            orderBy: { createdAt: 'desc' },
-            take: 5
-        });
         galleries.forEach(g => {
             feedPosts.push({
                 id: 'gal_' + g.id,
@@ -107,12 +99,6 @@ router.get('/', async (req, res) => {
             });
         });
 
-        const histories = await prisma.familyHistory.findMany({
-            where: { familyId },
-            include: { addedBy: { select: { firstName: true, lastName: true, avatar: true } } },
-            orderBy: { createdAt: 'desc' },
-            take: 5
-        });
         histories.forEach(h => {
             feedPosts.push({
                 id: 'his_' + h.id,
@@ -131,29 +117,24 @@ router.get('/', async (req, res) => {
         feedPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         feedPosts = feedPosts.slice(0, 10);
 
-        const activityData = [];
+        const activityPromises = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
             const nextD = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
-
             const monthName = d.toLocaleString('en-US', { month: 'short' });
 
-            const postsCount = await prisma.document.count({
-                where: { familyId, type: { startsWith: 'image/' }, createdAt: { gte: d, lt: nextD } }
-            });
-            const memoriesCount = await prisma.familyHistory.count({
-                where: { familyId, createdAt: { gte: d, lt: nextD } }
-            });
-            activityData.push({ month: monthName, posts: postsCount, memories: memoriesCount });
+            activityPromises.push((async () => {
+                const [posts, memories] = await Promise.all([
+                    prisma.document.count({ where: { familyId, type: { startsWith: 'image/' }, createdAt: { gte: d, lt: nextD } } }),
+                    prisma.familyHistory.count({ where: { familyId, createdAt: { gte: d, lt: nextD } } })
+                ]);
+                return { month: monthName, posts, memories, index: i };
+            })());
         }
 
-        const newMessagesCount = await prisma.message.count({
-            where: {
-                receiverId: userId,
-                sender: { familyId },
-                isRead: false
-            }
-        });
+        let activityData = await Promise.all(activityPromises);
+        activityData.sort((a, b) => b.index - a.index);
+        activityData = activityData.map(a => ({ month: a.month, posts: a.posts, memories: a.memories }));
 
         res.json({
             stats: { familyMembers: totalMembers, myPhotos, eventsThisMonth, newMessages: newMessagesCount },

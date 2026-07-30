@@ -115,39 +115,41 @@ export default function Dashboard() {
             <div className="text-center py-20 text-slate-400 font-medium bg-white rounded-2xl border border-[#E9E5F8] shadow-sm">No activity recorded yet</div>
           )}
 
-          {feedPosts.map(post => (
-            <div key={post.id} className="bg-white rounded-2xl p-6 shadow-sm border border-[#E9E5F8] animate-in fade-in duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border border-[#E9E5F8]" alt={post.author} />
-                <div>
-                  <div className="font-bold text-sm text-[#1F2430]">{post.author}</div>
-                  <div className="text-xs text-slate-400">{post.time}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {feedPosts.map(post => (
+              <div key={post.id} className="bg-white rounded-[24px] p-6 shadow-sm border border-[#E9E5F8] animate-in fade-in duration-300 flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border border-[#E9E5F8]" alt={post.author} />
+                  <div>
+                    <div className="font-bold text-sm text-[#1F2430]">{post.author}</div>
+                    <div className="text-xs text-slate-400">{post.time}</div>
+                  </div>
+                  {post.type === 'announcement' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-[#FAF8FF] text-[#7C5CFC]">Announcement</span>
+                  )}
+                  {post.type === 'memory' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-600">Memory</span>
+                  )}
+                  {post.type === 'photo' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">Gallery</span>
+                  )}
                 </div>
-                {post.type === 'announcement' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-[#FAF8FF] text-[#7C5CFC]">Announcement</span>
+                <p className="text-sm text-slate-700 leading-relaxed mb-3 line-clamp-3 flex-1">{post.content}</p>
+                {post.image && (
+                  <img src={post.image} alt="" className="w-full h-48 object-cover rounded-[16px] mb-3 shadow-sm border border-[#E9E5F8]" />
                 )}
-                {post.type === 'memory' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600">Memory</span>
-                )}
-                {post.type === 'photo' && (
-                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600">Gallery</span>
-                )}
+                <div className="flex items-center gap-4 pt-3 border-t border-[#E9E5F8] mt-auto">
+                  <button onClick={() => setLiked(p => { const n = new Set(p); n.has(post.id) ? n.delete(post.id) : n.add(post.id); return n; })} className={`flex items-center gap-2 text-sm font-semibold transition-colors ${liked.has(post.id) ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600'}`}>
+                    <Heart size={16} fill={liked.has(post.id) ? 'currentColor' : 'none'} />
+                    {post.likes + (liked.has(post.id) ? 1 : 0)}
+                  </button>
+                  <button className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-[#7C5CFC] transition-colors">
+                    <MessageSquare size={16} /> {post.comments}
+                  </button>
+                </div>
               </div>
-              <p className="text-sm text-slate-700 leading-relaxed mb-3">{post.content}</p>
-              {post.image && (
-                <img src={post.image} alt="" className="w-full h-auto max-h-96 object-cover rounded-[24px] mb-3 shadow-sm border border-[#E9E5F8]" />
-              )}
-              <div className="flex items-center gap-4 pt-3 border-t border-[#E9E5F8]">
-                <button onClick={() => setLiked(p => { const n = new Set(p); n.has(post.id) ? n.delete(post.id) : n.add(post.id); return n; })} className={`flex items-center gap-2 text-sm font-semibold transition-colors ${liked.has(post.id) ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600'}`}>
-                  <Heart size={16} fill={liked.has(post.id) ? 'currentColor' : 'none'} />
-                  {post.likes + (liked.has(post.id) ? 1 : 0)}
-                </button>
-                <button className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-[#7C5CFC] transition-colors">
-                  <MessageSquare size={16} /> {post.comments}
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Sidebar widgets */}
