@@ -246,20 +246,20 @@ export default function Home({ view }) {
           </nav>
         ) : (
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
-            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-[#7C5CFC] transition-colors">Home</a>
-            <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
-            <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="hover:text-[#7C5CFC] transition-colors">About</a>
-            <a href="#gallery" onClick={(e) => scrollToSection(e, 'gallery')} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
-            <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="hover:text-[#7C5CFC] transition-colors">Contact</a>
+            <Link to="/" onClick={(e) => { if(!view) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} className="hover:text-[#7C5CFC] transition-colors">Home</Link>
+            <a href="#features" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'features'); }} className="hover:text-[#7C5CFC] transition-colors">Features</a>
+            <a href="#about" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'about'); }} className="hover:text-[#7C5CFC] transition-colors">About</a>
+            <a href="#gallery" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'gallery'); }} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
+            <Link to="/contact" className="hover:text-[#7C5CFC] transition-colors">Contact</Link>
           </nav>
         )}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link to="/login" className="text-[#3C1053] hover:text-[#7C5CFC] font-bold text-[13px] sm:text-[14px] px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[12px] border border-[#E9E5F8] hover:bg-purple-50 transition-all">
             Login
           </Link>
-          <a href="#login-section" onClick={(e) => scrollToSection(e, 'login-section')} className="bg-[#7C5CFC] text-white px-4 sm:px-7 py-2 sm:py-2.5 rounded-[12px] text-[13px] sm:text-[14px] font-bold hover:bg-[#6B49F6] shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5 whitespace-nowrap">
+          <Link to="/login" className="bg-[#7C5CFC] text-white px-4 sm:px-7 py-2 sm:py-2.5 rounded-[12px] text-[13px] sm:text-[14px] font-bold hover:bg-[#6B49F6] shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5 whitespace-nowrap">
             Get Started
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -283,9 +283,9 @@ export default function Home({ view }) {
             {heroAbout.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
           </p>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
-            <a href="#login-section" onClick={(e) => scrollToSection(e, 'login-section')} className="bg-[#7C5CFC] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[16px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1">
+            <Link to="/login" className="bg-[#7C5CFC] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[16px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1">
               Start Free
-            </a>
+            </Link>
             <button className="flex items-center gap-3 text-[#1F2430] font-bold text-[14px] sm:text-[15px] hover:text-[#7C5CFC] transition-colors group">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] group-hover:scale-110 transition-transform shadow-sm">
                 <Play size={16} fill="currentColor" className="ml-1" />
@@ -350,15 +350,15 @@ export default function Home({ view }) {
 
       {!view && !familyData && (
         /* ─── LATEST FEED (Facebook Style) ─── */
-        <section id="feed" className="w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
+        <section id="feed" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Latest from the Family</h2>
             <p className="text-gray-400 text-sm font-semibold mt-2">Stay updated with our latest memories and announcements.</p>
           </div>
           
-          <div className="space-y-6">
-            {familyFeed.length > 0 ? (
-              familyFeed.map((item, index) => (
+          {familyFeed.length > 0 ? (
+            <div className="space-y-6 max-w-[800px] mx-auto">
+              {familyFeed.map((item, index) => (
                 <div key={index} className="bg-white rounded-[24px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -385,14 +385,39 @@ export default function Home({ view }) {
                     </div>
                   )}
                 </div>
-              ))
+              ))}
+            </div>
+            ) : !familyData ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {[
+                  { img: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Summer Vacation" },
+                  { img: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Birthday Party" },
+                  { img: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Reunion" }
+                ].map((post, i) => (
+                  <div key={`mock-feed-${i}`} className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left pointer-events-none">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] font-bold">
+                          <ImageIcon size={18} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#1F2430] text-sm">{post.title}</p>
+                          <p className="text-xs text-gray-400 font-medium">2 hours ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full h-[220px] sm:h-[240px] rounded-2xl overflow-hidden bg-gray-100 mt-2">
+                      <img src={post.img} alt={post.title} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+              <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100 max-w-[800px] mx-auto">
                 <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 font-medium">No recent activities found.</p>
               </div>
             )}
-          </div>
         </section>
       )}
 
@@ -494,7 +519,18 @@ export default function Home({ view }) {
                       {item.year}
                     </span>
                   </div>
-                )) : (
+                )) : !familyData ? (
+                  <div className="flex flex-col items-center group cursor-pointer w-20 sm:w-24 shrink-0 mx-auto pointer-events-none">
+                    <div className="w-18 h-22 sm:w-20 sm:h-24 rounded-[16px] sm:rounded-[18px] overflow-hidden border-3 sm:border-4 border-white shadow-[0_8px_20px_rgba(124,92,252,0.18)] bg-purple-50 shrink-0">
+                      <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80" alt="Sample" className="w-full h-full object-cover block" />
+                    </div>
+                    <div className="w-0.5 h-5 sm:h-6 bg-gradient-to-b from-purple-300 to-[#7C5CFC] my-1 shrink-0"></div>
+                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#7C5CFC] border-2 border-white shadow-[0_0_10px_rgba(124,92,252,0.6)] shrink-0"></div>
+                    <span className="mt-2.5 sm:mt-3 font-extrabold text-[13px] sm:text-[14px] text-gray-600 tracking-tight shrink-0">
+                      2026
+                    </span>
+                  </div>
+                ) : (
                   <div className="text-gray-400 text-sm font-medium w-full text-center mt-8">No events yet to display on timeline.</div>
                 )}
               </div>
@@ -580,6 +616,20 @@ export default function Home({ view }) {
               </div>
             ))}
           </div>
+        ) : !familyData ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pointer-events-none">
+            {[1, 2].map((i) => (
+              <div key={`mock-stream-${i}`} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-red-900 text-xl">Sample Live Stream</h3>
+                  <p className="text-red-700 mt-2 text-sm">Join the family for a live update!</p>
+                </div>
+                <button className="mt-6 w-full bg-red-600 text-white font-bold py-3 rounded-xl">
+                  Join Stream
+                </button>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center bg-gray-50 rounded-2xl py-8 border border-gray-100">
             <p className="text-gray-500 font-medium">No active live streams at the moment.</p>
@@ -648,6 +698,31 @@ export default function Home({ view }) {
               </div>
             ))}
           </div>
+        ) : !familyData ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-h-[260px] pointer-events-none">
+            {[
+              { src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Picnic" },
+              { src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Graduation" },
+              { src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Holiday Dinner" }
+            ].map((mock, i) => (
+              <div
+                key={`mock-gal-${i}`}
+                className="group relative rounded-[20px] sm:rounded-[24px] overflow-hidden border border-gray-100 shadow-sm h-[220px] sm:h-[240px] bg-purple-50"
+              >
+                <img
+                  src={mock.src}
+                  alt={mock.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4 sm:p-5">
+                  <div>
+                    <span className="inline-block bg-[#7C5CFC] text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full mb-1">Sample</span>
+                    <h4 className="text-white font-bold text-[15px] sm:text-[16px]">{mock.title}</h4>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
             <ImageIcon size={32} className="mx-auto text-gray-300 mb-3" />
@@ -679,6 +754,22 @@ export default function Home({ view }) {
                   </div>
                   <div className="p-5">
                     <h4 className="font-bold text-[#1F2430]">{video.name}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : !familyData ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pointer-events-none">
+              {[1, 2, 3].map((i) => (
+                <div key={`mock-vid-${i}`} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100">
+                  <div className="relative h-[220px] bg-gray-200 flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center relative z-10">
+                      <Play size={24} className="ml-1 text-white" fill="currentColor" />
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-bold text-[#1F2430]">Sample Family Video</h4>
                   </div>
                 </div>
               ))}
@@ -795,7 +886,20 @@ export default function Home({ view }) {
                   </div>
                 </div>
               </div>
-            )) : (
+            )) : !familyData ? (
+              <div className="bg-white border border-purple-100 rounded-2xl p-5 sm:p-6 shadow-sm pointer-events-none">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                    <MessageCircle size={18} className="text-[#7C5CFC]" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-bold text-[#1F2430] text-lg">Sample Announcement</h4>
+                    <p className="text-gray-600 mt-1">This is how a family announcement will appear. Great for sharing big news!</p>
+                    <p className="text-xs text-gray-400 mt-3 font-semibold">Today</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 font-medium">No recent announcements.</p>
               </div>
@@ -831,6 +935,18 @@ export default function Home({ view }) {
               </div>
             ))}
           </div>
+        ) : !familyData ? (
+          <div className="flex flex-wrap justify-center gap-6 pointer-events-none">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={`mock-mem-${i}`} className="flex flex-col items-center">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                  <img src={`https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=200&q=80`} alt="Sample" className="w-full h-full object-cover" />
+                </div>
+                <h4 className="mt-3 font-bold text-[#1F2430] text-sm sm:text-base">Sample User</h4>
+                <span className="text-xs font-semibold text-[#7C5CFC] bg-purple-50 px-2 py-0.5 rounded-full mt-1">Member</span>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500 font-medium">No members found.</p>
@@ -840,7 +956,7 @@ export default function Home({ view }) {
       )}
 
       {/* ─── CONTACT US FORM SECTION (Main domain only, replacing login) ─── */}
-      {!view && !familyData && (
+      {(!view || view === 'contact') && !familyData && (
         <section id="contact-form-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
 

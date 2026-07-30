@@ -298,6 +298,7 @@ function AppLayer() {
           <Route path="/gallery" element={<Landing view="gallery" />} />
           <Route path="/events" element={<Landing view="events" />} />
           <Route path="/livestreams" element={<Landing view="livestreams" />} />
+          <Route path="/contact" element={<Landing view="contact" />} />
           <Route path="/about" element={<Landing view="about" />} />
           <Route path="/live/:streamId" element={<LiveStreamPage />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
