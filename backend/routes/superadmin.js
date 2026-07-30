@@ -573,6 +573,53 @@ router.get('/support', async (req, res) => {
   }
 });
 
+// POST /support
+router.post('/support', async (req, res) => {
+  try {
+    const { family, subject, priority, status } = req.body;
+    const ticket = await prisma.supportTicket.create({
+      data: { 
+        family, 
+        subject, 
+        priority: priority || 'High', 
+        status: status || 'Open' 
+      }
+    });
+    res.json({ success: true, ticket });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error creating support ticket' });
+  }
+});
+
+// PUT /support/:id
+router.put('/support/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { family, subject, priority, status } = req.body;
+    const ticket = await prisma.supportTicket.update({
+      where: { id },
+      data: { family, subject, priority, status }
+    });
+    res.json({ success: true, ticket });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error updating support ticket' });
+  }
+});
+
+// DELETE /support/:id
+router.delete('/support/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.supportTicket.delete({ where: { id } });
+    res.json({ success: true, message: 'Support ticket deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error deleting support ticket' });
+  }
+});
+
 // GET /settings
 router.get('/settings', async (req, res) => {
   try {
