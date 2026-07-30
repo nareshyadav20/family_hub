@@ -27,7 +27,8 @@ export default function AddMember() {
     status: 'ACTIVE',
     notes: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: ''
   });
 
   const handleChange = (e) => {
@@ -57,8 +58,8 @@ export default function AddMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
-      toast.error('Please fill all required fields, including password.');
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
+      toast.error('Please fill all required fields, including password and phone number.');
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -109,6 +110,10 @@ export default function AddMember() {
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between">Email Address *</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} autoComplete="new-email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="email@example.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number *</label>
+                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. +1234567890" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender *</label>

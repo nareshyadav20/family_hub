@@ -87,7 +87,7 @@ router.get('/', async (req, res) => {
         let feedPosts = [];
 
         const galleries = await prisma.document.findMany({
-            where: { familyId, type: { startsWith: 'image/' }, visibility: 'FAMILY' },
+            where: { familyId, type: { startsWith: 'image/' }, visibility: { in: ['FAMILY', 'PUBLIC'] } },
             include: { uploader: { select: { firstName: true, lastName: true, avatar: true } } },
             orderBy: { createdAt: 'desc' },
             take: 5

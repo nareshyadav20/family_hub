@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import ReactFlow, { 
   MiniMap, Controls, Background, useNodesState, useEdgesState 
 } from 'reactflow';
@@ -9,7 +9,7 @@ import axios from 'axios';
 import API_BASE_URL from '../config/api';
 
 export default function FamilyTree() {
-  const { data: members = [] } = useQuery({
+  const { data: members = [], isLoading } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
       const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
@@ -19,24 +19,24 @@ export default function FamilyTree() {
     }
   });
 
-  const dynamicNodes = members.map((m, i) => ({
-    id: String(m.id),
-    position: { x: (i % 4) * 250 + 100, y: Math.floor(i / 4) * 180 + 100 },
-    data: { label: `${m.firstName} ${m.lastName}\n(${m.relationship || 'Member'})` },
-    type: m.status === 'INVITATION_SENT' ? 'default' : 'output'
-  }));
+  const dynamicNodes = useMemo(() => {
+    return members.map((m, i) => ({
+      id: String(m.id),
+      position: { x: (i % 4) * 250 + 100, y: Math.floor(i / 4) * 180 + 100 },
+      data: { label: `${m.firstName} ${m.lastName}\n(${m.relationship || 'Member'})` },
+      type: m.status === 'INVITATION_SENT' ? 'default' : 'output'
+    }));
+  }, [members]);
 
-  // We can dynamically render edges if fatherId/motherId existed properly. 
-  // For basic sync requirement, we just map out nodes dynamically to show instant add feature.
-  const dynamicEdges = [];
+  const dynamicEdges = useMemo(() => [], [members]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setNodes(dynamicNodes);
     setEdges(dynamicEdges);
-  }, [members]);
+  }, [dynamicNodes, dynamicEdges, setNodes, setEdges]);
 
   return (
     <div className="h-full w-full flex flex-col space-y-6 animate-in fade-in duration-500">
@@ -46,7 +46,15 @@ export default function FamilyTree() {
             <p className="text-[#6B7280] text-[15px] font-semibold mt-1">Interactive visualization of your lineage.</p>
           </div>
        </div>
-       <div className="flex-1 bg-white rounded-[24px] border border-[#E9E5F8] shadow-sm overflow-hidden min-h-[600px]">
+       <div className="flex-1 bg-white rounded-[24px] border border-[#E9E5F8] shadow-sm overflow-hidden min-h-[600px] relative">
+         {isLoading && (
+           <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm rounded-[24px]">
+             <div className="flex flex-col items-center gap-3">
+               <div className="w-10 h-10 border-4 border-[#7C5CFC]/20 border-t-[#7C5CFC] rounded-full animate-spin" />
+               <p className="text-[#6B7280] font-semibold animate-pulse">Loading Family Tree...</p>
+             </div>
+           </div>
+         )}
          <ReactFlow
            nodes={nodes}
            edges={edges}
