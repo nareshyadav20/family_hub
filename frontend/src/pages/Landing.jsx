@@ -951,64 +951,75 @@ export default function Home({ view }) {
       <footer id="contact" className="w-full bg-white border-t border-gray-100 pt-16 pb-12">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col gap-10">
 
-          {/* Top Row: Brand & Horizontal Contact Info Cards */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 pb-10 border-b border-gray-100">
-            
-            {/* Brand Info */}
-            <div className="space-y-3 text-left">
+          {/* Top Row: Brand & Info (Single Line Layout) */}
+          {familyData ? (
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 pb-8 border-b border-gray-100">
               <div className="flex items-center gap-2.5">
-                {familyData && !hasUploadedLogo ? (
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-base tracking-tight shadow-md">
+                {!hasUploadedLogo ? (
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-md">
                     {getInitials(familyName)}
                   </div>
                 ) : (
-                  <img src={familyLogo} alt={familyName} className="w-9 h-9 object-contain rounded-xl" />
+                  <img src={familyLogo} alt={familyName} className="w-8 h-8 object-contain rounded-xl" />
                 )}
-                <span className="font-black text-[22px] text-[#2E1E6B]">
-                  {familyData ? familyName : <>Family<span className="text-[#7C5CFC]">Hub</span></>}
-                </span>
+                <span className="font-black text-[20px] text-[#2E1E6B]">{familyName}</span>
               </div>
-              <p className="text-gray-400 text-sm max-w-sm leading-relaxed font-medium">
+              <span className="hidden sm:inline text-gray-300 font-bold">•</span>
+              <p className="text-gray-500 text-sm font-medium">
                 Preserving family stories and memories for generations to come.
               </p>
             </div>
-
-            {/* Horizontal Contact Info Cards */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full lg:w-auto">
-              {/* Contact 1 */}
-              <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
-                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] shrink-0">
-                  <MessageCircle size={18} />
+          ) : (
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 pb-10 border-b border-gray-100">
+              {/* Brand Info */}
+              <div className="space-y-3 text-left">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-black text-[22px] text-[#2E1E6B]">
+                    Family<span className="text-[#7C5CFC]">Hub</span>
+                  </span>
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Support</p>
-                  <p className="text-sm font-extrabold text-[#1F2430]">24/7 Live Chat</p>
-                </div>
+                <p className="text-gray-400 text-sm max-w-sm leading-relaxed font-medium">
+                  Preserving family stories and memories for generations to come.
+                </p>
               </div>
 
-              {/* Contact 2 */}
-              <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                  <Phone size={18} />
+              {/* Horizontal Contact Info Cards (Main domain) */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full lg:w-auto">
+                {/* Contact 1 */}
+                <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] shrink-0">
+                    <MessageCircle size={18} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Support</p>
+                    <p className="text-sm font-extrabold text-[#1F2430]">24/7 Live Chat</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone</p>
-                  <p className="text-sm font-extrabold text-[#1F2430]">+91 97875 43210</p>
-                </div>
-              </div>
 
-              {/* Contact 3 */}
-              <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                  <Mail size={18} />
+                {/* Contact 2 */}
+                <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-emerald-600 shrink-0">
+                    <Phone size={18} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone</p>
+                    <p className="text-sm font-extrabold text-[#1F2430]">+91 97875 43210</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</p>
-                  <p className="text-sm font-extrabold text-[#1F2430]">support@familyhub.com</p>
+
+                {/* Contact 3 */}
+                <div className="flex items-center gap-3 bg-[#FAF8FF] border border-[#E9E5F8] px-5 py-3 rounded-2xl hover:border-[#7C5CFC] transition-all">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                    <Mail size={18} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                    <p className="text-sm font-extrabold text-[#1F2430]">support@familyhub.com</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Bottom Copyright & Legal Links */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs sm:text-sm font-medium text-gray-400">
