@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -12,7 +11,7 @@ const { sendInvitationEmail, sendForgotPasswordEmail } = require('./services/ema
 const crypto = require('crypto');
 const compression = require('compression');
 
-const prisma = new PrismaClient();
+const prisma = require('./prismaClient');
 const app = express();
 const server = http.createServer(app);
 

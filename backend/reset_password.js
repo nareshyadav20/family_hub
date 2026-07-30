@@ -1,6 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const prisma = new PrismaClient();
+const prisma = require('./prismaClient');
 
 async function main() {
   const email = 'panganareshyadav24@gmail.com';

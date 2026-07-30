@@ -1,5 +1,4 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
@@ -23,7 +22,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-const prisma = new PrismaClient();
+const prisma = require('../prismaClient');
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];

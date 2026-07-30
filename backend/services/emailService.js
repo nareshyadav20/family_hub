@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../prismaClient');
 
 console.log('[EmailService]: Application Started');
 console.log('[EmailService]: Verifying loaded SMTP Environment Variables...');
