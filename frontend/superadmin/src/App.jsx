@@ -14,6 +14,7 @@ import Revenue from './pages/Revenue';
 import Billing from './pages/Billing';
 import Analytics from './pages/Analytics';
 import Support from './pages/Support';
+import ContactInquiries from './pages/ContactInquiries';
 import Broadcast from './pages/Broadcast';
 import AuditLogs from './pages/AuditLogs';
 import Roles from './pages/Roles';
@@ -111,6 +112,7 @@ function App() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/contact-inquiries" element={<ContactInquiries />} />
             <Route path="/broadcast" element={<Broadcast />} />
             <Route path="/audit" element={<AuditLogs />} />
             <Route path="/roles" element={<Roles />} />

@@ -16,7 +16,17 @@ export default function Support() {
       try {
         const res = await axios.get(API_URL);
         if (res.data.success) {
-           setData(res.data.data);
+           const allTickets = res.data.data.tickets || [];
+           const regularTickets = allTickets.filter(ticket => 
+             !(ticket.family.includes('(Phone:') && ticket.subject.includes('Email:'))
+           );
+           const stats = {
+             open: regularTickets.filter(t => t.status === 'Open').length,
+             resolved: regularTickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length,
+             pending: regularTickets.filter(t => t.status === 'Pending').length,
+             closed: regularTickets.filter(t => t.status === 'Closed').length
+           };
+           setData({ tickets: regularTickets, stats });
         }
       } catch (err) {
         toast.error('Failed to load support tickets');

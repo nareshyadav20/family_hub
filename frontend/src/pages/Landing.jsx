@@ -18,6 +18,32 @@ export default function Home({ view }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [galleryTab, setGalleryTab] = useState('All');
   
+  const [contactForm, setContactForm] = useState({ name: '', phone: '', email: '', message: '' });
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState('');
+  const [contactError, setContactError] = useState('');
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactLoading(true);
+    setContactSuccess('');
+    setContactError('');
+    try {
+      const res = await axios.post(`${API_URL}/website/contact`, contactForm);
+      if (res.data.success) {
+        setContactSuccess('Your message has been sent successfully! We will get back to you shortly.');
+        setContactForm({ name: '', phone: '', email: '', message: '' });
+      } else {
+        setContactError('Failed to send message. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setContactError(err.response?.data?.error || 'Failed to submit contact form.');
+    } finally {
+      setContactLoading(false);
+    }
+  };
+  
   const queryClient = useQueryClient();
 
   // Extract ?domain= from the URL for local testing of multi-tenancy
@@ -813,40 +839,34 @@ export default function Home({ view }) {
         </section>
       )}
 
-      {/* ─── LOGIN SECTION (Mobile responsive clean style) ─── */}
+      {/* ─── CONTACT US FORM SECTION (Main domain only, replacing login) ─── */}
       {!view && !familyData && (
-        <section id="login-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
+        <section id="contact-form-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
 
-          {/* Left Panel — Clean white background */}
+          {/* Left Panel — Brand Info & Values */}
           <div className="bg-white rounded-[24px] sm:rounded-[28px] border border-slate-100 p-6 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between text-left">
             <div>
               <div className="flex items-center gap-2.5 sm:gap-3 mb-6 sm:mb-8">
-                {familyData && !hasUploadedLogo ? (
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-base tracking-tight shadow-md">
-                    {getInitials(familyName)}
-                  </div>
-                ) : (
-                  <img src={familyLogo} alt={familyName} className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl" />
-                )}
+                <img src="/logo.png" alt="FamilyHub Logo" className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl" />
                 <span className="font-black text-[20px] sm:text-[22px] text-[#2E1E6B] tracking-tight">
-                  {familyData ? familyName : <>Family<span className="text-[#7C5CFC]">Hub</span></>}
+                  Family<span className="text-[#7C5CFC]">Hub</span>
                 </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-[#1F2430] leading-tight mb-3 sm:mb-4">
-                Welcome back to<br/>your family.
+                Get in touch with<br/>our team.
               </h2>
               <p className="text-gray-500 font-medium leading-relaxed text-[14px] sm:text-[15px] max-w-sm">
-                Sign in to reconnect with your loved ones, browse memories, and stay up to date with family events.
+                Have questions about custom features, pricing plans, or need assistance setting up your family hub? Contact us today.
               </p>
             </div>
 
             {/* Features list */}
             <div className="space-y-3.5 sm:space-y-4 mt-6 sm:mt-8">
               {[
-                { icon: <Heart size={16} fill="#7C5CFC" className="text-[#7C5CFC]" />, text: 'Cherish every memory together' },
-                { icon: <Users size={16} className="text-[#7C5CFC]" />, text: 'Your family tree, beautifully mapped' },
-                { icon: <Shield size={16} className="text-[#7C5CFC]" />, text: 'Private & secure family space' },
+                { icon: <Heart size={16} fill="#7C5CFC" className="text-[#7C5CFC]" />, text: 'Dedicated support for custom setups' },
+                { icon: <Users size={16} className="text-[#7C5CFC]" />, text: 'Enterprise/Multi-branch configurations' },
+                { icon: <Shield size={16} className="text-[#7C5CFC]" />, text: 'Highly secure, private database hosting' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">{item.icon}</div>
@@ -856,70 +876,79 @@ export default function Home({ view }) {
             </div>
           </div>
 
-          {/* Right Panel — Login Form */}
-          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 w-full max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <h3 className="text-[26px] font-black text-[#1F2430] tracking-tight mb-1.5">Welcome back</h3>
-              <p className="text-gray-400 text-sm font-semibold">Enter your details to sign in.</p>
+          {/* Right Panel — Contact Us Form */}
+          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 w-full max-w-md mx-auto text-left">
+            <div className="text-center lg:text-left mb-8">
+              <h3 className="text-[26px] font-black text-[#1F2430] tracking-tight mb-1.5">Contact Us</h3>
+              <p className="text-gray-400 text-sm font-semibold">We'd love to hear from you. Send us a message.</p>
             </div>
 
-            {errorMsg && (
-              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200">
-                <p className="text-red-700 text-xs font-bold">{errorMsg}</p>
+            {contactSuccess && (
+              <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                <p className="text-emerald-700 text-xs sm:text-sm font-bold">{contactSuccess}</p>
               </div>
             )}
 
-            <form onSubmit={handleLogin} autoComplete="off" className="space-y-5">
+            {contactError && (
+              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200">
+                <p className="text-red-700 text-xs sm:text-sm font-bold">{contactError}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleContactSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#1F2430] ml-1">Email Address</label>
-                <div className="relative">
-                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    required
-                    autoComplete="off"
-                    value={loginForm.email}
-                    onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
-                    placeholder="Enter your email"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
-                  />
-                </div>
+                <label className="text-xs font-bold text-[#1F2430] ml-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={contactForm.name}
+                  onChange={e => setContactForm({ ...contactForm, name: e.target.value })}
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#1F2430] ml-1 flex justify-between">
-                  Password
-                  <Link to="/login" className="text-[#7C5CFC] hover:text-[#6B49F6] transition-colors font-bold">Forgot?</Link>
-                </label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    value={loginForm.password}
-                    onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-11 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7C5CFC] transition-colors">
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+                <label className="text-xs font-bold text-[#1F2430] ml-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={contactForm.email}
+                  onChange={e => setContactForm({ ...contactForm, email: e.target.value })}
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#1F2430] ml-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={contactForm.phone}
+                  onChange={e => setContactForm({ ...contactForm, phone: e.target.value })}
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#1F2430] ml-1">Message Details</label>
+                <textarea
+                  rows={3}
+                  value={contactForm.message}
+                  onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
+                  placeholder="How can we help your family?"
+                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold resize-none"
+                />
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={contactLoading}
                 className="w-full mt-2 py-3.5 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-bold text-[15px] rounded-xl shadow-md shadow-purple-500/30 transition-all outline-none disabled:opacity-70 hover:-translate-y-0.5"
               >
-                {loading ? 'Signing in...' : 'Sign In →'}
+                {contactLoading ? 'Sending...' : 'Contact Us →'}
               </button>
-
-              <div className="text-center pt-2">
-                <span className="text-[13px] font-semibold text-gray-400">Don't have an account? </span>
-                <Link to="/login" className="text-[13px] font-bold text-[#7C5CFC] hover:text-[#6B49F6] transition-colors">Register here</Link>
-              </div>
             </form>
           </div>
         </div>
