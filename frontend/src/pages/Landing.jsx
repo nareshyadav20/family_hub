@@ -27,10 +27,18 @@ export default function Home({ view }) {
   const { data, isLoading: familyLoading } = useQuery({
     queryKey: ['publicHomeData', explicitDomain],
     queryFn: async () => {
-      const url = `${API_BASE_URL}/api/public/home${explicitDomain ? `?domain=${explicitDomain}` : ''}`;
-      const res = await axios.get(url);
-      return res.data;
-    }
+      try {
+        const url = `${API_BASE_URL}/api/public/home${explicitDomain ? `?domain=${explicitDomain}` : ''}`;
+        const res = await axios.get(url);
+        return res.data;
+      } catch (err) {
+        if (err.response && (err.response.status === 404 || err.response.status === 400)) {
+          return { family: null, feed: [], statistics: null };
+        }
+        throw err;
+      }
+    },
+    retry: false
   });
 
   const familyData = data?.family || null;

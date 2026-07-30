@@ -8,9 +8,15 @@ import { globalLogout } from './utils/auth';
 import PageLoader from './components/loaders/PageLoader';
 import Splash from './components/Splash';
 
+/* --- CRITICAL ROUTES (Static Imports) --- */
+import AdminMainLayout from './layouts/MainLayout';
+import AdminDashboard from './pages/Dashboard';
+import MemberMainLayout from './layouts/member/MainLayout';
+import MemberDashboard from './pages/member/Dashboard';
+import Login from './pages/Login';
+import Landing from './pages/Landing';
+
 /* --- ADMIN IMPORTS --- */
-const AdminMainLayout = lazy(() => import('./layouts/MainLayout'));
-const AdminDashboard = lazy(() => import('./pages/Dashboard'));
 const Members = lazy(() => import('./pages/Members'));
 const AddMember = lazy(() => import('./pages/AddMember'));
 const InviteMember = lazy(() => import('./pages/InviteMember'));
@@ -37,8 +43,6 @@ const Profile = lazy(() => import('./pages/Profile'));
 const FamilyGroups = lazy(() => import('./pages/FamilyGroups'));
 
 /* --- MEMBER IMPORTS --- */
-const MemberMainLayout = lazy(() => import('./layouts/member/MainLayout'));
-const MemberDashboard = lazy(() => import('./pages/member/Dashboard'));
 const MemberFamily = lazy(() => import('./pages/member/Family'));
 const MemberGallery = lazy(() => import('./pages/member/Gallery'));
 const MemberEvents = lazy(() => import('./pages/member/Events'));
@@ -57,8 +61,6 @@ const MemberFamilyGroups = lazy(() => import('./pages/member/FamilyGroups'));
 const LiveStreamPage = lazy(() => import('./pages/events/LiveStreamPage'));
 
 /* --- SHARED IMPORTS --- */
-const Login = lazy(() => import('./pages/Login'));
-const Landing = lazy(() => import('./pages/Landing'));
 
 import {
   LayoutDashboard, Users, UserPlus, GitFork, CalendarDays, Calendar as CalIcon,
