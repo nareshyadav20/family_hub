@@ -877,9 +877,9 @@ export default function Home({ view }) {
           </div>
 
           {/* Right Panel — Contact Us Form */}
-          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 w-full max-w-md mx-auto text-left">
-            <div className="text-center lg:text-left mb-8">
-              <h3 className="text-[26px] font-black text-[#1F2430] tracking-tight mb-1.5">Contact Us</h3>
+          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-6 lg:p-8 w-full max-w-md mx-auto text-left flex flex-col justify-center h-full">
+            <div className="text-center lg:text-left mb-6">
+              <h3 className="text-[24px] font-black text-[#1F2430] tracking-tight mb-1">Contact Us</h3>
               <p className="text-gray-400 text-sm font-semibold">We'd love to hear from you. Send us a message.</p>
             </div>
 
@@ -895,8 +895,8 @@ export default function Home({ view }) {
               </div>
             )}
 
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div className="space-y-1.5">
+            <form onSubmit={handleContactSubmit} className="space-y-3">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Full Name</label>
                 <input
                   type="text"
@@ -904,11 +904,11 @@ export default function Home({ view }) {
                   value={contactForm.name}
                   onChange={e => setContactForm({ ...contactForm, name: e.target.value })}
                   placeholder="Your Name"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Email Address</label>
                 <input
                   type="email"
@@ -916,29 +916,29 @@ export default function Home({ view }) {
                   value={contactForm.email}
                   onChange={e => setContactForm({ ...contactForm, email: e.target.value })}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Phone Number</label>
                 <input
                   type="tel"
                   value={contactForm.phone}
                   onChange={e => setContactForm({ ...contactForm, phone: e.target.value })}
                   placeholder="+1 (555) 000-0000"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Message Details</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={contactForm.message}
                   onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
                   placeholder="How can we help your family?"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold resize-none"
                 />
               </div>
 
