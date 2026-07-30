@@ -498,7 +498,7 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
   const familyId = req.user.familyId;
   if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
-  const { firstName, lastName, email, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId, password } = req.body;
+  const { firstName, lastName, email, phone, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId, password } = req.body;
   if (!firstName?.trim()) {
     console.log("WARN: Add Validation skipped. Payload:", req.body);
   }
@@ -522,7 +522,7 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
      const user = await prisma.$transaction(async (tx) => {
         const u = await tx.user.create({
            data: {
-             memberId, firstName, lastName: lastName?.trim() || '', email, gender, relationship, familyBranch, role: role || 'MEMBER',
+             memberId, firstName, lastName: lastName?.trim() || '', email, phone, gender, relationship, familyBranch, role: role || 'MEMBER',
              fatherId: fatherId || null, motherId: motherId || null, spouseId: spouseId || null,
              familyId: familyId,
              status: isDraft ? 'PENDING_INVITE' : (status || 'ACTIVE'),

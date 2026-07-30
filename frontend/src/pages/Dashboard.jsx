@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, UserPlus, CalendarDays, Gift, CheckCircle, Image as ImageIcon,
-  Bell, TrendingUp, Activity, Plus, Link, Check, FileText
+  Bell, TrendingUp, Activity, Plus, Link, Check, FileText, Heart, MessageSquare
 } from 'lucide-react';
+import { CardSkeleton } from '../components/loaders/SkeletonLoaders';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -27,6 +28,7 @@ const API_URL = `${API_BASE_URL}/api/v1`;
 export default function Dashboard() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [liked, setLiked] = useState(new Set());
   const queryClient = useQueryClient();
   const token = localStorage.getItem('token');
 
@@ -93,7 +95,6 @@ export default function Dashboard() {
     refetchInterval: 60000
   });
 
-  // Fetch Recent Activity
   const { data: recentActivity = [], isLoading: activityLoading } = useQuery({
     queryKey: ['recent_activity'],
     queryFn: async () => {
@@ -104,6 +105,20 @@ export default function Dashboard() {
     },
     refetchInterval: 60000
   });
+
+  // Fetch Family Feed
+  const { data: feedData, isLoading: feedLoading } = useQuery({
+    queryKey: ['memberDashboardFeed'],
+    queryFn: async () => {
+      const res = await axios.get(`${API_URL}/member/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return res.data;
+    },
+    refetchInterval: 60000
+  });
+
+  const feedPosts = feedData?.feedPosts || [];
 
   const getActivityIcon = (type) => {
     switch (type) {
@@ -246,6 +261,60 @@ export default function Dashboard() {
                 );
               })
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Family Feed Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div className="lg:col-span-3 space-y-4">
+          <h2 className="text-xl font-bold text-[#1F2430]">Family Feed</h2>
+
+          {feedLoading && (
+            <div className="space-y-4">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          )}
+
+          {!feedLoading && feedPosts.length === 0 && (
+            <div className="text-center py-20 text-slate-400 font-medium bg-white rounded-[24px] border border-[#E9E5F8] shadow-sm">No activity recorded yet</div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {feedPosts.map(post => (
+              <div key={post.id} className="bg-white rounded-[24px] p-6 shadow-sm border border-[#E9E5F8] animate-in fade-in duration-300 flex flex-col">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border border-[#E9E5F8]" alt={post.author} />
+                  <div>
+                    <div className="font-bold text-sm text-[#1F2430]">{post.author}</div>
+                    <div className="text-xs text-slate-400">{post.time}</div>
+                  </div>
+                  {post.type === 'announcement' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-[#FAF8FF] text-[#7C5CFC]">Announcement</span>
+                  )}
+                  {post.type === 'memory' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-amber-50 text-amber-600">Memory</span>
+                  )}
+                  {post.type === 'photo' && (
+                    <span className="ml-auto text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">Gallery</span>
+                  )}
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed mb-3 line-clamp-3 flex-1">{post.content}</p>
+                {post.image && (
+                  <img src={post.image} alt="" className="w-full h-48 object-cover rounded-[16px] mb-3 shadow-sm border border-[#E9E5F8]" />
+                )}
+                <div className="flex items-center gap-4 pt-3 border-t border-[#E9E5F8] mt-auto">
+                  <button onClick={() => setLiked(p => { const n = new Set(p); n.has(post.id) ? n.delete(post.id) : n.add(post.id); return n; })} className={`flex items-center gap-2 text-sm font-semibold transition-colors ${liked.has(post.id) ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600'}`}>
+                    <Heart size={16} fill={liked.has(post.id) ? 'currentColor' : 'none'} />
+                    {post.likes + (liked.has(post.id) ? 1 : 0)}
+                  </button>
+                  <button className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-[#7C5CFC] transition-colors">
+                    <MessageSquare size={16} /> {post.comments}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

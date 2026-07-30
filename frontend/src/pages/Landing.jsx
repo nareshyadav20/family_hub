@@ -53,10 +53,18 @@ export default function Home({ view }) {
   const { data, isLoading: familyLoading } = useQuery({
     queryKey: ['publicHomeData', explicitDomain],
     queryFn: async () => {
-      const url = `${API_BASE_URL}/api/public/home${explicitDomain ? `?domain=${explicitDomain}` : ''}`;
-      const res = await axios.get(url);
-      return res.data;
-    }
+      try {
+        const url = `${API_BASE_URL}/api/public/home${explicitDomain ? `?domain=${explicitDomain}` : ''}`;
+        const res = await axios.get(url);
+        return res.data;
+      } catch (err) {
+        if (err.response && (err.response.status === 404 || err.response.status === 400)) {
+          return { family: null, feed: [], statistics: null };
+        }
+        throw err;
+      }
+    },
+    retry: false
   });
 
   const familyData = data?.family || null;
@@ -105,6 +113,15 @@ export default function Home({ view }) {
     }
   }, [familyLoading]);
 
+  const defaultGalleryItems = [
+    { id: 'mock-1', category: 'Trips', src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Summer Family Trip" },
+    { id: 'mock-2', category: 'Celebrations', src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Graduation Party" },
+    { id: 'mock-3', category: 'Gatherings', src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Holiday Reunion Dinner" },
+    { id: 'mock-4', category: 'Anniversaries', src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80", title: "Grandparents Anniversary" },
+    { id: 'mock-5', category: 'Trips', src: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=600&q=80", title: "Mountain Hiking Adventure" },
+    { id: 'mock-6', category: 'Celebrations', src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&q=80", title: "New Year Celebration" }
+  ];
+
   const galleryItems = data?.gallery && data.gallery.length > 0 
     ? data.gallery.map(doc => ({
         id: doc.id,
@@ -112,7 +129,15 @@ export default function Home({ view }) {
         src: doc.url,
         title: doc.name
       })) 
-    : [];
+    : (!familyData ? defaultGalleryItems : []);
+
+  const defaultTimelineItems = [
+    { year: 2018, title: "Summer Family Trip", src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80" },
+    { year: 2020, title: "Graduation Celebration", src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80" },
+    { year: 2022, title: "Grandparents Anniversary", src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80" },
+    { year: 2024, title: "Christmas Reunion", src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80" },
+    { year: 2026, title: "New Family Home", src: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80" }
+  ];
 
   const timelineItems = data?.events && data.events.length > 0 
     ? data.events.map(event => ({
@@ -120,7 +145,7 @@ export default function Home({ view }) {
         title: event.name,
         src: event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80"
       })).sort((a, b) => a.year - b.year)
-    : [];
+    : (!familyData ? defaultTimelineItems : []);
 
   const scrollTimeline = (direction) => {
     if (timelineRef.current) {
@@ -238,20 +263,20 @@ export default function Home({ view }) {
           </nav>
         ) : (
           <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
-            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-[#7C5CFC] transition-colors">Home</a>
-            <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
-            <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="hover:text-[#7C5CFC] transition-colors">About</a>
-            <a href="#gallery" onClick={(e) => scrollToSection(e, 'gallery')} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
-            <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="hover:text-[#7C5CFC] transition-colors">Contact</a>
+            <Link to="/" onClick={(e) => { if(!view) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }} className="hover:text-[#7C5CFC] transition-colors">Home</Link>
+            <a href="#features" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'features'); }} className="hover:text-[#7C5CFC] transition-colors">Features</a>
+            <a href="#about" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'about'); }} className="hover:text-[#7C5CFC] transition-colors">About</a>
+            <a href="#gallery" onClick={(e) => { if (view) navigate('/'); else scrollToSection(e, 'gallery'); }} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
+            <Link to="/contact" className="hover:text-[#7C5CFC] transition-colors">Contact</Link>
           </nav>
         )}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link to="/login" className="text-[#3C1053] hover:text-[#7C5CFC] font-bold text-[13px] sm:text-[14px] px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[12px] border border-[#E9E5F8] hover:bg-purple-50 transition-all">
             Login
           </Link>
-          <a href="#login-section" onClick={(e) => scrollToSection(e, 'login-section')} className="bg-[#7C5CFC] text-white px-4 sm:px-7 py-2 sm:py-2.5 rounded-[12px] text-[13px] sm:text-[14px] font-bold hover:bg-[#6B49F6] shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5 whitespace-nowrap">
+          <Link to="/login" className="bg-[#7C5CFC] text-white px-4 sm:px-7 py-2 sm:py-2.5 rounded-[12px] text-[13px] sm:text-[14px] font-bold hover:bg-[#6B49F6] shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5 whitespace-nowrap">
             Get Started
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -275,9 +300,9 @@ export default function Home({ view }) {
             {heroAbout.split('\n').map((line, i) => <React.Fragment key={i}>{line}<br/></React.Fragment>)}
           </p>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
-            <a href="#login-section" onClick={(e) => scrollToSection(e, 'login-section')} className="bg-[#7C5CFC] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[16px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1">
+            <Link to="/login" className="bg-[#7C5CFC] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-[16px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-lg shadow-purple-500/30 transition-all hover:-translate-y-1">
               Start Free
-            </a>
+            </Link>
             <button className="flex items-center gap-3 text-[#1F2430] font-bold text-[14px] sm:text-[15px] hover:text-[#7C5CFC] transition-colors group">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] group-hover:scale-110 transition-transform shadow-sm">
                 <Play size={16} fill="currentColor" className="ml-1" />
@@ -342,15 +367,15 @@ export default function Home({ view }) {
 
       {!view && !familyData && (
         /* ─── LATEST FEED (Facebook Style) ─── */
-        <section id="feed" className="w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
+        <section id="feed" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Latest from the Family</h2>
             <p className="text-gray-400 text-sm font-semibold mt-2">Stay updated with our latest memories and announcements.</p>
           </div>
           
-          <div className="space-y-6">
-            {familyFeed.length > 0 ? (
-              familyFeed.map((item, index) => (
+          {familyFeed.length > 0 ? (
+            <div className="space-y-6 max-w-[800px] mx-auto">
+              {familyFeed.map((item, index) => (
                 <div key={index} className="bg-white rounded-[24px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -377,26 +402,52 @@ export default function Home({ view }) {
                     </div>
                   )}
                 </div>
-              ))
+              ))}
+            </div>
+            ) : !familyData ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {[
+                  { img: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Summer Vacation" },
+                  { img: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Birthday Party" },
+                  { img: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Reunion" }
+                ].map((post, i) => (
+                  <div key={`mock-feed-${i}`} className="bg-white rounded-[24px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left pointer-events-none">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] font-bold">
+                          <ImageIcon size={18} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-[#1F2430] text-sm">{post.title}</p>
+                          <p className="text-xs text-gray-400 font-medium">2 hours ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full h-[220px] sm:h-[240px] rounded-2xl overflow-hidden bg-gray-100 mt-2">
+                      <img src={post.img} alt={post.title} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+              <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100 max-w-[800px] mx-auto">
                 <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500 font-medium">No recent activities found.</p>
               </div>
             )}
-          </div>
         </section>
       )}
 
       {/* ─── FEATURE CARDS ─── */}
       {!view && (
         <section id="features" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           {[
             { icon: <ImageIcon size={22} className="text-[#7C5CFC]" />, title: 'Share Memories', desc: 'Securely store and organize your precious moments in one beautiful place.' },
             { icon: <Users size={22} className="text-[#7C5CFC]" />, title: 'Family Tree', desc: 'Build your tree and explore your family connections visually and intuitively.' },
             { icon: <Calendar size={22} className="text-[#7C5CFC]" />, title: 'Events', desc: 'Celebrate birthdays and family milestones together without ever missing a date.' },
             { icon: <MessageSquare size={22} className="text-[#7C5CFC]" />, title: 'Private Chat', desc: 'Chat privately with your family members in a secure and dedicated hub.' },
+            { icon: <MessageCircle size={22} className="text-[#7C5CFC]" />, title: 'Announcements', desc: 'Broadcast important updates, achievements, or news to all members instantly.' },
           ].map((card, i) => (
             <div
               key={i}
@@ -486,7 +537,18 @@ export default function Home({ view }) {
                       {item.year}
                     </span>
                   </div>
-                )) : (
+                )) : !familyData ? (
+                  <div className="flex flex-col items-center group cursor-pointer w-20 sm:w-24 shrink-0 mx-auto pointer-events-none">
+                    <div className="w-18 h-22 sm:w-20 sm:h-24 rounded-[16px] sm:rounded-[18px] overflow-hidden border-3 sm:border-4 border-white shadow-[0_8px_20px_rgba(124,92,252,0.18)] bg-purple-50 shrink-0">
+                      <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80" alt="Sample" className="w-full h-full object-cover block" />
+                    </div>
+                    <div className="w-0.5 h-5 sm:h-6 bg-gradient-to-b from-purple-300 to-[#7C5CFC] my-1 shrink-0"></div>
+                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#7C5CFC] border-2 border-white shadow-[0_0_10px_rgba(124,92,252,0.6)] shrink-0"></div>
+                    <span className="mt-2.5 sm:mt-3 font-extrabold text-[13px] sm:text-[14px] text-gray-600 tracking-tight shrink-0">
+                      2026
+                    </span>
+                  </div>
+                ) : (
                   <div className="text-gray-400 text-sm font-medium w-full text-center mt-8">No events yet to display on timeline.</div>
                 )}
               </div>
@@ -553,22 +615,73 @@ export default function Home({ view }) {
         {livestreams.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {livestreams.map(stream => (
-              <div key={stream.id} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
-                  <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
+              <div key={stream.id} className="relative overflow-hidden rounded-[24px] shadow-md border border-slate-100 hover:shadow-xl hover:border-[#7C5CFC]/30 transition-all duration-300 h-[240px] bg-slate-900 group">
+                <img
+                  src={stream.bannerImage || "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=600&q=80"}
+                  alt={stream.name}
+                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md shadow-red-600/35">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  LIVE
                 </div>
-                <button 
-                  onClick={() => {
-                    if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
-                      window.open(`/live/${stream.streamId}`, '_blank');
-                    } else {
-                      navigate('/login');
-                    }
-                  }}
-                  className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
-                  Join Stream
-                </button>
+                <span className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  {stream.streamingPlatform || 'FamilyHub Live'}
+                </span>
+
+                {/* Details */}
+                <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end text-left">
+                  <h3 className="font-bold text-white text-lg sm:text-xl line-clamp-1">{stream.name}</h3>
+                  <p className="text-gray-300 mt-1.5 text-xs sm:text-sm font-semibold line-clamp-1">{stream.description}</p>
+                  <button 
+                    onClick={() => {
+                      if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
+                        window.open(`/live/${stream.streamId}`, '_blank');
+                      } else {
+                        navigate('/login');
+                      }
+                    }}
+                    className="mt-4 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl self-start shadow-md shadow-purple-500/25 transition-all cursor-pointer">
+                    Join Stream
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : !familyData ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { id: 1, title: 'Weekly Reunion update', desc: 'Join the family for our weekly update!', bg: 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=600&q=80' },
+              { id: 2, title: 'Virtual Birthday Gathering', desc: 'Celebrating together from around the world.', bg: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&q=80' }
+            ].map((stream) => (
+              <div key={`mock-stream-${stream.id}`} className="relative overflow-hidden rounded-[24px] shadow-md border border-slate-100 hover:shadow-xl hover:border-[#7C5CFC]/30 transition-all duration-300 h-[240px] bg-slate-900 group">
+                <img
+                  src={stream.bg}
+                  alt={stream.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md shadow-red-600/35">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  LIVE
+                </div>
+                <span className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  FamilyHub Live
+                </span>
+
+                {/* Details */}
+                <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end text-left">
+                  <h3 className="font-bold text-white text-lg sm:text-xl line-clamp-1">{stream.title}</h3>
+                  <p className="text-gray-300 mt-1.5 text-xs sm:text-sm font-semibold line-clamp-1">{stream.desc}</p>
+                  <button className="mt-4 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl self-start shadow-md shadow-purple-500/25 transition-all cursor-pointer">
+                    Join Stream
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -675,6 +788,22 @@ export default function Home({ view }) {
                 </div>
               ))}
             </div>
+          ) : !familyData ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pointer-events-none">
+              {[1, 2, 3].map((i) => (
+                <div key={`mock-vid-${i}`} className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100">
+                  <div className="relative h-[220px] bg-gray-200 flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80')] bg-cover bg-center">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center relative z-10">
+                      <Play size={24} className="ml-1 text-white" fill="currentColor" />
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-bold text-[#1F2430]">Sample Family Video</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="text-center bg-white rounded-2xl py-10 shadow-sm border border-gray-100">
               <Play size={32} className="mx-auto text-gray-300 mb-3" />
@@ -694,35 +823,63 @@ export default function Home({ view }) {
           <div className="space-y-5 text-left">
             <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-[#7C5CFC] px-4 py-1.5 rounded-full text-xs font-bold animate-pulse">
               <Heart size={14} fill="#7C5CFC" />
-              About the {familyData ? familyName : "Family"}
+              {familyData ? `About the ${familyName}` : "About FamilyHub"}
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1F2430] leading-tight tracking-tight">
-              {familyData?.description || `Preserving the ${familyName} Heritage.`}
+              {familyData ? (familyData.description || `Preserving the ${familyName} Heritage.`) : "Preserving Family Legacies Across Generations."}
             </h2>
-            {familyData?.about && (
-              <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed whitespace-pre-line">
-                {familyData.about}
-              </p>
-            )}
-            {familyData?.history && (
-              <div className="pt-4 border-t border-purple-100">
-                <h4 className="font-bold text-[#1F2430] text-lg mb-2">Our History</h4>
-                <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                  {familyData.history}
+            {familyData ? (
+              <>
+                {familyData.about && (
+                  <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed whitespace-pre-line">
+                    {familyData.about}
+                  </p>
+                )}
+                {familyData.history && (
+                  <div className="pt-4 border-t border-purple-100">
+                    <h4 className="font-bold text-[#1F2430] text-lg mb-2">Our History</h4>
+                    <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                      {familyData.history}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed">
+                  FamilyHub was created with a single core belief: every family has an extraordinary story that deserves to be remembered, celebrated, and passed down.
                 </p>
-              </div>
+                <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed">
+                  Our platform brings families together from around the globe to build interactive family trees, archive treasured photographs, coordinate events, and chat privately in a secure space.
+                </p>
+              </>
             )}
 
             {/* Stats / Highlights */}
             <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.members}</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Family Members Connected</p>
-              </div>
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{familyData?.createdAt ? new Date(familyData.createdAt).getFullYear() : '2026'}</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Year Started / Founded</p>
-              </div>
+              {familyData ? (
+                <>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.members}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Family Members Connected</p>
+                  </div>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{familyData.createdAt ? new Date(familyData.createdAt).getFullYear() : '2026'}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Year Started / Founded</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">100%</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Private & Encrypted</p>
+                  </div>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.photos + statistics.videos || '1205'}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Memories Shared</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -732,31 +889,57 @@ export default function Home({ view }) {
               <div className="w-14 h-14 rounded-2xl bg-[#7C5CFC] text-white flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
                 <Users size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Family Information</h3>
-              <div className="space-y-4 pt-2">
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Family Code</span>
-                  <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData?.familyCode || 'N/A'}</p>
-                </div>
-                {familyData?.contactEmail && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Email</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactEmail}</p>
+              {familyData ? (
+                <>
+                  <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Family Information</h3>
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Family Code</span>
+                      <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.familyCode || 'N/A'}</p>
+                    </div>
+                    {familyData.contactEmail && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Email</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactEmail}</p>
+                      </div>
+                    )}
+                    {familyData.contactPhone && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Phone</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactPhone}</p>
+                      </div>
+                    )}
+                    {familyData.website && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Website</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.website}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                {familyData?.contactPhone && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Phone</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactPhone}</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Our Mission</h3>
+                  <p className="text-gray-500 font-medium text-sm sm:text-base leading-relaxed mb-6">
+                    "To bridge generational distance and ensure no family memory, photo, or story is ever lost to time."
+                  </p>
+
+                  <div className="space-y-3 pt-4 border-t border-purple-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Multi-generational family tree mapping</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Real-time memory & event sharing</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Strict admin-controlled privacy settings</span>
+                    </div>
                   </div>
-                )}
-                {familyData?.website && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Website</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.website}</p>
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -765,7 +948,7 @@ export default function Home({ view }) {
       )}
 
       {/* ─── ANNOUNCEMENTS SECTION ─── */}
-      {!view && (
+      {!view && familyData && (
         <section id="announcements" className="w-full bg-[#FAF8FF] py-12 sm:py-16 border-y border-[#E9E5F8]">
         <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-8">
@@ -787,7 +970,20 @@ export default function Home({ view }) {
                   </div>
                 </div>
               </div>
-            )) : (
+            )) : !familyData ? (
+              <div className="bg-white border border-purple-100 rounded-2xl p-5 sm:p-6 shadow-sm pointer-events-none">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
+                    <MessageCircle size={18} className="text-[#7C5CFC]" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-bold text-[#1F2430] text-lg">Sample Announcement</h4>
+                    <p className="text-gray-600 mt-1">This is how a family announcement will appear. Great for sharing big news!</p>
+                    <p className="text-xs text-gray-400 mt-3 font-semibold">Today</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 font-medium">No recent announcements.</p>
               </div>
@@ -823,6 +1019,23 @@ export default function Home({ view }) {
               </div>
             ))}
           </div>
+        ) : !familyData ? (
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-10 lg:gap-12 pointer-events-none">
+            {[
+              { role: 'Grandfather', img: '/avatars/grandfather.png' },
+              { role: 'Grandmother', img: '/avatars/grandmother.png' },
+              { role: 'Father / Admin', img: '/avatars/father.png' },
+              { role: 'Mother', img: '/avatars/mother.png' },
+              { role: 'Daughter', img: '/avatars/daughter.png' }
+            ].map((mock, i) => (
+              <div key={`mock-mem-${i}`} className="flex flex-col items-center group">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gradient-to-b from-purple-50 to-white group-hover:scale-105 transition-transform duration-300 p-1 flex items-center justify-center">
+                  <img src={`${mock.img}?v=3`} alt={mock.role} className="w-full h-full object-contain" />
+                </div>
+                <h4 className="mt-4 font-bold text-[#1F2430] text-sm sm:text-base tracking-tight">{mock.role}</h4>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500 font-medium">No members found.</p>
@@ -832,7 +1045,7 @@ export default function Home({ view }) {
       )}
 
       {/* ─── CONTACT US FORM SECTION (Main domain only, replacing login) ─── */}
-      {!view && !familyData && (
+      {(!view || view === 'contact') && !familyData && (
         <section id="contact-form-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
 
@@ -869,9 +1082,9 @@ export default function Home({ view }) {
           </div>
 
           {/* Right Panel — Contact Us Form */}
-          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-8 lg:p-10 w-full max-w-md mx-auto text-left">
-            <div className="text-center lg:text-left mb-8">
-              <h3 className="text-[26px] font-black text-[#1F2430] tracking-tight mb-1.5">Contact Us</h3>
+          <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 p-6 lg:p-8 w-full max-w-md mx-auto text-left flex flex-col justify-center h-full">
+            <div className="text-center lg:text-left mb-6">
+              <h3 className="text-[24px] font-black text-[#1F2430] tracking-tight mb-1">Contact Us</h3>
               <p className="text-gray-400 text-sm font-semibold">We'd love to hear from you. Send us a message.</p>
             </div>
 
@@ -887,8 +1100,8 @@ export default function Home({ view }) {
               </div>
             )}
 
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div className="space-y-1.5">
+            <form onSubmit={handleContactSubmit} className="space-y-3">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Full Name</label>
                 <input
                   type="text"
@@ -896,11 +1109,11 @@ export default function Home({ view }) {
                   value={contactForm.name}
                   onChange={e => setContactForm({ ...contactForm, name: e.target.value })}
                   placeholder="Your Name"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Email Address</label>
                 <input
                   type="email"
@@ -908,29 +1121,29 @@ export default function Home({ view }) {
                   value={contactForm.email}
                   onChange={e => setContactForm({ ...contactForm, email: e.target.value })}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Phone Number</label>
                 <input
                   type="tel"
                   value={contactForm.phone}
                   onChange={e => setContactForm({ ...contactForm, phone: e.target.value })}
                   placeholder="+1 (555) 000-0000"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="text-xs font-bold text-[#1F2430] ml-1">Message Details</label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={contactForm.message}
                   onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
                   placeholder="How can we help your family?"
-                  className="w-full px-4 py-3 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#FAF8FF] border border-[#E9E5F8] text-sm text-[#1F2430] focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 focus:border-[#7C5CFC] transition-all font-semibold resize-none"
                 />
               </div>
 
