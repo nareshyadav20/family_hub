@@ -44,6 +44,7 @@ function Skeleton({ className = '' }) {
 export default function Settings() {
   const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState('general');
+  const [logoPreview, setLogoPreview] = useState(null);
 
   // ── Fetch family info ──
   const { data: familyData, isLoading: loadingFamily } = useQuery({
@@ -58,7 +59,7 @@ export default function Settings() {
   });
 
   // ── Local form states (initialised from fetched data) ──
-  const [familyForm, setFamilyForm] = useState({ name: '', address: '', city: '', state: '', country: '' });
+  const [familyForm, setFamilyForm] = useState({ name: '', address: '', city: '', state: '', country: '', logo: '' });
   const [notifForm, setNotifForm]   = useState({
     email_notifications: true, push_notifications: true, birthday_notifications: true,
     event_notifications: true, announcement_notifications: true, whatsapp_notifications: false,
@@ -75,9 +76,27 @@ export default function Settings() {
         city:    familyData.city    || '',
         state:   familyData.state   || '',
         country: familyData.country || '',
+        logo:    familyData.logo    || '',
       });
+      setLogoPreview(familyData.logo || null);
     }
   }, [familyData]);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size exceeds 5MB limit.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+        setFamilyForm(f => ({ ...f, logo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     if (meData) {
@@ -199,6 +218,34 @@ export default function Settings() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {/* Logo Upload */}
+                    <div className="sm:col-span-2 flex items-center gap-6 p-4 border border-slate-100 rounded-xl bg-slate-50/50 mb-2">
+                      <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center relative shrink-0">
+                        {logoPreview ? (
+                          <img src={logoPreview} alt="Family Logo" className="w-full h-full object-cover" />
+                        ) : (
+                          <Globe className="w-8 h-8 text-slate-400" />
+                        )}
+                      </div>
+                      <div className="text-left">
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Family Logo</label>
+                        <p className="text-xs text-slate-400 mb-3">Upload a PNG or JPG logo. Max size 5MB.</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoChange}
+                          className="hidden"
+                          id="logo-upload-input"
+                        />
+                        <label
+                          htmlFor="logo-upload-input"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl text-xs cursor-pointer shadow-sm transition-all"
+                        >
+                          Choose Logo
+                        </label>
+                      </div>
+                    </div>
+
                     {[
                       ['Family Name', 'name'],
                       ['Address',     'address'],
@@ -207,12 +254,12 @@ export default function Settings() {
                       ['Country',     'country'],
                     ].map(([label, key]) => (
                       <div key={key}>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2 text-left">{label}</label>
                         <input
                           type="text"
                           value={familyForm[key] || ''}
                           onChange={e => setFamilyForm(f => ({ ...f, [key]: e.target.value }))}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all"
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all text-left"
                         />
                       </div>
                     ))}
@@ -347,7 +394,10 @@ export default function Settings() {
             <button
               type="button"
               onClick={() => {
-                if (familyData && activeSection === 'general') setFamilyForm({ name: familyData.name || '', address: familyData.address || '', city: familyData.city || '', state: familyData.state || '', country: familyData.country || '' });
+                if (familyData && activeSection === 'general') {
+                  setFamilyForm({ name: familyData.name || '', address: familyData.address || '', city: familyData.city || '', state: familyData.state || '', country: familyData.country || '', logo: familyData.logo || '' });
+                  setLogoPreview(familyData.logo || null);
+                }
                 if (meData) {
                   const s = meData.memberSettings || {};
                   if (activeSection === 'notifications') setNotifForm({ email_notifications: s.email_notifications ?? true, push_notifications: s.push_notifications ?? true, birthday_notifications: s.birthday_notifications ?? true, event_notifications: s.event_notifications ?? true, announcement_notifications: s.announcement_notifications ?? true, whatsapp_notifications: s.whatsapp_notifications ?? false });

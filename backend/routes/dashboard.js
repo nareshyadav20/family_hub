@@ -379,10 +379,10 @@ router.put('/settings/family', authenticateToken, async (req, res) => {
   try {
     const familyId = req.user.familyId;
     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
-    const { name, address, city, state, country } = req.body;
+    const { name, address, city, state, country, logo } = req.body;
     const updated = await prisma.family.update({
       where: { id: familyId },
-      data: { name, address, city, state, country },
+      data: { name, address, city, state, country, logo },
     });
     res.json({ success: true, data: updated });
   } catch (err) {
