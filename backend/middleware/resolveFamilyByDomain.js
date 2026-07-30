@@ -39,6 +39,21 @@ const resolveFamilyByDomain = async (req, res, next) => {
 
     if (!family) {
       console.log('Resolved Family: NOT FOUND');
+      const isMainDomain = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'familyhub.com' || hostname.includes('localhost:');
+      if (isMainDomain) {
+        return res.status(200).json({
+          success: true,
+          family: null,
+          feed: [],
+          statistics: null,
+          gallery: [],
+          events: [],
+          announcements: [],
+          videos: [],
+          livestreams: [],
+          members: []
+        });
+      }
       return res.status(404).json({ error: 'Family Not Found' });
     }
 

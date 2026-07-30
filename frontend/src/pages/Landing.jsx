@@ -113,6 +113,15 @@ export default function Home({ view }) {
     }
   }, [familyLoading]);
 
+  const defaultGalleryItems = [
+    { id: 'mock-1', category: 'Trips', src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Summer Family Trip" },
+    { id: 'mock-2', category: 'Celebrations', src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Graduation Party" },
+    { id: 'mock-3', category: 'Gatherings', src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Holiday Reunion Dinner" },
+    { id: 'mock-4', category: 'Anniversaries', src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80", title: "Grandparents Anniversary" },
+    { id: 'mock-5', category: 'Trips', src: "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=600&q=80", title: "Mountain Hiking Adventure" },
+    { id: 'mock-6', category: 'Celebrations', src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&q=80", title: "New Year Celebration" }
+  ];
+
   const galleryItems = data?.gallery && data.gallery.length > 0 
     ? data.gallery.map(doc => ({
         id: doc.id,
@@ -120,7 +129,15 @@ export default function Home({ view }) {
         src: doc.url,
         title: doc.name
       })) 
-    : [];
+    : (!familyData ? defaultGalleryItems : []);
+
+  const defaultTimelineItems = [
+    { year: 2018, title: "Summer Family Trip", src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80" },
+    { year: 2020, title: "Graduation Celebration", src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80" },
+    { year: 2022, title: "Grandparents Anniversary", src: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80" },
+    { year: 2024, title: "Christmas Reunion", src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80" },
+    { year: 2026, title: "New Family Home", src: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80" }
+  ];
 
   const timelineItems = data?.events && data.events.length > 0 
     ? data.events.map(event => ({
@@ -128,7 +145,7 @@ export default function Home({ view }) {
         title: event.name,
         src: event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=300&q=80"
       })).sort((a, b) => a.year - b.year)
-    : [];
+    : (!familyData ? defaultTimelineItems : []);
 
   const scrollTimeline = (direction) => {
     if (timelineRef.current) {
@@ -424,12 +441,13 @@ export default function Home({ view }) {
       {/* ─── FEATURE CARDS ─── */}
       {!view && (
         <section id="features" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           {[
             { icon: <ImageIcon size={22} className="text-[#7C5CFC]" />, title: 'Share Memories', desc: 'Securely store and organize your precious moments in one beautiful place.' },
             { icon: <Users size={22} className="text-[#7C5CFC]" />, title: 'Family Tree', desc: 'Build your tree and explore your family connections visually and intuitively.' },
             { icon: <Calendar size={22} className="text-[#7C5CFC]" />, title: 'Events', desc: 'Celebrate birthdays and family milestones together without ever missing a date.' },
             { icon: <MessageSquare size={22} className="text-[#7C5CFC]" />, title: 'Private Chat', desc: 'Chat privately with your family members in a secure and dedicated hub.' },
+            { icon: <MessageCircle size={22} className="text-[#7C5CFC]" />, title: 'Announcements', desc: 'Broadcast important updates, achievements, or news to all members instantly.' },
           ].map((card, i) => (
             <div
               key={i}
@@ -597,36 +615,73 @@ export default function Home({ view }) {
         {livestreams.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {livestreams.map(stream => (
-              <div key={stream.id} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
-                  <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
+              <div key={stream.id} className="relative overflow-hidden rounded-[24px] shadow-md border border-slate-100 hover:shadow-xl hover:border-[#7C5CFC]/30 transition-all duration-300 h-[240px] bg-slate-900 group">
+                <img
+                  src={stream.bannerImage || "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=600&q=80"}
+                  alt={stream.name}
+                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md shadow-red-600/35">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  LIVE
                 </div>
-                <button 
-                  onClick={() => {
-                    if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
-                      window.open(`/live/${stream.streamId}`, '_blank');
-                    } else {
-                      navigate('/login');
-                    }
-                  }}
-                  className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
-                  Join Stream
-                </button>
+                <span className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  {stream.streamingPlatform || 'FamilyHub Live'}
+                </span>
+
+                {/* Details */}
+                <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end text-left">
+                  <h3 className="font-bold text-white text-lg sm:text-xl line-clamp-1">{stream.name}</h3>
+                  <p className="text-gray-300 mt-1.5 text-xs sm:text-sm font-semibold line-clamp-1">{stream.description}</p>
+                  <button 
+                    onClick={() => {
+                      if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
+                        window.open(`/live/${stream.streamId}`, '_blank');
+                      } else {
+                        navigate('/login');
+                      }
+                    }}
+                    className="mt-4 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl self-start shadow-md shadow-purple-500/25 transition-all cursor-pointer">
+                    Join Stream
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         ) : !familyData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pointer-events-none">
-            {[1, 2].map((i) => (
-              <div key={`mock-stream-${i}`} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-red-900 text-xl">Sample Live Stream</h3>
-                  <p className="text-red-700 mt-2 text-sm">Join the family for a live update!</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { id: 1, title: 'Weekly Reunion update', desc: 'Join the family for our weekly update!', bg: 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=600&q=80' },
+              { id: 2, title: 'Virtual Birthday Gathering', desc: 'Celebrating together from around the world.', bg: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&q=80' }
+            ].map((stream) => (
+              <div key={`mock-stream-${stream.id}`} className="relative overflow-hidden rounded-[24px] shadow-md border border-slate-100 hover:shadow-xl hover:border-[#7C5CFC]/30 transition-all duration-300 h-[240px] bg-slate-900 group">
+                <img
+                  src={stream.bg}
+                  alt={stream.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md shadow-red-600/35">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  LIVE
                 </div>
-                <button className="mt-6 w-full bg-red-600 text-white font-bold py-3 rounded-xl">
-                  Join Stream
-                </button>
+                <span className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-white font-bold text-[10px] px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  FamilyHub Live
+                </span>
+
+                {/* Details */}
+                <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end text-left">
+                  <h3 className="font-bold text-white text-lg sm:text-xl line-clamp-1">{stream.title}</h3>
+                  <p className="text-gray-300 mt-1.5 text-xs sm:text-sm font-semibold line-clamp-1">{stream.desc}</p>
+                  <button className="mt-4 bg-[#7C5CFC] hover:bg-[#6B49F6] text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl self-start shadow-md shadow-purple-500/25 transition-all cursor-pointer">
+                    Join Stream
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -693,31 +748,6 @@ export default function Home({ view }) {
                   <div>
                     <span className="inline-block bg-[#7C5CFC] text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full mb-1">{item.category}</span>
                     <h4 className="text-white font-bold text-[15px] sm:text-[16px]">{item.title}</h4>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : !familyData ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 min-h-[260px] pointer-events-none">
-            {[
-              { src: "https://images.unsplash.com/photo-1609220136736-443140cffec6?auto=format&fit=crop&w=600&q=80", title: "Family Picnic" },
-              { src: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=600&q=80", title: "Graduation" },
-              { src: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80", title: "Holiday Dinner" }
-            ].map((mock, i) => (
-              <div
-                key={`mock-gal-${i}`}
-                className="group relative rounded-[20px] sm:rounded-[24px] overflow-hidden border border-gray-100 shadow-sm h-[220px] sm:h-[240px] bg-purple-50"
-              >
-                <img
-                  src={mock.src}
-                  alt={mock.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4 sm:p-5">
-                  <div>
-                    <span className="inline-block bg-[#7C5CFC] text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-0.5 rounded-full mb-1">Sample</span>
-                    <h4 className="text-white font-bold text-[15px] sm:text-[16px]">{mock.title}</h4>
                   </div>
                 </div>
               </div>
@@ -793,35 +823,63 @@ export default function Home({ view }) {
           <div className="space-y-5 text-left">
             <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-[#7C5CFC] px-4 py-1.5 rounded-full text-xs font-bold animate-pulse">
               <Heart size={14} fill="#7C5CFC" />
-              About the {familyData ? familyName : "Family"}
+              {familyData ? `About the ${familyName}` : "About FamilyHub"}
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1F2430] leading-tight tracking-tight">
-              {familyData?.description || `Preserving the ${familyName} Heritage.`}
+              {familyData ? (familyData.description || `Preserving the ${familyName} Heritage.`) : "Preserving Family Legacies Across Generations."}
             </h2>
-            {familyData?.about && (
-              <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed whitespace-pre-line">
-                {familyData.about}
-              </p>
-            )}
-            {familyData?.history && (
-              <div className="pt-4 border-t border-purple-100">
-                <h4 className="font-bold text-[#1F2430] text-lg mb-2">Our History</h4>
-                <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                  {familyData.history}
+            {familyData ? (
+              <>
+                {familyData.about && (
+                  <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed whitespace-pre-line">
+                    {familyData.about}
+                  </p>
+                )}
+                {familyData.history && (
+                  <div className="pt-4 border-t border-purple-100">
+                    <h4 className="font-bold text-[#1F2430] text-lg mb-2">Our History</h4>
+                    <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                      {familyData.history}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed">
+                  FamilyHub was created with a single core belief: every family has an extraordinary story that deserves to be remembered, celebrated, and passed down.
                 </p>
-              </div>
+                <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed">
+                  Our platform brings families together from around the globe to build interactive family trees, archive treasured photographs, coordinate events, and chat privately in a secure space.
+                </p>
+              </>
             )}
 
             {/* Stats / Highlights */}
             <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.members}</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Family Members Connected</p>
-              </div>
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{familyData?.createdAt ? new Date(familyData.createdAt).getFullYear() : '2026'}</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Year Started / Founded</p>
-              </div>
+              {familyData ? (
+                <>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.members}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Family Members Connected</p>
+                  </div>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{familyData.createdAt ? new Date(familyData.createdAt).getFullYear() : '2026'}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Year Started / Founded</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">100%</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Private & Encrypted</p>
+                  </div>
+                  <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                    <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.photos + statistics.videos || '1205'}</p>
+                    <p className="text-xs font-bold text-gray-600 mt-1">Memories Shared</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -831,31 +889,57 @@ export default function Home({ view }) {
               <div className="w-14 h-14 rounded-2xl bg-[#7C5CFC] text-white flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
                 <Users size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Family Information</h3>
-              <div className="space-y-4 pt-2">
-                <div>
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Family Code</span>
-                  <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData?.familyCode || 'N/A'}</p>
-                </div>
-                {familyData?.contactEmail && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Email</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactEmail}</p>
+              {familyData ? (
+                <>
+                  <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Family Information</h3>
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Family Code</span>
+                      <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.familyCode || 'N/A'}</p>
+                    </div>
+                    {familyData.contactEmail && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Email</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactEmail}</p>
+                      </div>
+                    )}
+                    {familyData.contactPhone && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Phone</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactPhone}</p>
+                      </div>
+                    )}
+                    {familyData.website && (
+                      <div>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Website</span>
+                        <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.website}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-                {familyData?.contactPhone && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Phone</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactPhone}</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Our Mission</h3>
+                  <p className="text-gray-500 font-medium text-sm sm:text-base leading-relaxed mb-6">
+                    "To bridge generational distance and ensure no family memory, photo, or story is ever lost to time."
+                  </p>
+
+                  <div className="space-y-3 pt-4 border-t border-purple-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Multi-generational family tree mapping</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Real-time memory & event sharing</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
+                      <span className="text-sm font-semibold text-gray-700">Strict admin-controlled privacy settings</span>
+                    </div>
                   </div>
-                )}
-                {familyData?.website && (
-                  <div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Website</span>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.website}</p>
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -864,7 +948,7 @@ export default function Home({ view }) {
       )}
 
       {/* ─── ANNOUNCEMENTS SECTION ─── */}
-      {!view && (
+      {!view && familyData && (
         <section id="announcements" className="w-full bg-[#FAF8FF] py-12 sm:py-16 border-y border-[#E9E5F8]">
         <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-8">
@@ -936,14 +1020,19 @@ export default function Home({ view }) {
             ))}
           </div>
         ) : !familyData ? (
-          <div className="flex flex-wrap justify-center gap-6 pointer-events-none">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={`mock-mem-${i}`} className="flex flex-col items-center">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
-                  <img src={`https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=200&q=80`} alt="Sample" className="w-full h-full object-cover" />
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-10 lg:gap-12 pointer-events-none">
+            {[
+              { role: 'Grandfather', img: '/avatars/grandfather.png' },
+              { role: 'Grandmother', img: '/avatars/grandmother.png' },
+              { role: 'Father / Admin', img: '/avatars/father.png' },
+              { role: 'Mother', img: '/avatars/mother.png' },
+              { role: 'Daughter', img: '/avatars/daughter.png' }
+            ].map((mock, i) => (
+              <div key={`mock-mem-${i}`} className="flex flex-col items-center group">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gradient-to-b from-purple-50 to-white group-hover:scale-105 transition-transform duration-300 p-1 flex items-center justify-center">
+                  <img src={`${mock.img}?v=3`} alt={mock.role} className="w-full h-full object-contain" />
                 </div>
-                <h4 className="mt-3 font-bold text-[#1F2430] text-sm sm:text-base">Sample User</h4>
-                <span className="text-xs font-semibold text-[#7C5CFC] bg-purple-50 px-2 py-0.5 rounded-full mt-1">Member</span>
+                <h4 className="mt-4 font-bold text-[#1F2430] text-sm sm:text-base tracking-tight">{mock.role}</h4>
               </div>
             ))}
           </div>
