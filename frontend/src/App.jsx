@@ -293,6 +293,10 @@ function AppLayer() {
         <SessionWatcher />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/gallery" element={<Landing view="gallery" />} />
+          <Route path="/events" element={<Landing view="events" />} />
+          <Route path="/livestreams" element={<Landing view="livestreams" />} />
+          <Route path="/about" element={<Landing view="about" />} />
           <Route path="/live/:streamId" element={<LiveStreamPage />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
@@ -360,7 +364,8 @@ function AppLayer() {
 }
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const isSubpage = window.location.pathname !== '/' || window.location.search.includes('domain=');
+  const [showSplash, setShowSplash] = useState(!isSubpage);
 
   // Execute synchronous extraction to prevent child components from firing Bearer Null 401 traps
   const params = new URLSearchParams(window.location.search);

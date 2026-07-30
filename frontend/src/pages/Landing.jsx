@@ -9,7 +9,7 @@ import API_BASE_URL from '../config/api';
 
 const API_URL = `${API_BASE_URL}/api/v1`;
 
-export default function Home() {
+export default function Home({ view }) {
   const navigate = useNavigate();
   const timelineRef = useRef(null);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -58,6 +58,26 @@ export default function Home() {
       };
     }
   }, [familyData?.id, queryClient]);
+
+  // Handle auto-scroll to hash section when loading finishes (e.g. from new tab)
+  useEffect(() => {
+    if (!familyLoading && window.location.hash) {
+      const id = window.location.hash.substring(1);
+      let attempts = 0;
+      const interval = setInterval(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          clearInterval(interval);
+        }
+        attempts++;
+        if (attempts > 30) { // stop after 3 seconds
+          clearInterval(interval);
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [familyLoading]);
 
   const galleryItems = data?.gallery && data.gallery.length > 0 
     ? data.gallery.map(doc => ({
@@ -134,11 +154,36 @@ export default function Home() {
 
   if (familyLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C5CFC]"></div></div>;
 
-  const familyName = familyData?.name || "Family";
+  const familyName = familyData?.name || "FamilyHub";
   const heroDescription = familyData?.description || "Every Family Has A Story.";
   const heroAbout = familyData?.about || "Connect. Celebrate. Cherish.\nAll in one beautiful space.";
   const familyLogo = familyData?.logo || "/logo.png";
   const themeColor = familyData?.themeColor || "#7C5CFC";
+
+  const getInitials = (name) => {
+    if (!name) return "F";
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name[0].toUpperCase();
+  };
+
+  const hasUploadedLogo = familyData?.logo && familyData.logo !== '/logo.png';
+
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    if (window.location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate(`/${window.location.search}`);
+    }
+  };
+
+  const handleNavClick = (e, sectionId) => {
+    e.preventDefault();
+    navigate(`/${sectionId}${window.location.search}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFDFF] text-[#111827] font-sans relative overflow-x-hidden selection:bg-purple-200">
@@ -146,15 +191,34 @@ export default function Home() {
       {/* ─── HEADER ─── */}
       <header className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-5 flex justify-between items-center relative z-30">
         <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <img src={familyLogo} alt={familyName} className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
-          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">Family<span className="text-[#7C5CFC]">Hub</span></span>
+          {familyData && !hasUploadedLogo ? (
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-md shadow-purple-500/20 shrink-0">
+              {getInitials(familyName)}
+            </div>
+          ) : (
+            <img src={familyLogo} alt={familyName} className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg" />
+          )}
+          <span className="font-black text-[19px] sm:text-[22px] text-[#2E1E6B] tracking-tight">
+            {familyData ? familyName : <>Family<span className="text-[#7C5CFC]">Hub</span></>}
+          </span>
         </Link>
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
-          <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
-          <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="hover:text-[#7C5CFC] transition-colors">About</a>
-          <a href="#gallery" onClick={(e) => scrollToSection(e, 'gallery')} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
-          <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="hover:text-[#7C5CFC] transition-colors">Contact</a>
-        </nav>
+        {familyData ? (
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
+            <a href={`${window.location.pathname}${window.location.search}#`} onClick={handleHomeClick} className="hover:text-[#7C5CFC] transition-colors">Home</a>
+            <a href={`${window.location.pathname}${window.location.search}#gallery`} onClick={(e) => handleNavClick(e, 'gallery')} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
+            <a href={`${window.location.pathname}${window.location.search}#timeline`} onClick={(e) => handleNavClick(e, 'events')} className="hover:text-[#7C5CFC] transition-colors">Events</a>
+            <a href={`${window.location.pathname}${window.location.search}#livestreams`} onClick={(e) => handleNavClick(e, 'livestreams')} className="hover:text-[#7C5CFC] transition-colors">Live Stream</a>
+            <a href={`${window.location.pathname}${window.location.search}#about`} onClick={(e) => handleNavClick(e, 'about')} className="hover:text-[#7C5CFC] transition-colors">About</a>
+          </nav>
+        ) : (
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-semibold text-[14px] text-gray-500">
+            <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-[#7C5CFC] transition-colors">Home</a>
+            <a href="#features" onClick={(e) => scrollToSection(e, 'features')} className="hover:text-[#7C5CFC] transition-colors">Features</a>
+            <a href="#about" onClick={(e) => scrollToSection(e, 'about')} className="hover:text-[#7C5CFC] transition-colors">About</a>
+            <a href="#gallery" onClick={(e) => scrollToSection(e, 'gallery')} className="hover:text-[#7C5CFC] transition-colors">Gallery</a>
+            <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')} className="hover:text-[#7C5CFC] transition-colors">Contact</a>
+          </nav>
+        )}
         <div className="flex items-center gap-2 sm:gap-3">
           <Link to="/login" className="text-[#3C1053] hover:text-[#7C5CFC] font-bold text-[13px] sm:text-[14px] px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-[12px] border border-[#E9E5F8] hover:bg-purple-50 transition-all">
             Login
@@ -166,7 +230,8 @@ export default function Home() {
       </header>
 
       {/* ─── HERO SECTION ─── */}
-      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-4 sm:pt-8 pb-12 sm:pb-16 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+      {!view && (
+        <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 pt-4 sm:pt-8 pb-12 sm:pb-16 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
 
         {/* Left: Text */}
         <div className="w-full lg:w-[48%] space-y-4 sm:space-y-6 z-10 text-left">
@@ -247,55 +312,59 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* ─── LATEST FEED (Facebook Style) ─── */}
-      <section id="feed" className="w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Latest from the Family</h2>
-          <p className="text-gray-400 text-sm font-semibold mt-2">Stay updated with our latest memories and announcements.</p>
-        </div>
-        
-        <div className="space-y-6">
-          {familyFeed.length > 0 ? (
-            familyFeed.map((item, index) => (
-              <div key={index} className="bg-white rounded-[24px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] font-bold">
-                      {item.type === 'EVENT' ? <Calendar size={18} /> : item.type === 'PHOTO' ? <ImageIcon size={18} /> : item.type === 'ANNOUNCEMENT' ? <MessageCircle size={18} /> : <User size={18} />}
+      {!view && !familyData && (
+        /* ─── LATEST FEED (Facebook Style) ─── */
+        <section id="feed" className="w-full max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Latest from the Family</h2>
+            <p className="text-gray-400 text-sm font-semibold mt-2">Stay updated with our latest memories and announcements.</p>
+          </div>
+          
+          <div className="space-y-6">
+            {familyFeed.length > 0 ? (
+              familyFeed.map((item, index) => (
+                <div key={index} className="bg-white rounded-[24px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col gap-4 text-left">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7C5CFC] font-bold">
+                        {item.type === 'EVENT' ? <Calendar size={18} /> : item.type === 'PHOTO' ? <ImageIcon size={18} /> : item.type === 'ANNOUNCEMENT' ? <MessageCircle size={18} /> : <User size={18} />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#1F2430] text-sm">{item.title}</p>
+                        <p className="text-xs text-gray-400 font-medium">
+                          {new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-[#1F2430] text-sm">{item.title}</p>
-                      <p className="text-xs text-gray-400 font-medium">
-                        {new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
+                    <span className="text-[10px] font-bold uppercase px-2.5 py-1 bg-purple-50 text-[#7C5CFC] rounded-md">{item.type}</span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase px-2.5 py-1 bg-purple-50 text-[#7C5CFC] rounded-md">{item.type}</span>
+                  
+                  {item.description && (
+                    <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                  )}
+                  
+                  {item.image && (
+                    <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gray-100 mt-2">
+                      <img src={item.image} alt="Feed" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                 </div>
-                
-                {item.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
-                )}
-                
-                {item.image && (
-                  <div className="w-full h-[300px] sm:h-[400px] rounded-2xl overflow-hidden bg-gray-100 mt-2">
-                    <img src={item.image} alt="Feed" className="w-full h-full object-cover" />
-                  </div>
-                )}
+              ))
+            ) : (
+              <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+                <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium">No recent activities found.</p>
               </div>
-            ))
-          ) : (
-            <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
-              <MessageSquare size={32} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500 font-medium">No recent activities found.</p>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ─── FEATURE CARDS ─── */}
-      <section id="features" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
+      {!view && (
+        <section id="features" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-10 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
             { icon: <ImageIcon size={22} className="text-[#7C5CFC]" />, title: 'Share Memories', desc: 'Securely store and organize your precious moments in one beautiful place.' },
@@ -315,10 +384,12 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── TIMELINE (With < > scroll control buttons & scrollbar hidden) ─── */}
-      <section id="timeline" className="w-full bg-[#FAF8FF] py-12 sm:py-20 border-y border-[#E9E5F8]">
+      {!view && (
+        <section id="timeline" className="w-full bg-[#FAF8FF] py-12 sm:py-20 border-y border-[#E9E5F8]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
           <div className="w-full lg:w-[35%] text-left">
             <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] leading-tight mb-3 sm:mb-4 tracking-tight">
@@ -327,10 +398,6 @@ export default function Home() {
             <p className="text-gray-500 font-medium mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed">
               Your family's journey beautifully organised in an interactive timeline.
             </p>
-            <div className="flex items-center gap-4">
-              <button className="bg-[#7C5CFC] text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-[14px] text-[14px] sm:text-[15px] font-bold hover:bg-[#6B49F6] shadow-md shadow-purple-500/20 transition-all hover:-translate-y-0.5">
-                Explore Timeline
-              </button>
 
               {/* < > Left / Right Scroll Buttons (VISIBLE ONLY ON MOBILE & TABLET, HIDDEN ON WEB DESKTOP) */}
               <div className="flex items-center gap-2 lg:hidden">
@@ -352,7 +419,6 @@ export default function Home() {
                 </button>
               </div>
             </div>
-          </div>
 
           {/* Timeline Visual (Hidden scrollbars, items locked in perfect straight line) */}
           <div
@@ -401,74 +467,96 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
-      {/* ─── ABOUT US SECTION (NEW DEDICATED ABOUT SECTION) ─── */}
-      <section id="about" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-24 border-b border-[#E9E5F8]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          
-          {/* Left: About Content */}
-          <div className="space-y-5 text-left">
-            <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-[#7C5CFC] px-4 py-1.5 rounded-full text-xs font-bold">
-              <Heart size={14} fill="#7C5CFC" />
-              About FamilyHub
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1F2430] leading-tight tracking-tight">
-              Preserving Family Legacies Across Generations.
-            </h2>
-            <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed">
-              FamilyHub was created with a single core belief: every family has an extraordinary story that deserves to be remembered, celebrated, and passed down.
-            </p>
-            <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed">
-              Our platform brings families together from around the globe to build interactive family trees, archive treasured photographs, coordinate events, and chat privately in a secure space.
-            </p>
-
-            {/* Stats / Highlights */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">100%</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Private & Encrypted</p>
-              </div>
-              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
-                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.photos + statistics.videos}</p>
-                <p className="text-xs font-bold text-gray-600 mt-1">Memories Shared</p>
-              </div>
-            </div>
+      {/* ─── EVENTS LIST VIEW (Only shown on separate Events page) ─── */}
+      {view === 'events' && (
+        <section id="events-list" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-20">
+          <div className="mb-10 text-left">
+            <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Family Events</h2>
+            <p className="text-gray-500 font-medium mt-2">Browse upcoming and past family milestones, celebrations, and gatherings.</p>
           </div>
-
-          {/* Right: Feature Highlights Card */}
-          <div className="relative">
-            <div className="bg-gradient-to-br from-[#FAF8FF] to-purple-50/80 rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-xl shadow-purple-500/5 relative overflow-hidden text-left">
-              <div className="w-14 h-14 rounded-2xl bg-[#7C5CFC] text-white flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
-                <Users size={28} />
-              </div>
-              <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Our Mission</h3>
-              <p className="text-gray-500 font-medium text-sm sm:text-base leading-relaxed mb-6">
-                "To bridge generational distance and ensure no family memory, photo, or story is ever lost to time."
-              </p>
-
-              <div className="space-y-3 pt-4 border-t border-purple-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
-                  <span className="text-sm font-semibold text-gray-700">Multi-generational family tree mapping</span>
+          {data?.events && data.events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {data.events.map(event => (
+                <div key={event.id} className="bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between text-left">
+                  <div>
+                    <div className="h-[200px] w-full overflow-hidden bg-gray-50">
+                      <img
+                        src={event.bannerImage || "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80"}
+                        alt={event.name}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=600&q=80";
+                        }}
+                      />
+                    </div>
+                    <div className="p-6">
+                      <span className="text-xs font-bold text-[#7C5CFC] bg-purple-50 px-2.5 py-1 rounded-md uppercase">
+                        {new Date(event.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <h3 className="font-bold text-[#1F2430] text-xl mt-3">{event.name}</h3>
+                      <p className="text-gray-500 mt-2 text-sm line-clamp-3">{event.description || 'No description provided.'}</p>
+                    </div>
+                  </div>
+                  <div className="p-6 pt-0 border-t border-gray-50 mt-4 flex justify-between items-center">
+                    <span className="text-xs text-gray-400 font-semibold">{event.location || 'Online / Virtual'}</span>
+                    <span className="text-xs font-bold text-[#7C5CFC] bg-purple-50 px-2 py-0.5 rounded-full">{event.visibility}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
-                  <span className="text-sm font-semibold text-gray-700">Real-time memory & event sharing</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</div>
-                  <span className="text-sm font-semibold text-gray-700">Strict admin-controlled privacy settings</span>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="text-center bg-gray-50 rounded-2xl py-12 border border-gray-100">
+              <Calendar size={32} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 font-medium">No family events scheduled at the moment.</p>
+            </div>
+          )}
+        </section>
+      )}
 
+      {/* ─── LIVE STREAMS SECTION ─── */}
+      {(!view || view === 'livestreams') && (
+        <section id="livestreams" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+          <h2 className="text-2xl font-black text-[#1F2430]">Active Live Streams</h2>
         </div>
-      </section>
+        {livestreams.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {livestreams.map(stream => (
+              <div key={stream.id} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
+                  <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
+                      window.open(`/live/${stream.streamId}`, '_blank');
+                    } else {
+                      navigate('/login');
+                    }
+                  }}
+                  className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
+                  Join Stream
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center bg-gray-50 rounded-2xl py-8 border border-gray-100">
+            <p className="text-gray-500 font-medium">No active live streams at the moment.</p>
+          </div>
+        )}
+        </section>
+      )}
 
       {/* ─── GALLERY (With Category Filters & Mobile Responsive Grid) ─── */}
-      <section id="gallery" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-20">
+      {(!view || view === 'gallery') && (
+        <section id="gallery" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-20">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div>
             <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Beautiful Memories Gallery</h2>
@@ -532,10 +620,12 @@ export default function Home() {
             <p className="text-gray-500 font-medium">No gallery items found.</p>
           </div>
         )}
-      </section>
+        </section>
+      )}
 
       {/* ─── VIDEOS SECTION ─── */}
-      <section id="videos" className="w-full bg-[#F3F4F6] py-12 sm:py-20 border-t border-gray-200">
+      {(!view || view === 'gallery') && (
+        <section id="videos" className="w-full bg-[#F3F4F6] py-12 sm:py-20 border-t border-gray-200">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="mb-8">
             <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Family Videos</h2>
@@ -566,45 +656,91 @@ export default function Home() {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      )}
 
-      {/* ─── LIVE STREAMS SECTION ─── */}
-      <section id="livestreams" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-          <h2 className="text-2xl font-black text-[#1F2430]">Active Live Streams</h2>
-        </div>
-        {livestreams.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {livestreams.map(stream => (
-              <div key={stream.id} className="bg-red-50 border border-red-200 rounded-[24px] p-6 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-bold text-red-900 text-xl">{stream.name}</h3>
-                  <p className="text-red-700 mt-2 text-sm">{stream.description}</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    if (stream.visibility === 'Public' || stream.streamVisibility === 'Public') {
-                      window.open(`/live/${stream.streamId}`, '_blank');
-                    } else {
-                      navigate('/login');
-                    }
-                  }}
-                  className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">
-                  Join Stream
-                </button>
+      {/* ─── ABOUT US SECTION (NEW DEDICATED ABOUT SECTION) ─── */}
+      {(!view || view === 'about') && (
+        <section id="about" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-24 border-b border-[#E9E5F8]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left: About Content */}
+          <div className="space-y-5 text-left">
+            <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-[#7C5CFC] px-4 py-1.5 rounded-full text-xs font-bold animate-pulse">
+              <Heart size={14} fill="#7C5CFC" />
+              About the {familyData ? familyName : "Family"}
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1F2430] leading-tight tracking-tight">
+              {familyData?.description || `Preserving the ${familyName} Heritage.`}
+            </h2>
+            {familyData?.about && (
+              <p className="text-gray-500 font-medium text-base sm:text-lg leading-relaxed whitespace-pre-line">
+                {familyData.about}
+              </p>
+            )}
+            {familyData?.history && (
+              <div className="pt-4 border-t border-purple-100">
+                <h4 className="font-bold text-[#1F2430] text-lg mb-2">Our History</h4>
+                <p className="text-gray-400 font-medium text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                  {familyData.history}
+                </p>
               </div>
-            ))}
+            )}
+
+            {/* Stats / Highlights */}
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{statistics.members}</p>
+                <p className="text-xs font-bold text-gray-600 mt-1">Family Members Connected</p>
+              </div>
+              <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-4">
+                <p className="text-2xl sm:text-3xl font-black text-[#7C5CFC]">{familyData?.createdAt ? new Date(familyData.createdAt).getFullYear() : '2026'}</p>
+                <p className="text-xs font-bold text-gray-600 mt-1">Year Started / Founded</p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="text-center bg-gray-50 rounded-2xl py-8 border border-gray-100">
-            <p className="text-gray-500 font-medium">No active live streams at the moment.</p>
+
+          {/* Right: Feature Highlights Card */}
+          <div className="relative">
+            <div className="bg-gradient-to-br from-[#FAF8FF] to-purple-50/80 rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-xl shadow-purple-500/5 relative overflow-hidden text-left">
+              <div className="w-14 h-14 rounded-2xl bg-[#7C5CFC] text-white flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
+                <Users size={28} />
+              </div>
+              <h3 className="text-2xl font-bold text-[#1F2430] mb-3">Family Information</h3>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Family Code</span>
+                  <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData?.familyCode || 'N/A'}</p>
+                </div>
+                {familyData?.contactEmail && (
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Email</span>
+                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactEmail}</p>
+                  </div>
+                )}
+                {familyData?.contactPhone && (
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contact Phone</span>
+                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.contactPhone}</p>
+                  </div>
+                )}
+                {familyData?.website && (
+                  <div>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Website</span>
+                    <p className="text-sm font-semibold text-gray-700 mt-0.5">{familyData.website}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </section>
+
+        </div>
+        </section>
+      )}
 
       {/* ─── ANNOUNCEMENTS SECTION ─── */}
-      <section id="announcements" className="w-full bg-[#FAF8FF] py-12 sm:py-16 border-y border-[#E9E5F8]">
+      {!view && (
+        <section id="announcements" className="w-full bg-[#FAF8FF] py-12 sm:py-16 border-y border-[#E9E5F8]">
         <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-[#1F2430] tracking-tight">Family Announcements</h2>
@@ -632,10 +768,12 @@ export default function Home() {
             )}
           </div>
         </div>
-      </section>
+        </section>
+      )}
 
       {/* ─── LATEST MEMBERS & FAMILY TREE PREVIEW ─── */}
-      <section id="members" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-20">
+      {!view && (
+        <section id="members" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-16 sm:py-20">
         <div className="text-center mb-10">
           <h2 className="text-3xl sm:text-4xl font-black text-[#1F2430] tracking-tight">Meet the Family</h2>
           <p className="text-gray-500 font-medium mt-2">Connecting generations and celebrating our roots.</p>
@@ -664,18 +802,28 @@ export default function Home() {
             <p className="text-gray-500 font-medium">No members found.</p>
           </div>
         )}
-      </section>
+        </section>
+      )}
 
       {/* ─── LOGIN SECTION (Mobile responsive clean style) ─── */}
-      <section id="login-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
+      {!view && !familyData && (
+        <section id="login-section" className="w-full bg-[#FAF8FF] py-12 sm:py-24 border-t border-[#E9E5F8]">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
 
           {/* Left Panel — Clean white background */}
           <div className="bg-white rounded-[24px] sm:rounded-[28px] border border-slate-100 p-6 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between text-left">
             <div>
               <div className="flex items-center gap-2.5 sm:gap-3 mb-6 sm:mb-8">
-                <img src="/logo.png" alt="FamilyHub" className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl" />
-                <span className="font-black text-[20px] sm:text-[22px] text-[#2E1E6B] tracking-tight">Family<span className="text-[#7C5CFC]">Hub</span></span>
+                {familyData && !hasUploadedLogo ? (
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-base tracking-tight shadow-md">
+                    {getInitials(familyName)}
+                  </div>
+                ) : (
+                  <img src={familyLogo} alt={familyName} className="w-9 h-9 sm:w-10 sm:h-10 object-contain rounded-xl" />
+                )}
+                <span className="font-black text-[20px] sm:text-[22px] text-[#2E1E6B] tracking-tight">
+                  {familyData ? familyName : <>Family<span className="text-[#7C5CFC]">Hub</span></>}
+                </span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-[#1F2430] leading-tight mb-3 sm:mb-4">
                 Welcome back to<br/>your family.
@@ -768,6 +916,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ─── CONTACT / FOOTER (Contact details arranged HORIZONTALLY) ─── */}
       <footer id="contact" className="w-full bg-white border-t border-gray-100 pt-16 pb-12">
@@ -779,8 +928,16 @@ export default function Home() {
             {/* Brand Info */}
             <div className="space-y-3 text-left">
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="FamilyHub" className="w-9 h-9 object-contain rounded-xl" />
-                <span className="font-black text-[22px] text-[#2E1E6B]">Family<span className="text-[#7C5CFC]">Hub</span></span>
+                {familyData && !hasUploadedLogo ? (
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7C5CFC] to-[#6B49F6] text-white flex items-center justify-center font-bold text-base tracking-tight shadow-md">
+                    {getInitials(familyName)}
+                  </div>
+                ) : (
+                  <img src={familyLogo} alt={familyName} className="w-9 h-9 object-contain rounded-xl" />
+                )}
+                <span className="font-black text-[22px] text-[#2E1E6B]">
+                  {familyData ? familyName : <>Family<span className="text-[#7C5CFC]">Hub</span></>}
+                </span>
               </div>
               <p className="text-gray-400 text-sm max-w-sm leading-relaxed font-medium">
                 Preserving family stories and memories for generations to come.
