@@ -19,14 +19,16 @@ enum DocumentStatus {
   PENDING
   APPROVED
   REJECTED
+  VERIFIED
 }
 
 enum DocumentVisibility {
   PRIVATE
+  FAMILY
   FAMILY_ONLY
+  ADMIN_ONLY
   PUBLIC
 }
-
 
 enum DomainOwnership {
   FAMILY_OWNED
