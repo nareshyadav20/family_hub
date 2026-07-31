@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -9,266 +9,197 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  MEMBER
-}
-
-enum DomainOwnership {
-  FAMILY_OWNED
-  MANAGED_BY_FAMILYHUB
-}
-
-enum DomainStatus {
-  PENDING_SETUP
-  PURCHASED
-  DNS_CONFIGURED
-  SSL_ENABLED
-  LIVE
-  FAILED
-}
-
-enum SSLStatus {
-  PENDING
-  ACTIVE
-  FAILED
-}
-
-enum MemberStatus {
-  PENDING_INVITE
-  INVITATION_SENT
-  EMAIL_FAILED
-  OTP_VERIFIED
-  PROFILE_INCOMPLETE
-  ACTIVE
-}
-
-enum InviteStatus {
-  PENDING
-  ACCEPTED
-  EXPIRED
-}
-
 model User {
-  id              String   @id @default(cuid())
-  memberId        String?  @unique
-  firstName       String
-  lastName        String
-  email           String?  @unique
-  phone           String?  @unique
-  password        String?  
-  role            Role     @default(MEMBER)
-  familyId        String?
-  gender          String?
-  relationship    String?
-  familyBranch    String?
-  fatherId        String?
-  motherId        String?
-  spouseId        String?
-  notes           String?
-  status          MemberStatus @default(ACTIVE)
-  
-  avatar          String?
-  isActive        Boolean  @default(true)
-  profileCompletion Int @default(25)
-  currentProfileStep String @default("Basic Information")
-  isProfileCompleted Boolean @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  isTemporaryPassword Boolean @default(false)
-  mustChangePassword  Boolean @default(false)
-
-  brevoErrorCode    String?
-  brevoErrorMessage String?
-  lastEmailAttempt  DateTime?
-
-  family          Family?  @relation(fields: [familyId], references: [id])
-  memberProfile   MemberProfile?
-  memberSettings  MemberSettings?
-  invitation      Invitation?
-  documents       Document[]
-  announcements   Announcement[]
-  polls           Poll[] @relation("UserPolls")
-  
-  groupMembers    GroupMember[]
-  groupMessages   GroupMessage[]
-  sentMessages    Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  familyHistories FamilyHistory[]
-  googleCalendar  GoogleCalendarConnection?
-
-  groupPosts      GroupPost[]
-  groupComments   GroupPostComment[]
-  groupLikes      GroupPostLike[]
+  id                  String                    @id @default(cuid())
+  firstName           String
+  lastName            String
+  email               String?                   @unique
+  password            String?
+  role                Role                      @default(MEMBER)
+  familyId            String?
+  phone               String?                   @unique
+  avatar              String?
+  isActive            Boolean                   @default(true)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  familyBranch        String?
+  fatherId            String?
+  gender              String?
+  memberId            String?                   @unique
+  motherId            String?
+  notes               String?
+  relationship        String?
+  spouseId            String?
+  status              MemberStatus              @default(ACTIVE)
+  brevoErrorCode      String?
+  brevoErrorMessage   String?
+  lastEmailAttempt    DateTime?
+  profileCompletion   Int                       @default(25)
+  currentProfileStep  String                    @default("Basic Information")
+  isProfileCompleted  Boolean                   @default(false)
+  isTemporaryPassword Boolean                   @default(false)
+  mustChangePassword  Boolean                   @default(false)
+  invitation          Invitation?
+  memberProfile       MemberProfile?
+  announcements       Announcement[]
+  documents           Document[]
+  familyHistories     FamilyHistory[]
+  googleCalendar      GoogleCalendarConnection?
+  groupMembers        GroupMember[]
+  groupMessages       GroupMessage[]
+  groupComments       GroupPostComment[]
+  groupLikes          GroupPostLike[]
+  groupPosts          GroupPost[]
+  memberSettings      MemberSettings?
+  receivedMessages    Message[]                 @relation("ReceivedMessages")
+  sentMessages        Message[]                 @relation("SentMessages")
+  polls               Poll[]                    @relation("UserPolls")
+  family              Family?                   @relation(fields: [familyId], references: [id])
 
   @@index([familyId])
   @@map("users")
 }
 
 model Family {
-  id              String   @id @default(cuid())
-  name            String
-  familyCode      String?  @unique
-  customDomain    String?  @unique
-  logo            String?
-  coverImage      String?
-  bannerImage     String?
-  themeColor      String?
-  primaryColor    String?
-  secondaryColor  String?
-  description     String?  @db.Text
-  about           String?  @db.Text
-  history         String?  @db.Text
-  contactEmail    String?
-  contactPhone    String?
-  facebook        String?
-  youtube         String?
-  instagram       String?
-  twitter         String?
-  linkedin        String?
-  website         String?
-  subscription    String?
-
-  familyHead      String?
-  plan            String?  @default("Free")
-  status          String?  @default("Active")
-  address         String?
-  city            String?
-  state           String?
-  country         String?
-  
-  createdBy       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  members User[]
-  events          Event[]         @relation("FamilyEvents")
-  documents       Document[]      @relation("FamilyDocuments")
-  announcements   Announcement[]  @relation("FamilyAnnouncements")
-  polls           Poll[]          @relation("FamilyPolls")
-  notifications   Notification[]  @relation("FamilyNotifications")
-  groups          Group[]         @relation("FamilyGroups")
-  familyHistories FamilyHistory[] @relation("FamilyHistories")
+  id                        String                     @id @default(cuid())
+  name                      String
+  createdBy                 String
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  address                   String?
+  city                      String?
+  country                   String?
+  familyCode                String?                    @unique
+  familyHead                String?
+  plan                      String?                    @default("Free")
+  state                     String?
+  status                    String?                    @default("Active")
+  about                     String?
+  bannerImage               String?
+  contactEmail              String?
+  contactPhone              String?
+  coverImage                String?
+  customDomain              String?                    @unique
+  description               String?
+  facebook                  String?
+  history                   String?
+  instagram                 String?
+  linkedin                  String?
+  logo                      String?
+  primaryColor              String?
+  secondaryColor            String?
+  subscription              String?
+  themeColor                String?
+  twitter                   String?
+  website                   String?
+  youtube                   String?
+  announcements             Announcement[]             @relation("FamilyAnnouncements")
+  documents                 Document[]                 @relation("FamilyDocuments")
+  events                    Event[]                    @relation("FamilyEvents")
+  domains                   FamilyDomain[]
+  feeds                     FamilyFeed[]               @relation("FamilyFeeds")
+  familyHistories           FamilyHistory[]            @relation("FamilyHistories")
   googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
-  feeds           FamilyFeed[]    @relation("FamilyFeeds")
-  domains         FamilyDomain[]
+  groups                    Group[]                    @relation("FamilyGroups")
+  notifications             Notification[]             @relation("FamilyNotifications")
+  polls                     Poll[]                     @relation("FamilyPolls")
+  members                   User[]
 
   @@map("families")
 }
 
 model MemberProfile {
-  id              String @id @default(cuid())
-  userId          String @unique
-  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  dob             DateTime?
-  bloodGroup      String?
-  address         String?
-  education       String?
-  occupation      String?
-  company         String?
-  biography       String?
-  socialLinks     Json?
-  emergency       Json?
-  documents       Json?
-  privacySettings Json?
-
-  currentStage      Int @default(1)
-  profileCompletion Int @default(0)
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  dob               DateTime?
+  bloodGroup        String?
+  address           String?
+  education         String?
+  occupation        String?
+  company           String?
+  biography         String?
+  socialLinks       Json?
+  emergency         Json?
+  documents         Json?
+  privacySettings   Json?
+  currentStage      Int       @default(1)
+  profileCompletion Int       @default(0)
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Invitation {
   id        String       @id @default(cuid())
   userId    String       @unique
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String       @unique
-  otp       String?      
+  otp       String?
   expiresAt DateTime
   status    InviteStatus @default(PENDING)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Event {
-  id              String   @id @default(cuid())
-  eventId         String?  @unique
-  name            String
-  category        String
-  description     String
-  bannerImage     String?
-  eventDate       DateTime
-  startTime       String
-  endTime         String?
-  venue           String
-  address         String
-  city            String
-  state           String
-  country         String
-  googleMapsUrl   String?
-  organizerId     String
-  familyId        String?
-  family          Family?  @relation("FamilyEvents", fields: [familyId], references: [id], onDelete: Cascade)
-  familyBranch    String
-  visibility      String   @default("Private")
-  inviteType      String   @default("All Members")
-  invitedMembers  Json?
-  rsvpEnabled     Boolean  @default(false)
-  maxGuests       Int?
-  rsvpDeadline    DateTime?
-  liveStream      Boolean  @default(false)
-  streamVisibility String?
+  id                String    @id @default(cuid())
+  eventId           String?   @unique
+  name              String
+  category          String
+  description       String
+  bannerImage       String?
+  eventDate         DateTime
+  startTime         String
+  endTime           String?
+  venue             String
+  address           String
+  city              String
+  state             String
+  country           String
+  googleMapsUrl     String?
+  organizerId       String
+  familyBranch      String
+  visibility        String    @default("Private")
+  inviteType        String    @default("All Members")
+  invitedMembers    Json?
+  rsvpEnabled       Boolean   @default(false)
+  maxGuests         Int?
+  rsvpDeadline      DateTime?
+  liveStream        Boolean   @default(false)
+  streamVisibility  String?
+  liveChat          Boolean   @default(false)
+  recordEvent       Boolean   @default(false)
+  allowPhotos       Boolean   @default(true)
+  allowComments     Boolean   @default(true)
+  reminders         Json?
+  status            String    @default("Draft")
+  createdBy         String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  familyId          String?
   streamingPlatform String?
-  streamId        String?  @unique
-  streamLink      String?
-  streamStatus    String   @default("OFFLINE")
-  liveChat        Boolean  @default(false)
-  recordEvent     Boolean  @default(false)
-  recordedUrl     String?
-  allowPhotos     Boolean  @default(true)
-  allowComments   Boolean  @default(true)
-  reminders       Json?    
-  status          String   @default("Draft")
+  recordedUrl       String?
+  streamId          String?   @unique
+  streamLink        String?
+  streamStatus      String    @default("OFFLINE")
+  family            Family?   @relation("FamilyEvents", fields: [familyId], references: [id], onDelete: Cascade)
 
-  createdBy       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
   @@index([familyId])
   @@index([eventDate])
   @@map("events")
 }
 
-enum DocumentStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-}
-
-enum DocumentVisibility {
-  PRIVATE
-  FAMILY
-  ADMIN_ONLY
-  PUBLIC
-}
-
 model Document {
-  id          String   @id @default(cuid())
-  name        String
-  type        String
-  size        String
-  category    String
-  url         String
-  status      DocumentStatus @default(PENDING)
-  visibility  DocumentVisibility @default(PRIVATE)
-  
-  uploaderId  String
-  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
-  
-  familyId    String?
-  family      Family?  @relation("FamilyDocuments", fields: [familyId], references: [id], onDelete: Cascade)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String             @id @default(cuid())
+  name       String
+  type       String
+  size       String
+  category   String
+  url        String
+  status     DocumentStatus     @default(PENDING)
+  visibility DocumentVisibility @default(PRIVATE)
+  uploaderId String
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  familyId   String?
+  family     Family?            @relation("FamilyDocuments", fields: [familyId], references: [id], onDelete: Cascade)
+  uploader   User               @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
   @@index([createdAt])
@@ -278,52 +209,45 @@ model Document {
 model MemberSettings {
   id                         String   @id @default(cuid())
   userId                     String   @unique
-  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   profile_photo              String?
   display_name               String?
   username                   String?  @unique
   email                      String?
   mobile                     String?
-  
   theme                      String   @default("System")
   language                   String   @default("English")
   timezone                   String   @default("UTC")
-  
   show_mobile                Boolean  @default(false)
   show_email                 Boolean  @default(false)
   show_dob                   Boolean  @default(false)
   show_address               Boolean  @default(false)
   show_public_profile        Boolean  @default(true)
   allow_direct_messages      Boolean  @default(true)
-  
   email_notifications        Boolean  @default(true)
   whatsapp_notifications     Boolean  @default(true)
   push_notifications         Boolean  @default(true)
   birthday_notifications     Boolean  @default(true)
   event_notifications        Boolean  @default(true)
   announcement_notifications Boolean  @default(true)
-  
   two_factor_enabled         Boolean  @default(false)
   updated_at                 DateTime @updatedAt
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("member_settings")
 }
 
 model Announcement {
-  id          String   @id @default(cuid())
-  title       String
-  message     String
-  targetType  String   @default("All Members")
-  pinned      Boolean  @default(false)
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  familyId    String?
-  family      Family?  @relation("FamilyAnnouncements", fields: [familyId], references: [id], onDelete: Cascade)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  targetType String   @default("All Members")
+  pinned     Boolean  @default(false)
+  authorId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  familyId   String?
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  family     Family?  @relation("FamilyAnnouncements", fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
   @@index([createdAt])
@@ -331,87 +255,76 @@ model Announcement {
 }
 
 model Poll {
-  id          String   @id @default(cuid())
-  question    String
-  options     Json     // store array of strings or objects [{id, text}]
-  votes       Json     // store key/value map { "userId": optionId }
-  endDate     DateTime
-  authorId    String
-  author      User     @relation("UserPolls", fields: [authorId], references: [id], onDelete: Cascade)
-  
-  familyId    String?
-  family      Family?  @relation("FamilyPolls", fields: [familyId], references: [id], onDelete: Cascade)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  question  String
+  options   Json
+  votes     Json
+  endDate   DateTime
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  familyId  String?
+  author    User     @relation("UserPolls", fields: [authorId], references: [id], onDelete: Cascade)
+  family    Family?  @relation("FamilyPolls", fields: [familyId], references: [id], onDelete: Cascade)
 
   @@map("polls")
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  title       String
-  message     String
-  type        String   @default("system") // e.g., 'event', 'member', 'alert'
-  targetType  String   @default("All") // 'All', 'Admin', or specific userId
-  isRead      Boolean  @default(false)
-  
-  familyId    String?
-  family      Family?  @relation("FamilyNotifications", fields: [familyId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  type       String   @default("system")
+  targetType String   @default("All")
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  familyId   String?
+  family     Family?  @relation("FamilyNotifications", fields: [familyId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  
   @@index([familyId])
   @@index([createdAt])
   @@map("notifications")
 }
 
 model Group {
-  id              String   @id @default(cuid())
-  name            String
-  description     String?
-  category        String   @default("Immediate Family")
-  coverImage      String?
-  icon            String?
-  privacy         String   @default("Private")
-  status          String   @default("Active")
-  
-  allowInvites    Boolean  @default(true)
-  allowPosts      Boolean  @default(true)
-  allowFiles      Boolean  @default(true)
-  allowPhotos     Boolean  @default(true)
-  allowVideos     Boolean  @default(true)
-  allowPolls      Boolean  @default(true)
-  welcomeMessage  String?
-  
-  ownerId         String
-  familyId        String?
-  family          Family?  @relation("FamilyGroups", fields: [familyId], references: [id], onDelete: Cascade)
+  id             String         @id @default(cuid())
+  name           String
+  description    String?
+  category       String         @default("Immediate Family")
+  coverImage     String?
+  icon           String?
+  privacy        String         @default("Private")
+  status         String         @default("Active")
+  allowInvites   Boolean        @default(true)
+  allowPosts     Boolean        @default(true)
+  allowFiles     Boolean        @default(true)
+  allowPhotos    Boolean        @default(true)
+  allowVideos    Boolean        @default(true)
+  allowPolls     Boolean        @default(true)
+  welcomeMessage String?
+  ownerId        String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  familyId       String?
+  members        GroupMember[]
+  messages       GroupMessage[]
+  posts          GroupPost[]
+  family         Family?        @relation("FamilyGroups", fields: [familyId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  members         GroupMember[]
-  messages        GroupMessage[]
-  
-  posts           GroupPost[]
-  
   @@index([familyId])
   @@map("groups")
 }
 
 model GroupMember {
-  id        String   @id @default(cuid())
-  groupId   String
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  role      String   @default("Member") // 'Admin' or 'Member'
-  status    String   @default("Active") // 'Active', 'Muted'
-  isMuted   Boolean  @default(false)
-  
-  joinedAt  DateTime @default(now())
+  id       String   @id @default(cuid())
+  groupId  String
+  userId   String
+  role     String   @default("Member")
+  status   String   @default("Active")
+  isMuted  Boolean  @default(false)
+  joinedAt DateTime @default(now())
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
   @@map("group_members")
@@ -420,16 +333,14 @@ model GroupMember {
 model GroupMessage {
   id        String   @id @default(cuid())
   groupId   String
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   senderId  String
-  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  
-  type      String   @default("Text") // Text, Image, Video, File
+  type      String   @default("Text")
   content   String
   fileUrl   String?
   fileName  String?
-  
   createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([groupId])
   @@index([createdAt])
@@ -437,17 +348,16 @@ model GroupMessage {
 }
 
 model Message {
-  id          String   @id @default(cuid())
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiverId  String
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-  
-  text        String
-  fileUrl     String?
-  fileName    String?
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  text       String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  fileName   String?
+  fileUrl    String?
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([receiverId])
@@ -456,25 +366,22 @@ model Message {
 }
 
 model FamilyHistory {
-  id            String   @id @default(cuid())
-  title         String
-  description   String?  @db.Text
-  category      String
-  eventDate     DateTime
-  location      String?
-  visibility    String   @default("Family Only")
-  status        String   @default("Published")
-  thumbnailUrl  String?
-  addedById     String
-  addedBy       User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
-  
-  familyId      String?
-  family        Family?  @relation("FamilyHistories", fields: [familyId], references: [id], onDelete: Cascade)
-
-  relatedMembers Json?    
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  category       String
+  eventDate      DateTime
+  location       String?
+  visibility     String   @default("Family Only")
+  status         String   @default("Published")
+  thumbnailUrl   String?
+  addedById      String
+  relatedMembers Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  familyId       String?
+  addedBy        User     @relation(fields: [addedById], references: [id], onDelete: Cascade)
+  family         Family?  @relation("FamilyHistories", fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
   @@map("family_history")
@@ -483,78 +390,73 @@ model FamilyHistory {
 model GoogleCalendarConnection {
   id           String   @id @default(cuid())
   userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   familyId     String?
-  family       Family?  @relation("FamilyGoogleCalendar", fields: [familyId], references: [id], onDelete: Cascade)
   googleEmail  String
   accessToken  String
   refreshToken String?
   expiryDate   BigInt
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  family       Family?  @relation("FamilyGoogleCalendar", fields: [familyId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("google_calendar_connections")
 }
 
 model GroupPost {
-  id          String   @id @default(cuid())
+  id          String             @id @default(cuid())
   groupId     String
-  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
   authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  content     String   @db.Text
-  attachments Json?    // URLs for images, documents, etc.
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  content     String
+  attachments Json?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   comments    GroupPostComment[]
   likes       GroupPostLike[]
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  group       Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@map("group_posts")
 }
 
 model GroupPostComment {
-  id          String   @id @default(cuid())
-  postId      String
-  post        GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  content     String    @db.Text
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@map("group_post_comments")
 }
 
 model GroupPostLike {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   postId    String
-  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   createdAt DateTime  @default(now())
+  post      GroupPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
   @@map("group_post_likes")
 }
 
 model EmailQueue {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   recipient    String
   subject      String
   template     String?
   payload      Json?
-  status       String   @default("PENDING")
-  attempts     Int      @default(0)
+  status       String    @default("PENDING")
+  attempts     Int       @default(0)
   errorMessage String?
   sentAt       DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
   @@map("email_queue")
 }
 
@@ -595,20 +497,17 @@ model Transaction {
 model FamilyFeed {
   id          String   @id @default(cuid())
   familyId    String
-  family      Family   @relation("FamilyFeeds", fields: [familyId], references: [id], onDelete: Cascade)
-  
-  type        String   // PHOTO, EVENT, VIDEO, LIVE_STREAM, ANNOUNCEMENT, MEMORY, DOCUMENT, NEW_MEMBER, STORY
-  title       String?  @db.Text
-  description String?  @db.Text
+  type        String
+  title       String?
+  description String?
   image       String?
   video       String?
-  referenceId String?  // ID of the related record (e.g. eventId, documentId, announcementId)
-  
-  createdBy   String?  // userId who created this activity
-  visibility  String   @default("PUBLIC") // PUBLIC, PRIVATE, MEMBERS_ONLY
-
+  referenceId String?
+  createdBy   String?
+  visibility  String   @default("PUBLIC")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  family      Family   @relation("FamilyFeeds", fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
   @@index([createdAt])
@@ -625,39 +524,86 @@ model FamilyDomain {
   renewalPrice      Float?
   expiryDate        DateTime?
   autoRenew         Boolean         @default(false)
-  
   dnsVerified       Boolean         @default(false)
   sslStatus         SSLStatus       @default(PENDING)
   domainStatus      DomainStatus    @default(PENDING_SETUP)
-  
   verificationToken String?
   verifiedAt        DateTime?
   nameservers       Json?
-  dnsInstructions   String?         @db.Text
-  
+  dnsInstructions   String?
   createdBy         String
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
-  
-  family            Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
   histories         DomainHistory[]
-  
+  family            Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
   @@index([familyId])
   @@map("family_domains")
 }
 
 model DomainHistory {
-  id              String       @id @default(cuid())
-  familyDomainId  String
-  status          DomainStatus
-  updatedBy       String?
-  notes           String?      @db.Text
-  createdAt       DateTime     @default(now())
-
-  familyDomain    FamilyDomain @relation(fields: [familyDomainId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  familyDomainId String
+  status         DomainStatus
+  updatedBy      String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  familyDomain   FamilyDomain @relation(fields: [familyDomainId], references: [id], onDelete: Cascade)
 
   @@index([familyDomainId])
   @@map("domain_history")
 }
 
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MEMBER
+}
 
+enum DomainOwnership {
+  FAMILY_OWNED
+  MANAGED_BY_FAMILYHUB
+}
+
+enum DomainStatus {
+  PENDING_SETUP
+  PURCHASED
+  DNS_CONFIGURED
+  SSL_ENABLED
+  LIVE
+  FAILED
+}
+
+enum SSLStatus {
+  PENDING
+  ACTIVE
+  FAILED
+}
+
+enum MemberStatus {
+  PENDING_INVITE
+  INVITATION_SENT
+  OTP_VERIFIED
+  PROFILE_INCOMPLETE
+  ACTIVE
+  EMAIL_FAILED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum DocumentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  FAMILY
+  ADMIN_ONLY
+  PUBLIC
+}
