@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Families from './pages/Families';
+import CreateFamily from './pages/CreateFamily';
 import FamilyDetails from './pages/FamilyDetails';
 
 import Subscriptions from './pages/Subscriptions';
@@ -104,6 +105,7 @@ function App() {
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/families" element={<Families />} />
+            <Route path="/families/create" element={<CreateFamily />} />
             <Route path="/families/:id" element={<FamilyDetails />} />
 
             <Route path="/subscriptions" element={<Subscriptions />} />

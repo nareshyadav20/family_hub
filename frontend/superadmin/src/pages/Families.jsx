@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, Plus, X, Loader2, Mail, Trash2 } from 'lucide-react';
+import { Search, Eye, Plus, X, Loader2, Mail, Trash2, Globe, Server } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -13,31 +13,8 @@ export default function Families() {
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const navigate = useNavigate();
-
-  // Form State
-  const [formData, setFormData] = useState({
-    familyName: '',
-    familyCode: '',
-    customDomain: '',
-    familyHead: '',
-    adminName: '',
-    adminMobile: '',
-    adminEmail: '',
-    adminPassword: '',
-    plan: 'Free',
-    status: 'Active',
-    address: '',
-    city: '',
-    state: '',
-    country: '',
-    domainOwnership: 'OWNED', // OWNED or PURCHASED
-    desiredDomain: '',
-    registrar: 'GoDaddy',
-    autoRenew: false
-  });
 
   const fetchFamilies = async () => {
     try {
@@ -56,65 +33,6 @@ export default function Families() {
   useEffect(() => {
     fetchFamilies();
   }, []);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleCreateFamily = async (e) => {
-    e.preventDefault();
-    if (!formData.familyName || !formData.familyHead || !formData.adminName || !formData.adminEmail || !formData.adminPassword) {
-      toast.error('Please fill all required fields.');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const res = await axios.post(API_URL, formData);
-      if (res.data.success) {
-        const newFamily = res.data.data;
-        
-        // If they provided a custom domain or desired domain
-        const domainNameToSave = formData.domainOwnership === 'FAMILY_OWNED' ? formData.customDomain : formData.desiredDomain;
-        
-        if (domainNameToSave) {
-           try {
-             await axios.post('http://localhost:5000/api/v1/superadmin/domain/save', {
-               familyId: newFamily.id,
-               domainName: domainNameToSave,
-               ownership: formData.domainOwnership
-             }, {
-               headers: { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` }
-             });
-           } catch (domainErr) {
-             toast.error('Family created, but failed to save domain info.');
-           }
-        }
-
-        if (res.data.emailSent === false) {
-           toast.success('Family created, but welcome email could not be sent. You can resend it later.');
-        } else {
-           toast.success('Family and admin created successfully!');
-        }
-        setIsModalOpen(false);
-        fetchFamilies();
-        // Reset form
-        setFormData({
-          familyName: '', familyCode: '', customDomain: '', familyHead: '',
-          adminName: '', adminMobile: '', adminEmail: '', adminPassword: '',
-          plan: 'Free', status: 'Active', address: '', city: '', state: '', country: '',
-          domainOwnership: 'FAMILY_OWNED', desiredDomain: ''
-        });
-        
-        // Redirect to Family Details Domain Management
-        navigate(`/families/${newFamily.id}?tab=domain`);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Error creating family.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const resendWelcomeEmail = async (familyId) => {
     const loadingToast = toast.loading('Resending credentials...');
@@ -143,11 +61,11 @@ export default function Families() {
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Manage all registered families across the platform.</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm shadow-purple-200"
+          onClick={() => setIsOptionModalOpen(true)}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Family
+          <Plus className="w-4 h-4" />
+          <span>Add Family</span>
         </button>
       </div>
 
@@ -178,8 +96,8 @@ export default function Families() {
           ) : filteredFamilies.length === 0 ? (
             <div className="flex justify-center items-center h-48 flex-col text-gray-500 dark:text-slate-400">
               <p className="mb-4">No families found</p>
-              <button onClick={() => setIsModalOpen(true)} className="flex items-center px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 text-sm font-medium rounded-xl transition-colors">
-                <Plus className="w-4 h-4 mr-2" /> Create Family
+              <button onClick={() => setIsOptionModalOpen(true)} className="flex items-center px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 text-sm font-medium rounded-xl transition-colors">
+                <Plus className="w-4 h-4 mr-2" /> Add Family
               </button>
             </div>
           ) : (
@@ -264,143 +182,70 @@ export default function Families() {
         </div>
       </motion.div>
 
-      {/* CREATE FAMILY MODAL */}
+      {/* Domain Option Selection Modal */}
       <AnimatePresence>
-        {isModalOpen && (
+        {isOptionModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
-              onClick={() => !isSubmitting && setIsModalOpen(false)}
+              onClick={() => setIsOptionModalOpen(false)}
             />
             
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl z-10 overflow-hidden flex flex-col max-h-[90vh]"
+              className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl z-10 overflow-hidden flex flex-col relative"
             >
-              <form onSubmit={handleCreateFamily} className="flex flex-col min-h-0 h-full max-h-[90vh]">
-                <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50/50 shrink-0">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Create New Family</h3>
-                  <button type="button" onClick={() => setIsModalOpen(false)} disabled={isSubmitting} className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:text-slate-300">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+              <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 text-center relative bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                <button 
+                  onClick={() => setIsOptionModalOpen(false)}
+                  className="absolute right-6 top-6 p-2 hover:bg-white/50 dark:hover:bg-slate-800 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Create New Family</h3>
+                <p className="text-gray-500 dark:text-slate-400 mt-2">How will this family's domain be managed?</p>
+              </div>
 
-                <div className="p-6 overflow-y-auto flex-1 space-y-6">
-                  <div>
-                    <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Family Details</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Name *</label>
-                        <input required type="text" name="familyName" value={formData.familyName} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. The Smith Family" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Code (Auto-generated)</label>
-                        <input type="text" disabled value={formData.familyCode} className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-slate-400 rounded-lg p-2 outline-none" placeholder="Leave empty to auto-generate" />
-                      </div>
-                      <div className="col-span-2 border-t border-gray-100 dark:border-slate-800 pt-4 mt-2">
-                        <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Domain Management</h4>
-                        <div className="flex flex-col gap-4 mb-4">
-                          <label className="flex items-start text-sm text-gray-700 dark:text-slate-200 cursor-pointer p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-900/50">
-                            <input type="radio" name="domainOwnership" value="FAMILY_OWNED" checked={formData.domainOwnership === 'FAMILY_OWNED'} onChange={handleChange} className="mt-1 mr-3 text-purple-600 focus:ring-purple-500" />
-                            <div>
-                              <div className="font-semibold mb-1">Family already owns a domain</div>
-                              <div className="text-xs text-gray-500 dark:text-slate-400">The family already owns this domain. After saving the family, our technical team will provide DNS instructions to connect this domain to FamilyHub.</div>
-                            </div>
-                          </label>
-                          <label className="flex items-start text-sm text-gray-700 dark:text-slate-200 cursor-pointer p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-900/50">
-                            <input type="radio" name="domainOwnership" value="MANAGED_BY_FAMILYHUB" checked={formData.domainOwnership === 'MANAGED_BY_FAMILYHUB'} onChange={handleChange} className="mt-1 mr-3 text-purple-600 focus:ring-purple-500" />
-                            <div>
-                              <div className="font-semibold mb-1">FamilyHub manages the domain</div>
-                              <div className="text-xs text-gray-500 dark:text-slate-400">FamilyHub technical team will purchase and configure this domain. The family will receive the website once setup is completed.</div>
-                            </div>
-                          </label>
-                        </div>
-                        
-                        {formData.domainOwnership === 'FAMILY_OWNED' ? (
-                           <div className="mb-2">
-                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Root Domain</label>
-                             <input type="text" name="customDomain" value={formData.customDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
-                           </div>
-                        ) : (
-                           <div className="mb-2">
-                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Preferred Domain Name *</label>
-                             <input type="text" name="desiredDomain" value={formData.desiredDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
-                           </div>
-                        )}
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Head *</label>
-                        <input required type="text" name="familyHead" value={formData.familyHead} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="Head of Family" />
-                      </div>
-                    </div>
+              <div className="p-8 bg-gray-50/50 dark:bg-slate-900 flex flex-col sm:flex-row gap-6">
+                
+                {/* Option 1 */}
+                <button 
+                  onClick={() => {
+                    setIsOptionModalOpen(false);
+                    navigate('/families/create?domainOption=OPTION_1');
+                  }}
+                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 hover:shadow-lg transition-all group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                  <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Globe className="w-7 h-7 text-blue-600 dark:text-blue-400" />
                   </div>
+                  <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Family already owns a domain</h4>
+                  <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed">
+                    The family already owns their domain. Our technical team will provide DNS instructions to connect it to FamilyHub.
+                  </p>
+                </button>
 
-                  <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
-                    <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Primary Admin</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Admin Name *</label>
-                        <input required type="text" name="adminName" value={formData.adminName} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Admin Mobile</label>
-                        <input type="text" name="adminMobile" value={formData.adminMobile} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Admin Email *</label>
-                        <input required type="email" name="adminEmail" value={formData.adminEmail} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Admin Password *</label>
-                        <input required type="password" name="adminPassword" value={formData.adminPassword} onChange={handleChange} placeholder="Set admin password" className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" />
-                      </div>
-                    </div>
+                {/* Option 2 */}
+                <button 
+                  onClick={() => {
+                    setIsOptionModalOpen(false);
+                    navigate('/families/create?domainOption=OPTION_2');
+                  }}
+                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-indigo-500 hover:shadow-lg transition-all group relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                  <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Server className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                   </div>
+                  <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3">FamilyHub purchases domain</h4>
+                  <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed">
+                    Our technical team will purchase and configure the domain on behalf of the family.
+                  </p>
+                </button>
 
-                  <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
-                    <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Subscription & Location</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Plan</label>
-                        <select name="plan" value={formData.plan} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                          <option>Free</option>
-                          <option>Basic</option>
-                          <option>Professional</option>
-                          <option>Enterprise</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Status</label>
-                        <select name="status" value={formData.status} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
-                          <option>Active</option>
-                          <option>Trial</option>
-                          <option>Suspended</option>
-                        </select>
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Full Address</label>
-                        <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none mb-3" placeholder="Street Address" />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <input type="text" name="city" value={formData.city} onChange={handleChange} className="border border-gray-200 dark:border-slate-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="City" />
-                          <input type="text" name="state" value={formData.state} onChange={handleChange} className="border border-gray-200 dark:border-slate-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="State" />
-                          <input type="text" name="country" value={formData.country} onChange={handleChange} className="border border-gray-200 dark:border-slate-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500" placeholder="Country" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex justify-end gap-3 mt-auto shrink-0">
-                  <button type="button" disabled={isSubmitting} onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-slate-900/50">
-                    Cancel
-                  </button>
-                  <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 shadow-sm shadow-purple-200 flex items-center gap-2">
-                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                    {isSubmitting ? 'Creating...' : 'Create Family'}
-                  </button>
-                </div>
-              </form>
+              </div>
             </motion.div>
           </div>
         )}
