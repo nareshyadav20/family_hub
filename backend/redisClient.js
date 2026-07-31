@@ -3,12 +3,16 @@ const { createClient } = require('redis');
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: {
-    reconnectStrategy: false
+    reconnectStrategy: (retries) => {
+      // Exponential backoff, max 3 seconds
+      const delay = Math.min(retries * 100, 3000);
+      return delay;
+    }
   }
 });
 
 redisClient.on('error', (err) => {
-  // Only log if we were previously connected, otherwise fail silently in dev
+  console.error('❌ [Redis] Client Error:', err.message);
 });
 
 let isConnected = false;
