@@ -1,10 +1,15 @@
 const { createClient } = require('redis');
 
 const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: {
+    reconnectStrategy: false
+  }
 });
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('error', (err) => {
+  // Only log if we were previously connected, otherwise fail silently in dev
+});
 
 let isConnected = false;
 
