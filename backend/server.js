@@ -1279,6 +1279,8 @@ app.get('/api/test/brevo', async (req, res) => {
   }
 });
 
+const domainWorker = require('./workers/domainWorker');
+domainWorker();
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT} with WebSockets enabled`));
- 

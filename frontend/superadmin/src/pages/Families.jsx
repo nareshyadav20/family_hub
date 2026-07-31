@@ -32,7 +32,11 @@ export default function Families() {
     address: '',
     city: '',
     state: '',
-    country: ''
+    country: '',
+    domainOwnership: 'OWNED', // OWNED or PURCHASED
+    desiredDomain: '',
+    registrar: 'GoDaddy',
+    autoRenew: false
   });
 
   const fetchFamilies = async () => {
@@ -68,6 +72,25 @@ export default function Families() {
     try {
       const res = await axios.post(API_URL, formData);
       if (res.data.success) {
+        const newFamily = res.data.data;
+        
+        // If they provided a custom domain or desired domain
+        const domainNameToSave = formData.domainOwnership === 'FAMILY_OWNED' ? formData.customDomain : formData.desiredDomain;
+        
+        if (domainNameToSave) {
+           try {
+             await axios.post('http://localhost:5000/api/v1/superadmin/domain/save', {
+               familyId: newFamily.id,
+               domainName: domainNameToSave,
+               ownership: formData.domainOwnership
+             }, {
+               headers: { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` }
+             });
+           } catch (domainErr) {
+             toast.error('Family created, but failed to save domain info.');
+           }
+        }
+
         if (res.data.emailSent === false) {
            toast.success('Family created, but welcome email could not be sent. You can resend it later.');
         } else {
@@ -79,8 +102,12 @@ export default function Families() {
         setFormData({
           familyName: '', familyCode: '', customDomain: '', familyHead: '',
           adminName: '', adminMobile: '', adminEmail: '', adminPassword: '',
-          plan: 'Free', status: 'Active', address: '', city: '', state: '', country: ''
+          plan: 'Free', status: 'Active', address: '', city: '', state: '', country: '',
+          domainOwnership: 'FAMILY_OWNED', desiredDomain: ''
         });
+        
+        // Redirect to Family Details Domain Management
+        navigate(`/families/${newFamily.id}?tab=domain`);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error creating family.');
@@ -271,9 +298,36 @@ export default function Families() {
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Code (Auto-generated)</label>
                         <input type="text" disabled value={formData.familyCode} className="w-full border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-slate-400 rounded-lg p-2 outline-none" placeholder="Leave empty to auto-generate" />
                       </div>
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Root Domain (e.g. panga.com)</label>
-                        <input type="text" name="customDomain" value={formData.customDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
+                      <div className="col-span-2 border-t border-gray-100 dark:border-slate-800 pt-4 mt-2">
+                        <h4 className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wider">Domain Management</h4>
+                        <div className="flex flex-col gap-4 mb-4">
+                          <label className="flex items-start text-sm text-gray-700 dark:text-slate-200 cursor-pointer p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-900/50">
+                            <input type="radio" name="domainOwnership" value="FAMILY_OWNED" checked={formData.domainOwnership === 'FAMILY_OWNED'} onChange={handleChange} className="mt-1 mr-3 text-purple-600 focus:ring-purple-500" />
+                            <div>
+                              <div className="font-semibold mb-1">Family already owns a domain</div>
+                              <div className="text-xs text-gray-500 dark:text-slate-400">The family already owns this domain. After saving the family, our technical team will provide DNS instructions to connect this domain to FamilyHub.</div>
+                            </div>
+                          </label>
+                          <label className="flex items-start text-sm text-gray-700 dark:text-slate-200 cursor-pointer p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-900/50">
+                            <input type="radio" name="domainOwnership" value="MANAGED_BY_FAMILYHUB" checked={formData.domainOwnership === 'MANAGED_BY_FAMILYHUB'} onChange={handleChange} className="mt-1 mr-3 text-purple-600 focus:ring-purple-500" />
+                            <div>
+                              <div className="font-semibold mb-1">FamilyHub manages the domain</div>
+                              <div className="text-xs text-gray-500 dark:text-slate-400">FamilyHub technical team will purchase and configure this domain. The family will receive the website once setup is completed.</div>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        {formData.domainOwnership === 'FAMILY_OWNED' ? (
+                           <div className="mb-2">
+                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Root Domain</label>
+                             <input type="text" name="customDomain" value={formData.customDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
+                           </div>
+                        ) : (
+                           <div className="mb-2">
+                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Preferred Domain Name *</label>
+                             <input type="text" name="desiredDomain" value={formData.desiredDomain} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. panga.com" />
+                           </div>
+                        )}
                       </div>
                       <div className="col-span-2">
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Family Head *</label>

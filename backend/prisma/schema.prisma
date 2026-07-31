@@ -15,6 +15,26 @@ enum Role {
   MEMBER
 }
 
+enum DomainOwnership {
+  FAMILY_OWNED
+  MANAGED_BY_FAMILYHUB
+}
+
+enum DomainStatus {
+  PENDING_SETUP
+  PURCHASED
+  DNS_CONFIGURED
+  SSL_ENABLED
+  LIVE
+  FAILED
+}
+
+enum SSLStatus {
+  PENDING
+  ACTIVE
+  FAILED
+}
+
 enum MemberStatus {
   PENDING_INVITE
   INVITATION_SENT
@@ -133,6 +153,7 @@ model Family {
   familyHistories FamilyHistory[] @relation("FamilyHistories")
   googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
   feeds           FamilyFeed[]    @relation("FamilyFeeds")
+  domains         FamilyDomain[]
 
   @@map("families")
 }
@@ -593,3 +614,50 @@ model FamilyFeed {
   @@index([createdAt])
   @@map("family_feeds")
 }
+
+model FamilyDomain {
+  id                String          @id @default(cuid())
+  familyId          String
+  domainName        String          @unique
+  ownership         DomainOwnership
+  registrar         String?
+  purchasePrice     Float?
+  renewalPrice      Float?
+  expiryDate        DateTime?
+  autoRenew         Boolean         @default(false)
+  
+  dnsVerified       Boolean         @default(false)
+  sslStatus         SSLStatus       @default(PENDING)
+  domainStatus      DomainStatus    @default(PENDING_SETUP)
+  
+  verificationToken String?
+  verifiedAt        DateTime?
+  nameservers       Json?
+  dnsInstructions   String?         @db.Text
+  
+  createdBy         String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  family            Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  histories         DomainHistory[]
+  
+  @@index([familyId])
+  @@map("family_domains")
+}
+
+model DomainHistory {
+  id              String       @id @default(cuid())
+  familyDomainId  String
+  status          DomainStatus
+  updatedBy       String?
+  notes           String?      @db.Text
+  createdAt       DateTime     @default(now())
+
+  familyDomain    FamilyDomain @relation(fields: [familyDomainId], references: [id], onDelete: Cascade)
+
+  @@index([familyDomainId])
+  @@map("domain_history")
+}
+
+

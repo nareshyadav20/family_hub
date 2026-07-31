@@ -12,9 +12,22 @@ router.post('/families', async (req, res) => {
   const { familyName, familyCode, customDomain, familyHead, adminName, adminMobile, adminEmail, adminPassword, plan, status, address, city, state, country } = req.body;
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email: adminEmail } });
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: adminEmail },
+          { phone: (adminMobile && adminMobile.trim()) ? adminMobile.trim() : undefined }
+        ].filter(condition => condition.email || condition.phone)
+      }
+    });
+
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Admin email already exists' });
+      if (existingUser.email === adminEmail) {
+        return res.status(400).json({ success: false, message: 'Admin email already exists' });
+      }
+      if (adminMobile && existingUser.phone === adminMobile.trim()) {
+        return res.status(400).json({ success: false, message: 'Admin phone number already exists' });
+      }
     }
 
     // Auto generate code if not provided
@@ -48,7 +61,7 @@ router.post('/families', async (req, res) => {
           firstName,
           lastName,
           email: adminEmail,
-          phone: adminMobile,
+          phone: adminMobile || null,
           password: hashedPassword,
           role: 'ADMIN', // Wait, earlier schema says role ADMIN for family admin
           familyId: family.id,
@@ -675,5 +688,9 @@ router.get('/notifications', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching notifications' });
   }
 });
+
+// Mount Domain Management Routes
+const domainRoutes = require('./domains');
+router.use('/domain', domainRoutes);
 
 module.exports = router;

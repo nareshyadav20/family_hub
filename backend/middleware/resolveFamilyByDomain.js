@@ -1,4 +1,5 @@
 const prisma = require('../prismaClient');
+const redisClient = require('../redisClient');
 
 const resolveFamilyByDomain = async (req, res, next) => {
   try {
@@ -29,11 +30,46 @@ const resolveFamilyByDomain = async (req, res, next) => {
     console.log('Incoming Host:', req.headers.host);
     console.log('Resolved Hostname:', hostname);
 
-    let family = await prisma.family.findUnique({
-      where: {
-        customDomain: hostname,
-      },
-    });
+    let family = null;
+    let cachedFamilyId = null;
+
+    try {
+      cachedFamilyId = await redisClient.get(`tenant:${hostname}`);
+    } catch (e) {
+      console.warn('[Redis] Cache read failed', e);
+    }
+
+    if (cachedFamilyId) {
+       family = await prisma.family.findUnique({ where: { id: cachedFamilyId } });
+    }
+
+    if (!family) {
+      family = await prisma.family.findUnique({
+        where: {
+          customDomain: hostname,
+        },
+      });
+
+      if (!family) {
+         const familyDomain = await prisma.familyDomain.findUnique({
+           where: { domainName: hostname },
+           include: { family: true }
+         });
+         if (familyDomain && familyDomain.domainStatus === 'LIVE') {
+            family = familyDomain.family;
+         }
+      }
+
+      if (family) {
+         try {
+           await redisClient.set(`tenant:${hostname}`, family.id, {
+              EX: 3600 // cache for 1 hour
+           });
+         } catch(e) {
+            console.warn('[Redis] Cache write failed', e);
+         }
+      }
+    }
 
 
     if (!family) {

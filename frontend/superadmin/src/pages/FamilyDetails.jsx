@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Users, Shield, Calendar, Image, FileText, HardDrive, CreditCard, Activity, Settings, Loader2 } from 'lucide-react';
+import { ArrowLeft, Users, Shield, Calendar, Image, FileText, HardDrive, CreditCard, Activity, Settings, Loader2, Globe } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import API_BASE_URL from '../config/api';
@@ -17,13 +17,19 @@ const tabs = [
   { id: 'documents', name: 'Documents', icon: FileText },
   { id: 'storage', name: 'Storage Usage', icon: HardDrive },
   { id: 'subscription', name: 'Subscription', icon: CreditCard },
+  { id: 'domain', name: 'Domain Management', icon: Globe },
   { id: 'logs', name: 'Activity Logs', icon: Activity },
   { id: 'settings', name: 'Settings', icon: Settings },
 ];
 
+import DomainManagement from './DomainManagement';
+
 export default function FamilyDetails() {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [family, setFamily] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -272,6 +278,9 @@ export default function FamilyDetails() {
                   <button className="mt-6 w-full py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition">Manage Plan</button>
                 </div>
               </div>
+            )}
+            {activeTab === 'domain' && (
+              <DomainManagement familyId={id} />
             )}
             
             {activeTab === 'logs' && (
