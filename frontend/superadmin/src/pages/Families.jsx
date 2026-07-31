@@ -62,9 +62,9 @@ export default function Families() {
         </div>
         <button 
           onClick={() => setIsOptionModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors"
+          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all shadow-md shadow-purple-600/20 font-medium"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Add Family</span>
         </button>
       </div>
@@ -139,10 +139,22 @@ export default function Families() {
                     <td className="px-6 py-4 text-gray-600 dark:text-slate-300">{family.storage || '0 GB'}</td>
                     <td className="px-6 py-4 text-gray-500 dark:text-slate-400">{family.date}</td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200">
-                        <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-emerald-500"></span>
-                        {family.status || 'Active'}
-                      </span>
+                      {family.status === 'Pending' || family.status === 'PENDING_SETUP' || family.status === 'Pending Setup' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-amber-50 text-amber-800 border-amber-200">
+                          <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-amber-500 animate-pulse"></span>
+                          Pending
+                        </span>
+                      ) : family.status === 'Suspended' || family.status === 'Inactive' || family.status === 'FAILED' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-red-50 text-red-800 border-red-200">
+                          <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-red-500"></span>
+                          {family.status}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-800 border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full mr-1.5 bg-emerald-500"></span>
+                          {family.status || 'Active'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">

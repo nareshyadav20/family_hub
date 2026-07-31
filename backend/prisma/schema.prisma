@@ -9,101 +9,219 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MEMBER
+}
+
+enum DomainOwnership {
+  FAMILY_OWNED
+  MANAGED_BY_FAMILYHUB
+}
+
+enum DomainStatus {
+  PENDING_SETUP
+  PURCHASED
+  DNS_CONFIGURED
+  SSL_ENABLED
+  LIVE
+  FAILED
+}
+
+enum SSLStatus {
+  PENDING
+  ACTIVE
+  FAILED
+}
+
+enum VerificationMethod {
+  TXT
+  CNAME
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  FAILED
+  EXPIRED
+}
+
+enum PurchaseStatus {
+  NOT_APPLICABLE
+  SEARCHING
+  AVAILABLE
+  UNAVAILABLE
+  PURCHASING
+  PURCHASED
+  FAILED
+}
+
+enum RenewalStatus {
+  NONE
+  ACTIVE
+  MANUAL_REQUIRED
+  FAILED
+}
+
+enum WorkflowStep {
+  REQUEST_SUBMITTED
+  PENDING_SETUP
+  SEARCHING_DOMAIN
+  DOMAIN_PURCHASED
+  DNS_CONFIGURATION
+  DNS_VERIFICATION
+  SSL_GENERATION
+  TENANT_MAPPING
+  WEBSITE_LIVE
+}
+
+enum WorkflowStepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum ContactType {
+  OWNER
+  TECHNICAL
+  BILLING
+  SUPPORT
+}
+
+enum EventSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum MemberStatus {
+  PENDING_INVITE
+  INVITATION_SENT
+  EMAIL_FAILED
+  OTP_VERIFIED
+  PROFILE_INCOMPLETE
+  ACTIVE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
 model User {
-  id                  String                    @id @default(cuid())
-  firstName           String
-  lastName            String
-  email               String?                   @unique
-  password            String?
-  role                Role                      @default(MEMBER)
-  familyId            String?
-  phone               String?                   @unique
-  avatar              String?
-  isActive            Boolean                   @default(true)
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
-  familyBranch        String?
-  fatherId            String?
-  gender              String?
-  memberId            String?                   @unique
-  motherId            String?
-  notes               String?
-  relationship        String?
-  spouseId            String?
-  status              MemberStatus              @default(ACTIVE)
-  brevoErrorCode      String?
-  brevoErrorMessage   String?
-  lastEmailAttempt    DateTime?
-  profileCompletion   Int                       @default(25)
-  currentProfileStep  String                    @default("Basic Information")
-  isProfileCompleted  Boolean                   @default(false)
-  isTemporaryPassword Boolean                   @default(false)
-  mustChangePassword  Boolean                   @default(false)
-  invitation          Invitation?
-  memberProfile       MemberProfile?
-  announcements       Announcement[]
-  documents           Document[]
-  familyHistories     FamilyHistory[]
-  googleCalendar      GoogleCalendarConnection?
-  groupMembers        GroupMember[]
-  groupMessages       GroupMessage[]
-  groupComments       GroupPostComment[]
-  groupLikes          GroupPostLike[]
-  groupPosts          GroupPost[]
-  memberSettings      MemberSettings?
-  receivedMessages    Message[]                 @relation("ReceivedMessages")
-  sentMessages        Message[]                 @relation("SentMessages")
-  polls               Poll[]                    @relation("UserPolls")
-  family              Family?                   @relation(fields: [familyId], references: [id])
+  id              String   @id @default(cuid())
+  memberId        String?  @unique
+  firstName       String
+  lastName        String
+  email           String?  @unique
+  phone           String?  @unique
+  password        String?  
+  role            Role     @default(MEMBER)
+  familyId        String?
+  gender          String?
+  relationship    String?
+  familyBranch    String?
+  fatherId        String?
+  motherId        String?
+  spouseId        String?
+  notes           String?
+  status          MemberStatus @default(ACTIVE)
+  
+  avatar          String?
+  isActive        Boolean  @default(true)
+  profileCompletion Int @default(25)
+  currentProfileStep String @default("Basic Information")
+  isProfileCompleted Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  isTemporaryPassword Boolean @default(false)
+  mustChangePassword  Boolean @default(false)
+
+  brevoErrorCode    String?
+  brevoErrorMessage String?
+  lastEmailAttempt  DateTime?
+
+  family          Family?  @relation(fields: [familyId], references: [id])
+  memberProfile   MemberProfile?
+  memberSettings  MemberSettings?
+  invitation      Invitation?
+  documents       Document[]
+  announcements   Announcement[]
+  polls           Poll[] @relation("UserPolls")
+  
+  groupMembers    GroupMember[]
+  groupMessages   GroupMessage[]
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  familyHistories FamilyHistory[]
+  googleCalendar  GoogleCalendarConnection?
+
+  groupPosts      GroupPost[]
+  groupComments   GroupPostComment[]
+  groupLikes      GroupPostLike[]
+
+  familyAdmins    FamilyAdmin[]
 
   @@index([familyId])
   @@map("users")
 }
 
 model Family {
-  id                        String                     @id @default(cuid())
-  name                      String
-  createdBy                 String
-  createdAt                 DateTime                   @default(now())
-  updatedAt                 DateTime                   @updatedAt
-  address                   String?
-  city                      String?
-  country                   String?
-  familyCode                String?                    @unique
-  familyHead                String?
-  plan                      String?                    @default("Free")
-  state                     String?
-  status                    String?                    @default("Active")
-  about                     String?
-  bannerImage               String?
-  contactEmail              String?
-  contactPhone              String?
-  coverImage                String?
-  customDomain              String?                    @unique
-  description               String?
-  facebook                  String?
-  history                   String?
-  instagram                 String?
-  linkedin                  String?
-  logo                      String?
-  primaryColor              String?
-  secondaryColor            String?
-  subscription              String?
-  themeColor                String?
-  twitter                   String?
-  website                   String?
-  youtube                   String?
-  announcements             Announcement[]             @relation("FamilyAnnouncements")
-  documents                 Document[]                 @relation("FamilyDocuments")
-  events                    Event[]                    @relation("FamilyEvents")
-  domains                   FamilyDomain[]
-  feeds                     FamilyFeed[]               @relation("FamilyFeeds")
-  familyHistories           FamilyHistory[]            @relation("FamilyHistories")
+  id              String   @id @default(cuid())
+  name            String
+  familyCode      String?  @unique
+  customDomain    String?  @unique
+  logo            String?
+  coverImage      String?
+  bannerImage     String?
+  themeColor      String?
+  primaryColor    String?
+  secondaryColor  String?
+  description     String?  @db.Text
+  about           String?  @db.Text
+  history         String?  @db.Text
+  contactEmail    String?
+  contactPhone    String?
+  facebook        String?
+  youtube         String?
+  instagram       String?
+  twitter         String?
+  linkedin        String?
+  website         String?
+  subscription    String?
+
+  familyHead      String?
+  plan            String?  @default("Free")
+  status          String?  @default("Active")
+  address         String?
+  city            String?
+  state           String?
+  country         String?
+  
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members         User[]
+  admins          FamilyAdmin[]
+  events          Event[]         @relation("FamilyEvents")
+  documents       Document[]      @relation("FamilyDocuments")
+  announcements   Announcement[]  @relation("FamilyAnnouncements")
+  polls           Poll[]          @relation("FamilyPolls")
+  notifications   Notification[]  @relation("FamilyNotifications")
+  groups          Group[]         @relation("FamilyGroups")
+  familyHistories FamilyHistory[] @relation("FamilyHistories")
   googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
-  groups                    Group[]                    @relation("FamilyGroups")
-  notifications             Notification[]             @relation("FamilyNotifications")
-  polls                     Poll[]                     @relation("FamilyPolls")
-  members                   User[]
+  feeds           FamilyFeed[]    @relation("FamilyFeeds")
+  domains         FamilyDomain[]
+  contacts        DomainContact[]
 
   @@map("families")
 }
@@ -515,29 +633,57 @@ model FamilyFeed {
 }
 
 model FamilyDomain {
-  id                String          @id @default(cuid())
-  familyId          String
-  domainName        String          @unique
-  ownership         DomainOwnership
-  registrar         String?
-  purchasePrice     Float?
-  renewalPrice      Float?
-  expiryDate        DateTime?
-  autoRenew         Boolean         @default(false)
-  dnsVerified       Boolean         @default(false)
-  sslStatus         SSLStatus       @default(PENDING)
-  domainStatus      DomainStatus    @default(PENDING_SETUP)
-  verificationToken String?
-  verifiedAt        DateTime?
-  nameservers       Json?
-  dnsInstructions   String?
-  createdBy         String
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  histories         DomainHistory[]
-  family            Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  id                  String             @id @default(cuid())
+  familyId            String
+  domainName          String             @unique
+  ownership           DomainOwnership    @default(FAMILY_OWNED)
+  registrar           String?
+  dnsProvider         String?
+  purchasePrice       Float?
+  renewalPrice        Float?
+  expiryDate          DateTime?
+  autoRenew           Boolean            @default(false)
+  
+  verificationToken   String?            @unique
+  verificationMethod  VerificationMethod @default(TXT)
+  verificationStatus  VerificationStatus @default(UNVERIFIED)
 
+  dnsVerified         Boolean            @default(false)
+  sslStatus           SSLStatus          @default(PENDING)
+  sslIssuedAt         DateTime?
+  sslExpiresAt        DateTime?
+  sslRenewalDate      DateTime?
+
+  purchaseStatus      PurchaseStatus     @default(NOT_APPLICABLE)
+  renewalStatus       RenewalStatus      @default(NONE)
+  registrationYears   Int                @default(1)
+  purchaseDate        DateTime?
+
+  domainStatus        DomainStatus       @default(PENDING_SETUP)
+  migrationRequired   Boolean            @default(false)
+  notes               String?            @db.Text
+
+  connectedAt         DateTime?
+  verifiedAt          DateTime?
+  nameservers         Json?
+  dnsInstructions     String?            @db.Text
+  
+  createdBy           String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  deletedAt           DateTime?
+  
+  family              Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  histories           DomainHistory[]
+  contacts            DomainContact[]
+  dnsRecords          DomainDnsRecord[]
+  workflows           DomainWorkflow[]
+  events              DomainEvent[]
+  
   @@index([familyId])
+  @@index([domainName])
+  @@index([domainStatus])
+  @@index([deletedAt])
   @@map("family_domains")
 }
 
@@ -554,56 +700,89 @@ model DomainHistory {
   @@map("domain_history")
 }
 
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  MEMBER
+model FamilyAdmin {
+  id          String    @id @default(cuid())
+  familyId    String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family      Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([familyId])
+  @@index([userId])
+  @@map("family_admins")
 }
 
-enum DomainOwnership {
-  FAMILY_OWNED
-  MANAGED_BY_FAMILYHUB
+model DomainContact {
+  id          String       @id @default(cuid())
+  domainId    String
+  domain      FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  familyId    String
+  family      Family       @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  contactType ContactType  @default(OWNER)
+  name        String
+  email       String
+  phone       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@index([domainId])
+  @@index([familyId])
+  @@map("domain_contacts")
 }
 
-enum DomainStatus {
-  PENDING_SETUP
-  PURCHASED
-  DNS_CONFIGURED
-  SSL_ENABLED
-  LIVE
-  FAILED
+model DomainDnsRecord {
+  id            String       @id @default(cuid())
+  domainId      String
+  domain        FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  recordType    String       // TXT, CNAME, A
+  recordName    String       // familyhub-verification or @
+  expectedValue String       @db.Text
+  actualValue   String?      @db.Text
+  isVerified    Boolean      @default(false)
+  ttl           Int          @default(300)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([domainId])
+  @@map("domain_dns_records")
 }
 
-enum SSLStatus {
-  PENDING
-  ACTIVE
-  FAILED
+model DomainWorkflow {
+  id          String             @id @default(cuid())
+  domainId    String
+  domain      FamilyDomain       @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  step        WorkflowStep
+  status      WorkflowStepStatus @default(PENDING)
+  startedAt   DateTime?
+  completedAt DateTime?
+  completedBy String?
+  remarks     String?            @db.Text
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([domainId, step])
+  @@index([domainId])
+  @@map("domain_workflow")
 }
 
-enum MemberStatus {
-  PENDING_INVITE
-  INVITATION_SENT
-  OTP_VERIFIED
-  PROFILE_INCOMPLETE
-  ACTIVE
-  EMAIL_FAILED
+model DomainEvent {
+  id          String        @id @default(cuid())
+  domainId    String
+  domain      FamilyDomain  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  eventType   String        // FAMILY_CREATED, ADMIN_CREATED, DOMAIN_CREATED, VERIFICATION_GENERATED, VERIFICATION_SUCCESS, VERIFICATION_FAILED, SSL_GENERATED, SSL_FAILED, DOMAIN_PURCHASED, RENEWED, TRANSFERRED, WEBSITE_ACTIVATED
+  severity    EventSeverity @default(INFO)
+  message     String        @db.Text
+  metadata    Json?
+  triggeredBy String?
+  createdAt   DateTime      @default(now())
+
+  @@index([domainId])
+  @@index([eventType])
+  @@map("domain_events")
 }
 
-enum InviteStatus {
-  PENDING
-  ACCEPTED
-  EXPIRED
-}
 
-enum DocumentStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-}
-
-enum DocumentVisibility {
-  PRIVATE
-  FAMILY
-  ADMIN_ONLY
-  PUBLIC
-}

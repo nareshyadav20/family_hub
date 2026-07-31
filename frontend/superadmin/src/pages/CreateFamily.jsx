@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { 
   ArrowLeft, Globe, User, MapPin, CheckCircle, 
   Clock, Server, Save, Info, AlertCircle, RefreshCw, ChevronDown, Check,
@@ -98,11 +99,59 @@ export default function CreateFamily() {
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
-      console.log('Form Payload:', data);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // mock network request
-      toast.success('Family created successfully! (Mock)');
+      const nameParts = (data.adminName || '').trim().split(' ');
+      const firstName = nameParts[0] || 'Admin';
+      const lastName = nameParts.slice(1).join(' ') || 'User';
+
+      let rawDomain = data.domainOption === 'OPTION_1' ? data.rootDomain : data.preferredDomain;
+      if (data.domainOption === 'OPTION_2' && rawDomain && !rawDomain.includes('.')) {
+        rawDomain = `${rawDomain}${data.preferredExtension || '.com'}`;
+      }
+
+      const rootDomain = (rawDomain || '').replace(/^(https?:\/\/)?(www\.)?/, '').trim();
+
+      const payload = {
+        familyName: data.familyName,
+        familyCode: data.familyCode || undefined,
+        admin: {
+          firstName,
+          lastName,
+          email: data.adminEmail,
+          phone: data.adminMobile || undefined,
+          password: data.adminPassword
+        },
+        domain: {
+          rootDomain,
+          ownershipType: data.domainOption === 'OPTION_1' ? 'FAMILY_OWNED' : 'MANAGED_BY_FAMILYHUB',
+          registrar: data.currentRegistrar || undefined,
+          registrationYears: parseInt(data.registrationPeriod) || 1
+        },
+        contacts: {
+          owner: {
+            name: data.registrantName || data.adminName,
+            email: data.adminEmail,
+            phone: data.adminMobile || undefined
+          }
+        }
+      };
+
+      const token = localStorage.getItem('superadmin_token');
+      const response = await axios.post('http://localhost:5000/api/v1/families', payload, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined
+        }
+      });
+
+      if (response.data.success) {
+        toast.success('Family and Custom Domain onboarding created successfully!');
+        setTimeout(() => navigate('/families'), 1000);
+      } else {
+        toast.error(response.data.message || 'Error creating family');
+      }
     } catch (err) {
-      toast.error('Error creating family');
+      console.error('Create Family Error:', err);
+      const msg = err.response?.data?.message || err.response?.data?.errors?.[0]?.message || err.message || 'Error creating family';
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -161,7 +210,7 @@ export default function CreateFamily() {
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={submitting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm shadow-blue-600/20"
+            className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 flex items-center gap-2 shadow-md shadow-purple-600/20"
           >
             {submitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Create Family
@@ -176,10 +225,10 @@ export default function CreateFamily() {
           <form id="create-family-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             
             {/* Section 0: Family Details (Required Context) */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="px-8 py-5 border-b border-gray-100 dark:border-slate-800 flex items-center gap-3 bg-gray-50/50 dark:bg-slate-800/30">
-                <div className="p-2 bg-blue-100/50 dark:bg-blue-900/30 rounded-lg">
-                  <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 bg-purple-100/50 dark:bg-purple-900/30 rounded-lg">
+                  <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Family Details</h2>
@@ -191,12 +240,12 @@ export default function CreateFamily() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Family Name *</label>
-                    <input {...register('familyName')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyName ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. Smith Family" />
+                    <input {...register('familyName')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyName ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. Smith Family" />
                     {errors.familyName && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.familyName.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Family Head *</label>
-                    <input {...register('familyHead')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyHead ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="Name of family head" />
+                    <input {...register('familyHead')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyHead ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="Name of family head" />
                   </div>
                   
                   <div className="md:col-span-2 pt-4 border-t border-gray-100 dark:border-slate-800">
@@ -205,19 +254,19 @@ export default function CreateFamily() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Name *</label>
-                    <input {...register('adminName')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminName ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="John Doe" />
+                    <input {...register('adminName')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminName ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="John Doe" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Mobile</label>
-                    <input {...register('adminMobile')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-white dark:bg-slate-800 outline-none transition-all" placeholder="+1 (555) 000-0000" />
+                    <input {...register('adminMobile')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" placeholder="+1 (555) 000-0000" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Email *</label>
-                    <input type="email" {...register('adminEmail')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminEmail ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="admin@example.com" />
+                    <input type="email" {...register('adminEmail')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminEmail ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="admin@example.com" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Password *</label>
-                    <input type="password" {...register('adminPassword')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminPassword ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="••••••••" />
+                    <input type="password" {...register('adminPassword')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminPassword ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="••••••••" />
                   </div>
                 </div>
               </div>
