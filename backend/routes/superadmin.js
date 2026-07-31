@@ -44,7 +44,7 @@ router.post('/families', async (req, res) => {
           customDomain: customDomain || null,
           familyHead,
           plan: plan || 'Free',
-          status: status || 'Active',
+          status: status || (customDomain ? 'Pending' : 'Active'),
           address, city, state, country,
           createdBy: 'SUPER_ADMIN',
         }

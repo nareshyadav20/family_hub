@@ -44,6 +44,7 @@ const websiteRouter = require('./routes/website');
 const superadminRouter = require('./routes/superadmin');
 const googleCalendarRouter = require('./routes/googleCalendar');
 const publicRouter = require('./routes/publicRoutes');
+const domainRoutes = require('./src/routes/domainRoutes');
 app.use('/api/public', publicRouter);
 
 app.use(async (req, res, next) => {
@@ -82,6 +83,9 @@ app.use('/api/v1/family-history', familyHistoryRouter);
 app.use('/api/v1/member/dashboard', memberDashboardRouter);
 app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
+app.use('/api/v1/superadmin/domain', domainRoutes);
+app.use('/api/v1/domains', domainRoutes);
+app.use('/api/v1', domainRoutes);
 app.use('/api/google', googleCalendarRouter);
 app.use('/api/public', publicRouter);
 
