@@ -20,7 +20,7 @@ const schema = z.object({
   adminName: z.string().min(1, 'Admin Name is required'),
   adminMobile: z.string().optional(),
   adminEmail: z.string().email('Invalid email address'),
-  adminPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  adminPassword: z.string().min(8, 'Password must be at least 8 characters'),
   
   // Domain Management Option
   domainOption: z.enum(['OPTION_1', 'OPTION_2']).default('OPTION_1'),
@@ -110,6 +110,12 @@ export default function CreateFamily() {
 
       const rootDomain = (rawDomain || '').replace(/^(https?:\/\/)?(www\.)?/, '').trim();
 
+      let cleanPhone = data.adminMobile ? data.adminMobile.replace(/[^\d+]/g, '') : undefined;
+      // Strip leading zeros if they exist since regex requires [1-9] after optional +
+      if (cleanPhone && cleanPhone.startsWith('0')) {
+        cleanPhone = cleanPhone.substring(1);
+      }
+
       const payload = {
         familyName: data.familyName,
         familyCode: data.familyCode || undefined,
@@ -117,7 +123,7 @@ export default function CreateFamily() {
           firstName,
           lastName,
           email: data.adminEmail,
-          phone: data.adminMobile || undefined,
+          phone: cleanPhone,
           password: data.adminPassword
         },
         domain: {
@@ -130,7 +136,7 @@ export default function CreateFamily() {
           owner: {
             name: data.registrantName || data.adminName,
             email: data.adminEmail,
-            phone: data.adminMobile || undefined
+            phone: cleanPhone
           }
         }
       };

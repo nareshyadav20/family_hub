@@ -15,6 +15,19 @@ enum Role {
   MEMBER
 }
 
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  FAMILY_ONLY
+  PUBLIC
+}
+
+
 enum DomainOwnership {
   FAMILY_OWNED
   MANAGED_BY_FAMILYHUB

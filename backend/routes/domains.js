@@ -82,6 +82,10 @@ router.post('/save', async (req, res) => {
           notes: 'Domain mapping created.'
         }
       });
+      await tx.family.update({
+        where: { id: familyId },
+        data: { status: 'PENDING_SETUP' }
+      });
       return fd;
     });
 
@@ -142,6 +146,17 @@ router.put('/update-status', async (req, res) => {
           sslStatus
         }
       });
+      
+      let newFamilyStatus = status;
+      if (status === 'LIVE') {
+        newFamilyStatus = 'Active';
+      }
+
+      await tx.family.update({
+        where: { id: familyDomain.familyId },
+        data: { status: newFamilyStatus }
+      });
+
       await tx.domainHistory.create({
         data: {
           familyDomainId: fd.id,

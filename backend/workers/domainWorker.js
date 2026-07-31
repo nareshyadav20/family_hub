@@ -13,8 +13,7 @@ const domainWorker = () => {
         where: {
           domainStatus: {
             in: ['PENDING_SETUP', 'DNS_CONFIGURED']
-          },
-          deletedAt: null
+          }
         }
       });
 

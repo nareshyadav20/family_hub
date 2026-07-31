@@ -10,6 +10,7 @@ const validateRequest = (schema) => {
           field: e.path.join('.'),
           message: e.message
         }));
+        console.error('Validation failed:', formattedErrors);
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
