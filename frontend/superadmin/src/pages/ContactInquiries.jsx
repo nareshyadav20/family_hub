@@ -159,7 +159,7 @@ export default function ContactInquiries() {
 
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
         </div>
       ) : (
         /* Full-width Table View */
@@ -197,7 +197,7 @@ export default function ContactInquiries() {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleOpenView(inquiry)}
-                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition cursor-pointer"
                               title="View message details"
                             >
                               <Eye size={16} />

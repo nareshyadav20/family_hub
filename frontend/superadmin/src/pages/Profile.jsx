@@ -139,7 +139,7 @@ export default function Profile() {
     || `https://ui-avatars.com/api/?name=${profile?.firstName}+${profile?.lastName}&background=4f46e5&color=fff&size=150`;
 
   if (isLoading || !profile) {
-     return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" /></div>;
+     return <div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" /></div>;
   }
 
   return (
@@ -204,7 +204,7 @@ export default function Profile() {
                <button
                  type="button"
                  onClick={handleAvatarClick}
-                 className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg border-2 border-white hover:bg-indigo-700 transition-colors"
+                 className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full shadow-lg border-2 border-white hover:bg-purple-700 transition-colors"
                  title="Upload avatar"
                >
                  <Upload size={14} />
@@ -213,13 +213,13 @@ export default function Profile() {
 
              {/* Avatar pending indicator */}
              {avatarPreview && (
-               <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mb-2 animate-pulse">
+               <p className="text-xs text-purple-600 dark:text-indigo-400 font-semibold mb-2 animate-pulse">
                  ✨ New avatar ready — save to apply
                </p>
              )}
 
              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{profile.firstName} {profile.lastName}</h3>
-             <span className="mt-2 flex items-center gap-1.5 text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-full uppercase tracking-wider">
+             <span className="mt-2 flex items-center gap-1.5 text-[11px] font-bold bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400 px-3 py-1.5 rounded-full uppercase tracking-wider">
                <Shield size={14} /> Super Admin
              </span>
              <div className="mt-6 space-y-3 w-full text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -250,25 +250,25 @@ export default function Profile() {
             {/* Personal Information */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl"><User size={20} /></div>
+                <div className="p-2.5 bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400 rounded-xl"><User size={20} /></div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Personal Information</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">First Name</label>
-                  <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Last Name</label>
-                  <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Email Address</label>
-                  <input type="email" name="email" value={formData.email || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="email" name="email" value={formData.email || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Mobile Number</label>
-                  <input type="text" name="phone" value={formData.phone || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="text" name="phone" value={formData.phone || ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
               </div>
             </div>
@@ -276,13 +276,13 @@ export default function Profile() {
             {/* Preferences */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl"><Globe size={20} /></div>
+                <div className="p-2.5 bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400 rounded-xl"><Globe size={20} /></div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Preferences</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Theme</label>
-                  <select name="theme" value={formData.theme || 'System Default'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300">
+                  <select name="theme" value={formData.theme || 'System Default'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300">
                     <option>Light</option>
                     <option>Dark</option>
                     <option>System Default</option>
@@ -290,7 +290,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Language</label>
-                  <select name="language" value={formData.language || 'English (US)'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300">
+                  <select name="language" value={formData.language || 'English (US)'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300">
                     <option>English (US)</option>
                     <option>French (FR)</option>
                     <option>Spanish (ES)</option>
@@ -298,7 +298,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Time Zone</label>
-                  <select name="timezone" value={formData.timezone || 'UTC'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300">
+                  <select name="timezone" value={formData.timezone || 'UTC'} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300">
                     <option>UTC-5 (EST)</option>
                     <option>UTC (GMT)</option>
                     <option>UTC+5:30 (IST)</option>
@@ -310,17 +310,17 @@ export default function Profile() {
             {/* Security */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl"><Lock size={20} /></div>
+                <div className="p-2.5 bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400 rounded-xl"><Lock size={20} /></div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Security</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Change Password</label>
-                  <input type="password" name="password" value={formData.password || ''} onChange={handleChange} placeholder="Enter new password" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="password" name="password" value={formData.password || ''} onChange={handleChange} placeholder="Enter new password" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Confirm Password</label>
-                  <input type="password" name="confirmPassword" value={formData.confirmPassword || ''} onChange={handleChange} placeholder="Confirm new password" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium hover:border-slate-300" />
+                  <input type="password" name="confirmPassword" value={formData.confirmPassword || ''} onChange={handleChange} placeholder="Confirm new password" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all font-medium hover:border-slate-300" />
                 </div>
               </div>
             </div>
@@ -330,7 +330,7 @@ export default function Profile() {
               <button type="button" onClick={() => { setFormData(profile); setAvatarPreview(null); setAvatarBase64(null); }} className="w-full sm:w-auto px-6 py-3 font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl transition-colors">
                 Revert Changes
               </button>
-              <button type="submit" disabled={updateMutation.isPending} className="w-full sm:w-auto px-6 py-3 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-60">
+              <button type="submit" disabled={updateMutation.isPending} className="w-full sm:w-auto px-6 py-3 font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-md shadow-indigo-500/20 transition-all flex justify-center items-center gap-2 disabled:opacity-60">
                 {updateMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save Changes
               </button>
             </div>

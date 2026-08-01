@@ -30,7 +30,7 @@ export default function Settings() {
   if (loading || !data) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <Loader2 className="w-10 h-10 animate-spin text-purple-600 dark:text-indigo-400" />
       </div>
     );
   }
@@ -39,8 +39,8 @@ export default function Settings() {
     {
       title: 'General',
       icon: Settings2,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bg: 'bg-indigo-50 dark:bg-indigo-500/10',
+      color: 'text-purple-600 dark:text-indigo-400',
+      bg: 'bg-purple-50 dark:bg-indigo-500/10',
       items: [
         { label: 'Platform Name', value: data.config.platformName },
         { label: 'Platform Version', value: data.config.version },
@@ -63,8 +63,8 @@ export default function Settings() {
     {
       title: 'Storage',
       icon: Database,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
       items: [
         { label: 'Provider', value: 'Cloudinary' },
         { label: 'Usage', value: `${data.stats.storageUsed} / 200 GB` },

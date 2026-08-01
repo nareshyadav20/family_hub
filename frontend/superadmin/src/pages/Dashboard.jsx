@@ -51,11 +51,11 @@ export default function Dashboard() {
 
   const kpis = [
     { name: 'Total Families', value: apiKpis.totalFamilies?.toLocaleString() || '0', change: '+12%', icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { name: 'Family Admins', value: apiKpis.totalAdmins?.toLocaleString() || '0', change: '+8%', icon: ShieldCheck, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'Family Admins', value: apiKpis.totalAdmins?.toLocaleString() || '0', change: '+8%', icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-100' },
     { name: 'Total Members', value: apiKpis.totalMembers?.toLocaleString() || '0', change: '+24%', icon: UserCircle, color: 'text-emerald-600', bg: 'bg-emerald-100' },
     { name: 'Monthly Revenue', value: apiKpis.monthlyRevenue, change: '+14%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-100' },
     { name: 'Active Subscriptions', value: apiKpis.activeSubscriptions?.toLocaleString() || '0', change: '+5%', icon: CreditCard, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { name: 'Storage Usage', value: apiKpis.storageUsage, change: '+12 GB', icon: HardDrive, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100' },
+    { name: 'Storage Usage', value: apiKpis.storageUsage, change: '+12 GB', icon: HardDrive, color: 'text-purple-600 dark:text-indigo-400', bg: 'bg-purple-100' },
     { name: 'API Requests', value: apiKpis.apiRequests, change: '+5%', icon: Globe, color: 'text-cyan-600', bg: 'bg-cyan-100' },
     { name: 'Platform Health', value: apiKpis.platformHealth, change: 'Stable', icon: Activity, color: 'text-green-600', bg: 'bg-green-100' },
   ];

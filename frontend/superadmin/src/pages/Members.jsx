@@ -78,7 +78,7 @@ export default function Members() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
-                      member.role === 'FAMILY_ADMIN' ? 'bg-amber-100 text-amber-800' : 'bg-blue-50 text-blue-700'
+                      member.role === 'FAMILY_ADMIN' ? 'bg-amber-100 text-amber-800' : 'bg-purple-50 text-purple-700'
                     }`}>
                       {member.role === 'FAMILY_ADMIN' && <ShieldAlert className="w-3 h-3 mr-1" />}
                       {member.role === 'FAMILY_ADMIN' ? 'Admin' : 'Member'}
@@ -109,7 +109,7 @@ export default function Members() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
-                      <button className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Profile">
+                      <button className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="View Profile">
                         <Eye className="w-4 h-4" />
                       </button>
                       <button className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Send Email">

@@ -151,10 +151,10 @@ export default function Plans() {
   };
 
   const stats = [
-    { name: 'Total Plans', value: plans.length.toString(), icon: Layers, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100' },
+    { name: 'Total Plans', value: plans.length.toString(), icon: Layers, color: 'text-purple-600 dark:text-indigo-400', bg: 'bg-purple-100' },
     { name: 'Active Subscribers', value: plans.reduce((acc, p) => acc + (p.families || 0), 0).toString(), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-100' },
     { name: 'Trial Users', value: '0', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' }, 
-    { name: 'Monthly Revenue', value: '₹0', icon: IndianRupee, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'Monthly Revenue', value: '₹0', icon: IndianRupee, color: 'text-purple-600', bg: 'bg-purple-100' },
   ];
 
   return (
@@ -164,7 +164,7 @@ export default function Plans() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Subscription Plans</h2>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Configure plan tiers, features, member limits, and pricing.</p>
         </div>
-        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow-md font-medium text-sm">
+        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-lg hover:bg-purple-700 transition shadow-md font-medium text-sm">
           <Plus size={18} />
           Add Plan
         </button>
@@ -196,12 +196,12 @@ export default function Plans() {
         <div className="overflow-x-auto">
           {loading ? (
              <div className="flex justify-center items-center h-48">
-               <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+               <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
              </div>
           ) : plans.length === 0 ? (
              <div className="flex justify-center flex-col items-center h-48 text-gray-500 dark:text-slate-400">
                <p className="mb-4">No plans found</p>
-               <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-lg hover:bg-indigo-100 transition font-medium text-sm">
+               <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400 px-4 py-2 rounded-lg hover:bg-purple-100 transition font-medium text-sm">
                  <Plus size={18} /> Create Plan
                </button>
              </div>
@@ -235,7 +235,7 @@ export default function Plans() {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => handleEditClick(plan)}
-                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-500/10 rounded-lg transition" 
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:text-indigo-400 hover:bg-purple-50 dark:bg-indigo-500/10 rounded-lg transition" 
                           title="Edit Plan"
                         >
                           <Edit2 size={16} />
@@ -249,7 +249,7 @@ export default function Plans() {
                         </button>
                         <button 
                           onClick={() => viewSubscribers(plan)}
-                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" 
+                          className="p-2 text-slate-400 dark:text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" 
                           title="View Subscribers"
                         >
                           <Eye size={16} />
@@ -296,30 +296,30 @@ export default function Plans() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Plan Name *</label>
-                      <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Pro" />
+                      <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. Pro" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">DB Match Name</label>
-                      <input type="text" name="dbName" value={formData.dbName} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Premium" />
+                      <input type="text" name="dbName" value={formData.dbName} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. Premium" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Price *</label>
-                      <input required type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. ₹999/month" />
+                      <input required type="text" name="price" value={formData.price} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. ₹999/month" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Storage *</label>
-                      <input required type="text" name="storage" value={formData.storage} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. 100 GB" />
+                      <input required type="text" name="storage" value={formData.storage} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. 100 GB" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Features (Comma separated)</label>
-                    <input type="text" name="features" value={formData.features} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none" placeholder="e.g. Basic, Gallery, Calendar" />
+                    <input type="text" name="features" value={formData.features} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none" placeholder="e.g. Basic, Gallery, Calendar" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Status</label>
-                    <select name="status" value={formData.status} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                    <select name="status" value={formData.status} onChange={handleChange} className="w-full border border-gray-200 dark:border-slate-700 rounded-lg p-2 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
@@ -331,7 +331,7 @@ export default function Plans() {
                   <button type="button" disabled={isSubmitting} onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-slate-900/50">
                     Cancel
                   </button>
-                  <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 flex items-center gap-2 shadow-sm">
+                  <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 flex items-center gap-2 shadow-sm">
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingPlan ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
                     {isSubmitting ? 'Saving...' : (editingPlan ? 'Save Changes' : 'Create Plan')}
                   </button>
@@ -365,7 +365,7 @@ export default function Plans() {
               <div className="p-6 overflow-y-auto flex-1">
                 {loadingSubscribers ? (
                   <div className="flex justify-center items-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+                    <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
                   </div>
                 ) : subscribers.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 dark:text-slate-400">
