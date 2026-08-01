@@ -166,7 +166,8 @@ export default function CreateFamily() {
         toast.error(response.data.message || `Failed to execute ${endpoint}`);
       }
     } catch (e) {
-      toast.success(`Simulated action: ${endpoint.replace(/-/g, ' ').toUpperCase()} initialized successfully.`);
+      const errorMsg = e.response?.data?.message || e.message;
+      toast.error(`Error: ${errorMsg}`);
     } finally {
       setActionLoading(prev => ({ ...prev, [endpoint]: false }));
     }
@@ -832,7 +833,7 @@ export default function CreateFamily() {
                 <button 
                   type="button" 
                   disabled={actionLoading["gen-verify-email"]}
-                  onClick={() => handleDevopsAction("send-dns")} // using the correct validation email endpoint trigger alias
+                  onClick={() => handleDevopsAction("gen-verify-email")} 
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50"
                 >
                   {actionLoading["gen-verify-email"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4"/>}

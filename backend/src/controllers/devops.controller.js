@@ -10,11 +10,22 @@ class DevOpsController {
     try {
       const { domainId, purchasePrice, registrar } = req.body;
       
+      console.log(`[DevOps] markPurchased request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: {
           purchaseStatus: 'PURCHASED',
-          purchasePrice: parseFloat(purchasePrice),
+          purchasePrice: purchasePrice ? parseFloat(purchasePrice) : null,
           registrar,
           purchaseDate: new Date(),
           domainStatus: 'DNS_CONFIGURED' // typically moves to next step
@@ -25,7 +36,7 @@ class DevOpsController {
         data: {
           domainId,
           eventType: 'DOMAIN_PURCHASED',
-          message: `Domain purchased successfully via ${registrar}.`,
+          message: `Domain purchased successfully via ${registrar || 'DevOps'}.`,
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
@@ -46,10 +57,15 @@ class DevOpsController {
         }
       });
 
+      console.log(`[DevOps] Successfully marked domainId ${domainId} as purchased.`);
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+      console.error(`[DevOps] Error in markPurchased:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
     }
   }
 
@@ -60,6 +76,17 @@ class DevOpsController {
     try {
       const { domainId } = req.body;
       
+      console.log(`[DevOps] sendDnsInstructions request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
       await prisma.domainEvent.create({
         data: {
           domainId,
@@ -69,10 +96,54 @@ class DevOpsController {
         }
       });
 
+      console.log(`[DevOps] Successfully sent DNS instructions for domainId ${domainId}.`);
       return res.status(200).json({ success: true, message: 'Instructions sent.' });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+      console.error(`[DevOps] Error in sendDnsInstructions:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
+    }
+  }
+
+  /**
+   * PUT /api/v1/domains/devops/gen-verify-email
+   */
+  async generateVerifyEmail(req, res) {
+    try {
+      const { domainId } = req.body;
+      
+      console.log(`[DevOps] generateVerifyEmail request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
+      await prisma.domainEvent.create({
+        data: {
+          domainId,
+          eventType: 'VERIFICATION_GENERATED',
+          message: 'Domain verification email generated.',
+          triggeredBy: req.user?.id || 'DEVOPS'
+        }
+      });
+
+      console.log(`[DevOps] Successfully generated verify email for domainId ${domainId}.`);
+      return res.status(200).json({ success: true, message: 'Verification email generated.' });
+    } catch (error) {
+      console.error(`[DevOps] Error in generateVerifyEmail:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
     }
   }
 
@@ -83,6 +154,17 @@ class DevOpsController {
     try {
       const { domainId } = req.body;
       
+      console.log(`[DevOps] markDnsConfigured request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { domainStatus: 'DNS_CONFIGURED' }
@@ -112,10 +194,15 @@ class DevOpsController {
         }
       });
 
+      console.log(`[DevOps] Successfully marked domainId ${domainId} as DNS configured.`);
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+      console.error(`[DevOps] Error in markDnsConfigured:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
     }
   }
 
@@ -126,6 +213,17 @@ class DevOpsController {
     try {
       const { domainId } = req.body;
       
+      console.log(`[DevOps] generateSsl request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { 
@@ -158,10 +256,15 @@ class DevOpsController {
         }
       });
 
+      console.log(`[DevOps] Successfully generated SSL for domainId ${domainId}.`);
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+      console.error(`[DevOps] Error in generateSsl:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
     }
   }
 
@@ -172,6 +275,17 @@ class DevOpsController {
     try {
       const { domainId } = req.body;
       
+      console.log(`[DevOps] markLive request received for domainId: ${domainId}`);
+
+      if (!domainId) {
+        return res.status(400).json({ success: false, message: 'domainId is required' });
+      }
+
+      const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
+      if (!existingDomain) {
+        return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { 
@@ -196,10 +310,15 @@ class DevOpsController {
         data: { status: 'Completed', completedAt: new Date() }
       });
 
+      console.log(`[DevOps] Successfully marked domainId ${domainId} as live.`);
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
+      console.error(`[DevOps] Error in markLive:`, error);
+      return res.status(500).json({ 
+        success: false, 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      });
     }
   }
 
