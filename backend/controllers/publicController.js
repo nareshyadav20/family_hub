@@ -18,7 +18,7 @@ const getHome = async (req, res) => {
       members,
       familyTree,
       posts
-    ] = await Promise.all([
+    ] = await prisma.$transaction([
       prisma.familyFeed.findMany({
         where: { familyId, visibility: 'PUBLIC' },
         orderBy: { createdAt: 'desc' },

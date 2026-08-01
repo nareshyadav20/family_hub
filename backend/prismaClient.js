@@ -21,7 +21,7 @@ const pool = new Pool({
   connectionString: cleanConnectionString,
   max: 20, // Limit connections to prevent overwhelming the pooler
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
   allowExitOnIdle: true,
   // Explicitly set SSL options; this will now be respected by pg
   ssl: rawConnectionString?.includes('localhost') ? false : { rejectUnauthorized: false }
