@@ -41,6 +41,9 @@ const resolveFamilyByDomain = async (req, res, next) => {
 
     if (cachedFamilyId) {
        family = await prisma.family.findUnique({ where: { id: cachedFamilyId } });
+       if (family && family.status !== 'Active') {
+         family = null; // Don't serve pending/inactive families from cache
+       }
     }
 
     if (!family) {
@@ -49,6 +52,10 @@ const resolveFamilyByDomain = async (req, res, next) => {
           customDomain: hostname,
         },
       });
+      
+      if (family && family.status !== 'Active') {
+        family = null; // Enforce Active status for customDomain mapping
+      }
 
       if (!family) {
          const familyDomain = await prisma.familyDomain.findUnique({
@@ -60,7 +67,7 @@ const resolveFamilyByDomain = async (req, res, next) => {
          }
       }
 
-      if (family) {
+      if (family && family.status === 'Active') {
          try {
            await redisClient.set(`tenant:${hostname}`, family.id, {
               EX: 3600 // cache for 1 hour
@@ -68,6 +75,11 @@ const resolveFamilyByDomain = async (req, res, next) => {
          } catch(e) {
             console.warn('[Redis] Cache write failed', e);
          }
+      } else if (family) {
+        // If it was found via FamilyDomain but the family itself isn't active
+        if (family.status !== 'Active') {
+          family = null;
+        }
       }
     }
 
