@@ -967,19 +967,35 @@ export default function CreateFamily() {
               <div className="p-5 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Ownership Status</span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  {domainStatus === 'LIVE' || domainStatus === 'SSL_ENABLED' || domainStatus === 'DNS_VERIFIED' || domainStatus === 'DNS_CONFIGURED' || domainStatus === 'DNS_INSTRUCTIONS_SENT' || domainStatus === 'PURCHASED' ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">🟢 Verified</span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-700 dark:text-slate-300">DNS Status</span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  {domainStatus === 'LIVE' || domainStatus === 'SSL_ENABLED' || domainStatus === 'DNS_VERIFIED' || domainStatus === 'DNS_CONFIGURED' ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">🟢 Configured</span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-700 dark:text-slate-300">SSL Status</span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  {domainStatus === 'LIVE' || domainStatus === 'SSL_ENABLED' ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">🟢 Active</span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                  )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Website Status</span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending Setup</span>
+                  {domainStatus === 'LIVE' ? (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">🟢 Live</span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending Setup</span>
+                  )}
                 </div>
               </div>
             </div>
