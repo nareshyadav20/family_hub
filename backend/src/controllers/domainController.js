@@ -12,13 +12,19 @@ class DomainController {
       const result = await familyService.createFamilyWorkflow(req, data);
       return res.status(201).json({
         success: true,
+        familyId: result.family?.id,
+        domainId: result.domain?.id,
+        family: result.family,
+        domain: result.domain,
         message: 'Family and Custom Domain onboarding created successfully',
         data: result,
         errors: null
       });
     } catch (err) {
       console.error('[DomainController] createFamily error:', err);
-      return res.status(400).json({
+      const isConflict = err.message?.includes('already exists') || err.message?.includes('already registered');
+      const statusCode = isConflict ? 409 : 400;
+      return res.status(statusCode).json({
         success: false,
         message: err.message || 'Failed to create family workflow',
         data: null,

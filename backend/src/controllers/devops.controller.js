@@ -1,6 +1,25 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+async function createAuditLog(req, action, oldStatus, newStatus, domainId) {
+  const details = JSON.stringify({
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    domainId,
+    oldStatus,
+    newStatus
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      user: req.user?.id || 'DEVOPS',
+      action,
+      module: 'DEVOPS_DOMAIN',
+      details
+    }
+  });
+}
+
 class DevOpsController {
   
   /**
@@ -19,6 +38,10 @@ class DevOpsController {
       const existingDomain = await prisma.familyDomain.findUnique({ where: { id: domainId } });
       if (!existingDomain) {
         return res.status(404).json({ success: false, message: 'Domain not found' });
+      }
+
+      if (existingDomain.domainStatus !== 'PENDING_SETUP') {
+        return res.status(400).json({ success: false, message: `Invalid state transition. Domain is currently ${existingDomain.domainStatus}` });
       }
 
       const domain = await prisma.familyDomain.update({
@@ -40,6 +63,8 @@ class DevOpsController {
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
+
+      await createAuditLog(req, 'MARK_PURCHASED', existingDomain.domainStatus, domain.domainStatus, domainId);
 
       // Update DevOps Ticket
       await prisma.devOpsTicket.updateMany({
@@ -87,6 +112,10 @@ class DevOpsController {
         return res.status(404).json({ success: false, message: 'Domain not found' });
       }
 
+      if (existingDomain.domainStatus !== 'PENDING_SETUP') {
+        return res.status(400).json({ success: false, message: `Invalid state transition. Domain is currently ${existingDomain.domainStatus}` });
+      }
+
       await prisma.domainEvent.create({
         data: {
           domainId,
@@ -95,6 +124,8 @@ class DevOpsController {
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
+
+      await createAuditLog(req, 'SEND_DNS_INSTRUCTIONS', existingDomain.domainStatus, existingDomain.domainStatus, domainId);
 
       console.log(`[DevOps] Successfully sent DNS instructions for domainId ${domainId}.`);
       return res.status(200).json({ success: true, message: 'Instructions sent.' });
@@ -135,6 +166,8 @@ class DevOpsController {
         }
       });
 
+      await createAuditLog(req, 'GENERATE_VERIFY_EMAIL', existingDomain.domainStatus, existingDomain.domainStatus, domainId);
+
       console.log(`[DevOps] Successfully generated verify email for domainId ${domainId}.`);
       return res.status(200).json({ success: true, message: 'Verification email generated.' });
     } catch (error) {
@@ -165,6 +198,10 @@ class DevOpsController {
         return res.status(404).json({ success: false, message: 'Domain not found' });
       }
 
+      if (existingDomain.domainStatus !== 'PENDING_SETUP' && existingDomain.domainStatus !== 'DNS_INSTRUCTIONS_SENT') {
+        return res.status(400).json({ success: false, message: `Invalid state transition. Domain is currently ${existingDomain.domainStatus}` });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { domainStatus: 'DNS_CONFIGURED' }
@@ -178,6 +215,8 @@ class DevOpsController {
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
+
+      await createAuditLog(req, 'MARK_DNS_CONFIGURED', existingDomain.domainStatus, domain.domainStatus, domainId);
 
       // Close DNS ticket
       await prisma.devOpsTicket.updateMany({
@@ -224,6 +263,10 @@ class DevOpsController {
         return res.status(404).json({ success: false, message: 'Domain not found' });
       }
 
+      if (existingDomain.domainStatus !== 'DNS_CONFIGURED') {
+        return res.status(400).json({ success: false, message: `Invalid state transition. Domain is currently ${existingDomain.domainStatus}` });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { 
@@ -241,6 +284,8 @@ class DevOpsController {
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
+
+      await createAuditLog(req, 'GENERATE_SSL', existingDomain.domainStatus, domain.domainStatus, domainId);
 
       await prisma.devOpsTicket.updateMany({
         where: { domainId, queueType: 'SSL' },
@@ -286,6 +331,10 @@ class DevOpsController {
         return res.status(404).json({ success: false, message: 'Domain not found' });
       }
 
+      if (existingDomain.domainStatus !== 'SSL_ENABLED') {
+        return res.status(400).json({ success: false, message: `Invalid state transition. Domain is currently ${existingDomain.domainStatus}` });
+      }
+
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
         data: { 
@@ -304,6 +353,8 @@ class DevOpsController {
           triggeredBy: req.user?.id || 'DEVOPS'
         }
       });
+
+      await createAuditLog(req, 'MARK_LIVE', existingDomain.domainStatus, domain.domainStatus, domainId);
 
       await prisma.devOpsTicket.updateMany({
         where: { domainId, queueType: 'Deployment' },

@@ -12,6 +12,7 @@ import {
   CreditCard, Calendar as CalendarIcon, Hash, Link,
   Upload, FileText, Send, Mail, PlayCircle, ShieldCheck, Download, Copy, AlertTriangle, Eye, EyeOff
 } from 'lucide-react';
+import useDomainStore from '../store/useDomainStore';
 
 const schema = z.object({
   // Family Details
@@ -127,6 +128,8 @@ export default function CreateFamily() {
 
   const queryParams = new URLSearchParams(location.search);
   const initialOption = queryParams.get('domainOption') === 'OPTION_2' ? 'OPTION_2' : 'OPTION_1';
+  
+  const { familyId, domainId, domainStatus, setFamilyAndDomain, setDomainStatus } = useDomainStore();
 
   const {
     register,
@@ -153,7 +156,11 @@ export default function CreateFamily() {
 
   const [actionLoading, setActionLoading] = useState({});
 
-  const handleDevopsAction = async (endpoint, domainId = "clp_dummy_123") => {
+  const handleDevopsAction = async (endpoint) => {
+    if (!domainId) {
+      toast.error('No Domain ID found! Please create a family first.');
+      return;
+    }
     setActionLoading(prev => ({ ...prev, [endpoint]: true }));
     try {
       const token = localStorage.getItem('superadmin_token');
@@ -162,6 +169,9 @@ export default function CreateFamily() {
       });
       if (response.data.success) {
         toast.success(`Successfully executed: ${endpoint.replace(/-/g, ' ').toUpperCase()}`);
+        if (response.data.data?.domainStatus) {
+          setDomainStatus(response.data.data.domainStatus);
+        }
       } else {
         toast.error(response.data.message || `Failed to execute ${endpoint}`);
       }
@@ -172,6 +182,25 @@ export default function CreateFamily() {
       setActionLoading(prev => ({ ...prev, [endpoint]: false }));
     }
   };
+
+  useEffect(() => {
+    if (domainId) {
+      const fetchStatus = async () => {
+        try {
+          const token = localStorage.getItem('superadmin_token');
+          const response = await axios.get(`http://localhost:5000/api/v1/domains/status/${domainId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.data.success && response.data.data?.domainStatus) {
+            setDomainStatus(response.data.data.domainStatus);
+          }
+        } catch (e) {
+          console.error('Failed to fetch domain status', e);
+        }
+      };
+      fetchStatus();
+    }
+  }, [domainId, setDomainStatus]);
 
 
   const onSubmit = async (data) => {
@@ -227,7 +256,8 @@ export default function CreateFamily() {
 
       if (response.data.success) {
         toast.success('Family and Custom Domain onboarding created successfully!');
-        setTimeout(() => navigate('/families'), 1000);
+        setFamilyAndDomain(response.data.familyId, response.data.domainId);
+        // Do not navigate immediately so the user can use the DevOps Panel
       } else {
         toast.error(response.data.message || 'Error creating family');
       }
@@ -823,45 +853,50 @@ export default function CreateFamily() {
               <div className="p-5 space-y-3">
                 <button 
                   type="button" 
-                  disabled={actionLoading["send-dns"]}
+                  title={!domainId ? "Complete Family Creation first" : domainStatus !== 'PENDING_SETUP' ? `Domain is in ${domainStatus} state` : "Send DNS Instructions"}
+                  disabled={!domainId || domainStatus !== 'PENDING_SETUP' || actionLoading["send-dns"]}
                   onClick={() => handleDevopsAction("send-dns")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {actionLoading["send-dns"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4"/>}
                   <span>Send DNS Instructions</span>
                 </button>
                 <button 
                   type="button" 
-                  disabled={actionLoading["gen-verify-email"]}
+                  title={!domainId ? "Complete Family Creation first" : "Generate verification email"}
+                  disabled={!domainId || actionLoading["gen-verify-email"]}
                   onClick={() => handleDevopsAction("gen-verify-email")} 
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {actionLoading["gen-verify-email"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4"/>}
                   <span>Gen Verify Email</span>
                 </button>
                 <button 
                   type="button" 
-                  disabled={actionLoading["mark-dns-configured"]}
+                  title={!domainId ? "Complete Family Creation first" : (domainStatus !== 'PENDING_SETUP' && domainStatus !== 'DNS_INSTRUCTIONS_SENT') ? `Cannot mark DNS configured in ${domainStatus} state` : "Mark DNS Configured"}
+                  disabled={!domainId || (domainStatus !== 'PENDING_SETUP' && domainStatus !== 'DNS_INSTRUCTIONS_SENT') || actionLoading["mark-dns-configured"]}
                   onClick={() => handleDevopsAction("mark-dns-configured")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {actionLoading["mark-dns-configured"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4"/>}
                   <span>Mark DNS Configured</span>
                 </button>
                 <button 
                   type="button" 
-                  disabled={actionLoading["generate-ssl"]}
+                  title={!domainId ? "Complete Family Creation first" : domainStatus !== 'DNS_CONFIGURED' ? "DNS must be configured first" : "Generate SSL"}
+                  disabled={!domainId || domainStatus !== 'DNS_CONFIGURED' || actionLoading["generate-ssl"]}
                   onClick={() => handleDevopsAction("generate-ssl")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {actionLoading["generate-ssl"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4"/>}
                   <span>Generate SSL</span>
                 </button>
                 <button 
                   type="button" 
-                  disabled={actionLoading["mark-live"]}
+                  title={!domainId ? "Complete Family Creation first" : domainStatus !== 'SSL_ENABLED' ? "SSL must be enabled first" : "Mark Website Live"}
+                  disabled={!domainId || domainStatus !== 'SSL_ENABLED' || actionLoading["mark-live"]}
                   onClick={() => handleDevopsAction("mark-live")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-all hover:translate-y-[-1px] active:translate-y-[1px] shadow-md hover:shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-all hover:translate-y-[-1px] active:translate-y-[1px] shadow-md hover:shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {actionLoading["mark-live"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4"/>}
                   <span>Mark Website Live</span>

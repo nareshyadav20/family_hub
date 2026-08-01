@@ -11,8 +11,8 @@ const protectSuperAdmin = (req, res, next) => {
   if (!token) return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'SUPER_ADMIN') {
-      return res.status(403).json({ success: false, message: 'Forbidden: Super Admin only' });
+    if (decoded.role !== 'SUPER_ADMIN' && decoded.role !== 'DEVOPS') {
+      return res.status(403).json({ success: false, message: 'Forbidden: Super Admin or DevOps only' });
     }
     req.user = decoded;
     next();
