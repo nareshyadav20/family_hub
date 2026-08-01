@@ -29,11 +29,11 @@ const queryClient = new QueryClient();
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('superadmin_token');
   const userString = localStorage.getItem('superadmin_user');
-  
+
   if (!token || !userString) {
     return <Navigate to="/login" replace />;
   }
-  
+
   try {
     const user = JSON.parse(userString);
     if (user?.role?.toUpperCase() !== 'SUPER_ADMIN') {
@@ -45,7 +45,7 @@ function ProtectedRoute({ children }) {
     localStorage.removeItem('superadmin_user');
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 }
 
@@ -64,8 +64,8 @@ function App() {
           document.documentElement.classList.remove('dark');
         }
       }
-    } catch(e) {}
-    
+    } catch (e) { }
+
     // Setup listener for storage events
     const handleStorage = () => {
       try {
@@ -79,10 +79,10 @@ function App() {
             document.documentElement.classList.remove('dark');
           }
         }
-      } catch(e) {}
+      } catch (e) { }
     };
     window.addEventListener('storage', handleStorage);
-    
+
     // Also poll occasionally to catch same-tab updates
     const interval = setInterval(handleStorage, 1000);
     return () => {
@@ -98,9 +98,9 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          
+
           <Route path="/" element={<Navigate to="/login" replace />} />
-          
+
           {/* Protected Routes */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />

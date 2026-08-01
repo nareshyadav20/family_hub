@@ -21,14 +21,14 @@ async function createAuditLog(req, action, oldStatus, newStatus, domainId) {
 }
 
 class DevOpsController {
-  
+
   /**
    * PUT /api/v1/domains/devops/purchase
    */
   async markPurchased(req, res) {
     try {
       const { domainId, purchasePrice, registrar } = req.body;
-      
+
       console.log(`[DevOps] markPurchased request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -71,7 +71,7 @@ class DevOpsController {
         where: { domainId, queueType: 'Purchase' },
         data: { status: 'Completed', completedAt: new Date() }
       });
-      
+
       // Create next ticket for DNS
       await prisma.devOpsTicket.create({
         data: {
@@ -86,10 +86,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
       console.error(`[DevOps] Error in markPurchased:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -100,7 +100,7 @@ class DevOpsController {
   async sendDnsInstructions(req, res) {
     try {
       const { domainId } = req.body;
-      
+
       console.log(`[DevOps] sendDnsInstructions request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -131,10 +131,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, message: 'Instructions sent.' });
     } catch (error) {
       console.error(`[DevOps] Error in sendDnsInstructions:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -145,7 +145,7 @@ class DevOpsController {
   async generateVerifyEmail(req, res) {
     try {
       const { domainId } = req.body;
-      
+
       console.log(`[DevOps] generateVerifyEmail request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -172,10 +172,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, message: 'Verification email generated.' });
     } catch (error) {
       console.error(`[DevOps] Error in generateVerifyEmail:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -186,7 +186,7 @@ class DevOpsController {
   async markDnsConfigured(req, res) {
     try {
       const { domainId } = req.body;
-      
+
       console.log(`[DevOps] markDnsConfigured request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -237,10 +237,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
       console.error(`[DevOps] Error in markDnsConfigured:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -251,7 +251,7 @@ class DevOpsController {
   async generateSsl(req, res) {
     try {
       const { domainId } = req.body;
-      
+
       console.log(`[DevOps] generateSsl request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -269,7 +269,7 @@ class DevOpsController {
 
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
-        data: { 
+        data: {
           sslStatus: 'ACTIVE',
           sslIssuedAt: new Date(),
           domainStatus: 'SSL_ENABLED'
@@ -291,7 +291,7 @@ class DevOpsController {
         where: { domainId, queueType: 'SSL' },
         data: { status: 'Completed', completedAt: new Date() }
       });
-      
+
       // Open Deployment ticket
       await prisma.devOpsTicket.create({
         data: {
@@ -305,10 +305,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
       console.error(`[DevOps] Error in generateSsl:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -319,7 +319,7 @@ class DevOpsController {
   async markLive(req, res) {
     try {
       const { domainId } = req.body;
-      
+
       console.log(`[DevOps] markLive request received for domainId: ${domainId}`);
 
       if (!domainId) {
@@ -337,7 +337,7 @@ class DevOpsController {
 
       const domain = await prisma.familyDomain.update({
         where: { id: domainId },
-        data: { 
+        data: {
           domainStatus: 'LIVE',
           deploymentStatus: 'Live',
           connectedAt: new Date()
@@ -365,10 +365,10 @@ class DevOpsController {
       return res.status(200).json({ success: true, data: domain });
     } catch (error) {
       console.error(`[DevOps] Error in markLive:`, error);
-      return res.status(500).json({ 
-        success: false, 
+      return res.status(500).json({
+        success: false,
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }

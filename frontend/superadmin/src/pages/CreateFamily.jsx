@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { 
-  ArrowLeft, Globe, User, MapPin, CheckCircle, 
+import {
+  ArrowLeft, Globe, User, MapPin, CheckCircle,
   Clock, Server, Save, Info, AlertCircle, RefreshCw, ChevronDown, Check, ChevronRight,
   CreditCard, Calendar as CalendarIcon, Hash, Link,
   Upload, FileText, Send, Mail, PlayCircle, ShieldCheck, Download, Copy, AlertTriangle, Eye, EyeOff
@@ -23,7 +23,7 @@ const schema = z.object({
   adminMobile: z.string().min(1, 'Admin Mobile is required'),
   adminEmail: z.string().email('Invalid email address'),
   adminPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  
+
   // Domain Management Option
   domainOption: z.enum(['OPTION_1', 'OPTION_2']).default('OPTION_1'),
 
@@ -34,7 +34,7 @@ const schema = z.object({
   currentNameservers: z.string().optional(),
   hostingProvider: z.string().optional(),
   currentWebsite: z.string().optional(),
-  
+
   // Ownership
   confirmOwnership: z.boolean().optional(),
   ownershipProof: z.any().optional(),
@@ -57,7 +57,7 @@ const schema = z.object({
   expectedGoLiveDate: z.string().optional(),
 
   specialInstructions: z.string().optional(),
-  
+
   // Option 2 Fields
   preferredDomain: z.string().optional(),
   alternativeDomain1: z.string().optional(),
@@ -128,7 +128,7 @@ export default function CreateFamily() {
 
   const queryParams = new URLSearchParams(location.search);
   const initialOption = queryParams.get('domainOption') === 'OPTION_2' ? 'OPTION_2' : 'OPTION_1';
-  
+
   const { familyId, domainId, domainStatus, setFamilyAndDomain, setDomainStatus } = useDomainStore();
 
   const {
@@ -291,7 +291,7 @@ export default function CreateFamily() {
       {/* Header */}
       <div className="max-w-[1500px] mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => navigate('/families')}
             className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 hover:bg-gray-50 transition-colors"
           >
@@ -305,13 +305,13 @@ export default function CreateFamily() {
       </div>
 
       <div className="max-w-[1500px] mx-auto flex flex-col xl:flex-row gap-8">
-        
+
         {/* Left Column - Form */}
         <div className="flex-1 space-y-8">
-          
+
           <form id="create-family-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <input type="hidden" {...register('domainOption')} value={initialOption} />
-            
+
             {/* Section 0: Family Details (Required Context) */}
             {/* Section 0: Family Details (Required Context) */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
@@ -320,13 +320,13 @@ export default function CreateFamily() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Family Name <span className="text-red-500 ml-0.5">*</span></label>
                     <input {...register('familyName')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyName ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. Smith Family" />
-                    {errors.familyName && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.familyName.message}</p>}
+                    {errors.familyName && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.familyName.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Family Head <span className="text-red-500 ml-0.5">*</span></label>
                     <input {...register('familyHead')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyHead ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="Name of family head" />
                   </div>
-                  
+
                   <div className="md:col-span-2 pt-4 border-t border-gray-100 dark:border-slate-800">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Admin Account</h3>
                   </div>
@@ -338,7 +338,7 @@ export default function CreateFamily() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Mobile <span className="text-red-500 ml-0.5">*</span></label>
                     <input {...register('adminMobile')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminMobile ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="+1 (555) 000-0000" />
-                    {errors.adminMobile && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.adminMobile.message}</p>}
+                    {errors.adminMobile && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.adminMobile.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Email <span className="text-red-500 ml-0.5">*</span></label>
@@ -347,12 +347,12 @@ export default function CreateFamily() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Password <span className="text-red-500 ml-0.5">*</span></label>
                     <div className="relative">
-                      <input 
-                        type={showPassword ? "text" : "password"} 
+                      <input
+                        type={showPassword ? "text" : "password"}
                         autoComplete="new-password"
-                        {...register('adminPassword')} 
-                        className={`w-full pl-4 pr-11 py-2.5 rounded-xl border ${errors.adminPassword ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} 
-                        placeholder="••••••••" 
+                        {...register('adminPassword')}
+                        className={`w-full pl-4 pr-11 py-2.5 rounded-xl border ${errors.adminPassword ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`}
+                        placeholder="••••••••"
                       />
                       <button
                         type="button"
@@ -362,7 +362,7 @@ export default function CreateFamily() {
                         {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
                       </button>
                     </div>
-                    {errors.adminPassword && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.adminPassword.message}</p>}
+                    {errors.adminPassword && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.adminPassword.message}</p>}
                   </div>
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function CreateFamily() {
 
             {/* DOMAIN MANAGEMENT SUPER CARD */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden relative">
-              
+
               <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-start gap-4 bg-gradient-to-r from-blue-50/50 to-white dark:from-blue-900/10 dark:to-slate-900">
                 <div className="p-3 bg-purple-100 dark:bg-blue-900/40 rounded-xl shadow-sm">
                   <Globe className="w-6 h-6 text-purple-600 dark:text-blue-400" />
@@ -382,7 +382,7 @@ export default function CreateFamily() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="p-8">
                 <div className="mb-8">
                   {domainOption === 'OPTION_1' ? (
@@ -409,7 +409,7 @@ export default function CreateFamily() {
                 </div>
 
                 <AnimatePresence mode="wait">
-                  
+
                   {/* OPTION 1 CONTENT */}
                   {domainOption === 'OPTION_1' && (
                     <motion.div
@@ -420,7 +420,7 @@ export default function CreateFamily() {
                       transition={{ duration: 0.3 }}
                       className="space-y-10 overflow-hidden"
                     >
-                      
+
                       <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
                         <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                           <Globe className="w-5 h-5 text-blue-500" /> Domain Information
@@ -429,7 +429,7 @@ export default function CreateFamily() {
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Root Domain <span className="text-red-500 ml-0.5">*</span></label>
                             <input {...register('rootDomain')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.rootDomain ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="Example: panga.com" />
-                            {errors.rootDomain && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.rootDomain.message}</p>}
+                            {errors.rootDomain && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.rootDomain.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Current Website <span className="text-gray-400 font-normal ml-1">(Optional)</span></label>
@@ -450,7 +450,7 @@ export default function CreateFamily() {
                               </select>
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
-                            {errors.currentRegistrar && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.currentRegistrar.message}</p>}
+                            {errors.currentRegistrar && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.currentRegistrar.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Domain Expiry Date</label>
@@ -477,169 +477,169 @@ export default function CreateFamily() {
                               </select>
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
-                            {errors.hostingProvider && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.hostingProvider.message}</p>}
+                            {errors.hostingProvider && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.hostingProvider.message}</p>}
                           </div>
                         </div>
                       </div>
 
                       <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
                         <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                           <ShieldCheck className="w-5 h-5 text-purple-500" /> Domain Ownership
+                          <ShieldCheck className="w-5 h-5 text-purple-500" /> Domain Ownership
                         </h3>
                         <div className="space-y-6">
-                           <label className="flex items-start gap-3 cursor-pointer">
-                              <div className="flex items-center h-5 mt-0.5">
-                                <input type="checkbox" {...register('confirmOwnership')} className="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-600" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Family confirms ownership of this domain <span className="text-red-500">*</span></span>
-                                <span className="text-xs text-gray-500 mt-0.5">Verify that the family legally owns this domain before proceeding.</span>
-                              </div>
-                            </label>
-                                    <div>
-                               <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Upload Domain Ownership Proof <span className="text-red-500">*</span></label>
-                               <div className="flex items-center justify-center w-full">
-                                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
-                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                          <Upload className="w-6 h-6 text-gray-400 mb-2" />
-                                          <p className="mb-1 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                          <p className="text-xs text-gray-400 dark:text-gray-500">Examples: Invoice, Screenshot, WHOIS, Purchase Receipt</p>
-                                      </div>
-                                      <input type="file" className="hidden" />
-                                  </label>
-                               </div>
-                               {errors.confirmOwnership && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.confirmOwnership.message}</p>}
+                          <label className="flex items-start gap-3 cursor-pointer">
+                            <div className="flex items-center h-5 mt-0.5">
+                              <input type="checkbox" {...register('confirmOwnership')} className="w-5 h-5 text-purple-600 rounded border-gray-300 focus:ring-purple-600" />
                             </div>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-gray-900 dark:text-white text-sm">Family confirms ownership of this domain <span className="text-red-500">*</span></span>
+                              <span className="text-xs text-gray-500 mt-0.5">Verify that the family legally owns this domain before proceeding.</span>
+                            </div>
+                          </label>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Upload Domain Ownership Proof <span className="text-red-500">*</span></label>
+                            <div className="flex items-center justify-center w-full">
+                              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                  <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                                  <p className="mb-1 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                  <p className="text-xs text-gray-400 dark:text-gray-500">Examples: Invoice, Screenshot, WHOIS, Purchase Receipt</p>
+                                </div>
+                                <input type="file" className="hidden" />
+                              </label>
+                            </div>
+                            {errors.confirmOwnership && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.confirmOwnership.message}</p>}
+                          </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-6 border-t border-gray-100 dark:border-slate-700">
-                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrant Name</label>
-                                 <input {...register('registrantName')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                               </div>
-                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrant Email</label>
-                                 <input type="email" {...register('registrantEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                               </div>
-                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Name</label>
-                                 <input {...register('techContactName')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                               </div>
-                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Email</label>
-                                 <input type="email" {...register('techContactEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                               </div>
-                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Phone <span className="text-red-500">*</span></label>
-                                 <input {...register('techContactMobile')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.techContactMobile ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} />
-                                 {errors.techContactMobile && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.techContactMobile.message}</p>}
-                               </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-6 border-t border-gray-100 dark:border-slate-700">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrant Name</label>
+                              <input {...register('registrantName')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
                             </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrant Email</label>
+                              <input type="email" {...register('registrantEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Name</label>
+                              <input {...register('techContactName')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Email</label>
+                              <input type="email" {...register('techContactEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Technical Contact Phone <span className="text-red-500">*</span></label>
+                              <input {...register('techContactMobile')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.techContactMobile ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} />
+                              {errors.techContactMobile && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.techContactMobile.message}</p>}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><Server className="w-5 h-5 text-purple-500"/> DNS Access</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><Server className="w-5 h-5 text-purple-500" /> DNS Access</h3>
                         <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">Can Family Access DNS? <span className="text-red-500">*</span></label>
-                                <div className="flex gap-4">
-                                  <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Yes' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                    <input type="radio" value="Yes" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">Yes</span>
-                                  </label>
-                                  <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'No' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                    <input type="radio" value="No" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">No</span>
-                                  </label>
-                                  <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Need Help' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                    <input type="radio" value="Need Help" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">Need Help</span>
-                                  </label>
-                                </div>
-                                {errors.dnsAccessAvailable && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.dnsAccessAvailable.message}</p>}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">Can Family Access DNS? <span className="text-red-500">*</span></label>
+                            <div className="flex gap-4">
+                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Yes' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
+                                <input type="radio" value="Yes" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Yes</span>
+                              </label>
+                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'No' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
+                                <input type="radio" value="No" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">No</span>
+                              </label>
+                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Need Help' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
+                                <input type="radio" value="Need Help" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Need Help</span>
+                              </label>
                             </div>
-                            
-                            <AnimatePresence mode="wait">
-                                {watchAllFields.dnsAccessAvailable === 'Yes' && (
-                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-700">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <CheckCircle className="w-4 h-4 text-green-500" />
-                                            <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">DNS Login Available</span>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                            <div>
-                                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Username</label>
-                                              <input {...register('registrarUsername')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                                            </div>
-                                            <div>
-                                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Email</label>
-                                              <input type="email" {...register('registrarEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Notes</label>
-                                                <textarea {...register('dnsNotes')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none"></textarea>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                                {(watchAllFields.dnsAccessAvailable === 'No' || watchAllFields.dnsAccessAvailable === 'Need Help') && (
-                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="p-4 bg-purple-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl flex items-start gap-3">
-                                        <Info className="w-5 h-5 text-purple-600 mt-0.5" />
-                                        <p className="text-sm text-purple-800 dark:text-blue-200">FamilyHub DevOps Team will configure DNS after receiving temporary access.</p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            {errors.dnsAccessAvailable && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.dnsAccessAvailable.message}</p>}
+                          </div>
+
+                          <AnimatePresence mode="wait">
+                            {watchAllFields.dnsAccessAvailable === 'Yes' && (
+                              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <div className="flex items-center gap-2 mb-4">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                  <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">DNS Login Available</span>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Username</label>
+                                    <input {...register('registrarUsername')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Email</label>
+                                    <input type="email" {...register('registrarEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
+                                  </div>
+                                  <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Notes</label>
+                                    <textarea {...register('dnsNotes')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none"></textarea>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                            {(watchAllFields.dnsAccessAvailable === 'No' || watchAllFields.dnsAccessAvailable === 'Need Help') && (
+                              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="p-4 bg-purple-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl flex items-start gap-3">
+                                <Info className="w-5 h-5 text-purple-600 mt-0.5" />
+                                <p className="text-sm text-purple-800 dark:text-blue-200">FamilyHub DevOps Team will configure DNS after receiving temporary access.</p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
                       </div>
 
                       <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><RefreshCw className="w-5 h-5 text-blue-500"/> Migration Information</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><RefreshCw className="w-5 h-5 text-blue-500" /> Migration Information</h3>
                         <div className="space-y-8">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Existing Website</label>
+                            <div className="flex flex-wrap gap-3">
+                              {['No Website', 'Static Website', 'WordPress', 'React', 'NextJS', 'Custom', 'Other'].map(type => (
+                                <label key={type} className={`px-4 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all ${watchAllFields.existingWebsiteType === type ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}>
+                                  <input type="radio" value={type} {...register('existingWebsiteType')} className="hidden" />
+                                  {type}
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6 border-t border-gray-100 dark:border-slate-800">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Existing Website</label>
-                                <div className="flex flex-wrap gap-3">
-                                    {['No Website', 'Static Website', 'WordPress', 'React', 'NextJS', 'Custom', 'Other'].map(type => (
-                                        <label key={type} className={`px-4 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all ${watchAllFields.existingWebsiteType === type ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}>
-                                            <input type="radio" value={type} {...register('existingWebsiteType')} className="hidden" />
-                                            {type}
-                                        </label>
-                                    ))}
-                                </div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Migration Required? <span className="text-red-500 ml-0.5">*</span></label>
+                              <div className="flex gap-4">
+                                <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'Yes' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
+                                  <input type="radio" value="Yes" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">Yes</span>
+                                </label>
+                                <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'No' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
+                                  <input type="radio" value="No" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">No</span>
+                                </label>
+                              </div>
+                              {errors.migrationRequired && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.migrationRequired.message}</p>}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6 border-t border-gray-100 dark:border-slate-800">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Migration Required? <span className="text-red-500 ml-0.5">*</span></label>
-                                    <div className="flex gap-4">
-                                      <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'Yes' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
-                                        <input type="radio" value="Yes" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                        <span className="text-sm font-medium text-gray-900 dark:text-white">Yes</span>
-                                      </label>
-                                      <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'No' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
-                                        <input type="radio" value="No" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                        <span className="text-sm font-medium text-gray-900 dark:text-white">No</span>
-                                      </label>
-                                    </div>
-                                    {errors.migrationRequired && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.migrationRequired.message}</p>}
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Migration Priority</label>
-                                    <div className="relative">
-                                      <select {...register('migrationPriority')} className="appearance-none w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-sm">
-                                        <option value="Low">Low</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="High">High</option>
-                                      </select>
-                                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Expected Go Live Date</label>
-                                    <input type="date" {...register('expectedGoLiveDate')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-gray-600 dark:text-gray-300 text-sm" />
-                                </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Migration Priority</label>
+                              <div className="relative">
+                                <select {...register('migrationPriority')} className="appearance-none w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-sm">
+                                  <option value="Low">Low</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="High">High</option>
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
+                              </div>
                             </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Expected Go Live Date</label>
+                              <input type="date" {...register('expectedGoLiveDate')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-gray-600 dark:text-gray-300 text-sm" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
@@ -649,7 +649,7 @@ export default function CreateFamily() {
                           <textarea {...register('specialInstructions')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none" placeholder="Example: The family website is currently hosted on GoDaddy. DNS changes must be scheduled after 8 PM."></textarea>
                         </div>
                       </div>
-                      
+
                       {Object.keys(errors).length > 0 && (
                         <div className="text-red-500 text-sm font-semibold flex justify-center mb-4">
                           Form has errors: {Object.keys(errors).join(', ')}
@@ -657,14 +657,14 @@ export default function CreateFamily() {
                       )}
                       {/* Centered Actions */}
                       <div className="flex justify-center items-center gap-4 pt-4">
-                        <button 
+                        <button
                           type="button"
                           onClick={() => navigate('/families')}
                           className="px-8 py-3 bg-white dark:bg-slate-800 border border-gray-250 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
                         >
                           Cancel
                         </button>
-                        <button 
+                        <button
                           type="button"
                           onClick={handleSubmit(onSubmit, (err) => console.log("Form Validation Errors:", err))}
                           disabled={submitting}
@@ -700,12 +700,12 @@ export default function CreateFamily() {
                           <span className="w-6 h-[1px] bg-gray-200 dark:bg-slate-700"></span>
                           Section 1: Domain Preferences
                         </h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Preferred Domain <span className="text-red-500 ml-0.5">*</span></label>
                             <input {...register('preferredDomain')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.preferredDomain ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. panga.com" />
-                            {errors.preferredDomain && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.preferredDomain.message}</p>}
+                            {errors.preferredDomain && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.preferredDomain.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Preferred Extension <span className="text-red-500">*</span></label>
@@ -720,17 +720,17 @@ export default function CreateFamily() {
                               </select>
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
-                            {errors.preferredExtension && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.preferredExtension.message}</p>}
+                            {errors.preferredExtension && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.preferredExtension.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Alternative Domain 1 <span className="text-red-500">*</span></label>
                             <input {...register('alternativeDomain1')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.alternativeDomain1 ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. panga-family.com" />
-                            {errors.alternativeDomain1 && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.alternativeDomain1.message}</p>}
+                            {errors.alternativeDomain1 && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.alternativeDomain1.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Alternative Domain 2 <span className="text-red-500">*</span></label>
                             <input {...register('alternativeDomain2')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.alternativeDomain2 ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="e.g. thepangas.com" />
-                            {errors.alternativeDomain2 && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.alternativeDomain2.message}</p>}
+                            {errors.alternativeDomain2 && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.alternativeDomain2.message}</p>}
                           </div>
                         </div>
                       </div>
@@ -740,7 +740,7 @@ export default function CreateFamily() {
                           <span className="w-6 h-[1px] bg-gray-200 dark:bg-slate-700"></span>
                           Section 2: Purchase Configuration
                         </h3>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registration Period <span className="text-red-500">*</span></label>
@@ -753,7 +753,7 @@ export default function CreateFamily() {
                               </select>
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
-                            {errors.registrationPeriod && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.registrationPeriod.message}</p>}
+                            {errors.registrationPeriod && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.registrationPeriod.message}</p>}
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Purchase Account <span className="text-red-500">*</span></label>
@@ -764,7 +764,7 @@ export default function CreateFamily() {
                               </select>
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
-                            {errors.purchaseAccount && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.purchaseAccount.message}</p>}
+                            {errors.purchaseAccount && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.purchaseAccount.message}</p>}
                           </div>
                           <div className="md:col-span-2 pt-2">
                             <label className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -784,12 +784,12 @@ export default function CreateFamily() {
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Billing Email <span className="text-red-500">*</span></label>
                                 <input type="email" {...register('billingEmail')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.billingEmail ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="billing@example.com" />
-                                {errors.billingEmail && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.billingEmail.message}</p>}
+                                {errors.billingEmail && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.billingEmail.message}</p>}
                               </div>
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Billing Phone <span className="text-red-500">*</span></label>
                                 <input {...register('billingPhone')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.billingPhone ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="+1 (555) 000-0000" />
-                                {errors.billingPhone && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3"/>{errors.billingPhone.message}</p>}
+                                {errors.billingPhone && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.billingPhone.message}</p>}
                               </div>
                             </div>
                           </div>
@@ -806,7 +806,7 @@ export default function CreateFamily() {
                           <textarea {...register('internalNotes')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none" placeholder="Any internal instructions for DevOps..."></textarea>
                         </div>
                       </div>
-                      
+
                       {Object.keys(errors).length > 0 && (
                         <div className="text-red-500 text-sm font-semibold flex justify-center mb-4">
                           Form has errors: {Object.keys(errors).join(', ')}
@@ -814,14 +814,14 @@ export default function CreateFamily() {
                       )}
                       {/* Centered Actions */}
                       <div className="flex justify-center items-center gap-4 pt-4">
-                        <button 
+                        <button
                           type="button"
                           onClick={() => navigate('/families')}
                           className="px-8 py-3 bg-white dark:bg-slate-800 border border-gray-250 dark:border-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
                         >
                           Cancel
                         </button>
-                        <button 
+                        <button
                           type="button"
                           onClick={handleSubmit(onSubmit, (err) => console.log("Form Validation Errors:", err))}
                           disabled={submitting}
@@ -842,7 +842,7 @@ export default function CreateFamily() {
         {/* Right Column - Sticky Sidebar */}
         <div className="w-full xl:w-[420px] space-y-6">
           <div className="sticky top-8 space-y-6">
-            
+
             {/* DEVOPS ACTION PANEL */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
@@ -851,59 +851,59 @@ export default function CreateFamily() {
                 </h3>
               </div>
               <div className="p-5 space-y-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   title={!domainId ? "Complete Family Creation first" : domainStatus !== 'PENDING_SETUP' ? `Domain is in ${domainStatus} state` : "Send DNS Instructions"}
                   disabled={!domainId || domainStatus !== 'PENDING_SETUP' || actionLoading["send-dns"]}
                   onClick={() => handleDevopsAction("send-dns")}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading["send-dns"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4"/>}
+                  {actionLoading["send-dns"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   <span>Send DNS Instructions</span>
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   title={!domainId ? "Complete Family Creation first" : "Generate verification email"}
                   disabled={!domainId || actionLoading["gen-verify-email"]}
-                  onClick={() => handleDevopsAction("gen-verify-email")} 
+                  onClick={() => handleDevopsAction("gen-verify-email")}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading["gen-verify-email"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4"/>}
+                  {actionLoading["gen-verify-email"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                   <span>Gen Verify Email</span>
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   title={!domainId ? "Complete Family Creation first" : (domainStatus !== 'PENDING_SETUP' && domainStatus !== 'DNS_INSTRUCTIONS_SENT') ? `Cannot mark DNS configured in ${domainStatus} state` : "Mark DNS Configured"}
                   disabled={!domainId || (domainStatus !== 'PENDING_SETUP' && domainStatus !== 'DNS_INSTRUCTIONS_SENT') || actionLoading["mark-dns-configured"]}
                   onClick={() => handleDevopsAction("mark-dns-configured")}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading["mark-dns-configured"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4"/>}
+                  {actionLoading["mark-dns-configured"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   <span>Mark DNS Configured</span>
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   title={!domainId ? "Complete Family Creation first" : domainStatus !== 'DNS_CONFIGURED' ? "DNS must be configured first" : "Generate SSL"}
                   disabled={!domainId || domainStatus !== 'DNS_CONFIGURED' || actionLoading["generate-ssl"]}
                   onClick={() => handleDevopsAction("generate-ssl")}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-purple-50 dark:bg-slate-850 dark:hover:bg-purple-950/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-700/50 rounded-xl text-sm font-semibold transition-all hover:translate-y-[-1px] active:translate-y-[1px] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading["generate-ssl"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4"/>}
+                  {actionLoading["generate-ssl"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                   <span>Generate SSL</span>
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   title={!domainId ? "Complete Family Creation first" : domainStatus !== 'SSL_ENABLED' ? "SSL must be enabled first" : "Mark Website Live"}
                   disabled={!domainId || domainStatus !== 'SSL_ENABLED' || actionLoading["mark-live"]}
                   onClick={() => handleDevopsAction("mark-live")}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-all hover:translate-y-[-1px] active:translate-y-[1px] shadow-md hover:shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading["mark-live"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4"/>}
+                  {actionLoading["mark-live"] ? <RefreshCw className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
                   <span>Mark Website Live</span>
                 </button>
               </div>
             </div>
-            
+
             {/* DOMAIN SUMMARY CARD */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
@@ -928,7 +928,7 @@ export default function CreateFamily() {
                     {domainOption === 'OPTION_1' ? 'Family Owned' : 'FamilyHub Managed'}
                   </span>
                 </div>
-                
+
                 {domainOption === 'OPTION_1' ? (
                   <>
                     <div className="flex justify-between items-center pb-3 border-b border-gray-100 dark:border-slate-800 border-dashed">
@@ -961,84 +961,84 @@ export default function CreateFamily() {
 
             {/* DOMAIN VERIFICATION CARD */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
-                <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm">Domain Status</h3>
+              <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">Domain Status</h3>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Ownership Status</span>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
                 </div>
-                <div className="p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Ownership Status</span>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">DNS Status</span>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">SSL Status</span>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Website Status</span>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending Setup</span>
-                    </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300">DNS Status</span>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300">SSL Status</span>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Website Status</span>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">🟡 Pending Setup</span>
+                </div>
+              </div>
             </div>
 
             {/* DNS INSTRUCTIONS CARD */}
             {domainOption === 'OPTION_1' && (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
-                    <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
-                        <h3 className="font-bold text-gray-900 dark:text-white text-sm">DNS Configuration</h3>
-                        <div className="flex gap-2">
-                            <button type="button" onClick={() => toast.success('DNS Instructions copied')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Copy"><Copy className="w-4 h-4"/></button>
-                            <button type="button" onClick={() => toast.success('Downloading DNS Instructions PDF...')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Download PDF"><Download className="w-4 h-4"/></button>
-                            <button type="button" onClick={() => toast.success('DNS Email instructions sent')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Email Instructions"><Mail className="w-4 h-4"/></button>
-                        </div>
-                    </div>
-                    <div className="p-5 overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                            <thead className="text-gray-500 border-b border-gray-200 dark:border-slate-700">
-                                <tr>
-                                    <th className="pb-2 font-medium">Type</th>
-                                    <th className="pb-2 font-medium">Host</th>
-                                    <th className="pb-2 font-medium">Value</th>
-                                    <th className="pb-2 font-medium">TTL</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                                <tr>
-                                    <td className="py-2 font-semibold">TXT</td>
-                                    <td className="py-2 font-mono">_familyhub-challenge</td>
-                                    <td className="py-2 font-mono text-purple-600 dark:text-purple-400 font-medium">
-                                      {watchAllFields.rootDomain ? `fh_${watchAllFields.rootDomain.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 10)}` : 'fh_token_...'}
-                                    </td>
-                                    <td className="py-2">300</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-2 font-semibold">CNAME</td>
-                                    <td className="py-2 font-mono">@</td>
-                                    <td className="py-2 font-mono">verify.familyhub.ai</td>
-                                    <td className="py-2">300</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
+                <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">DNS Configuration</h3>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => toast.success('DNS Instructions copied')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Copy"><Copy className="w-4 h-4" /></button>
+                    <button type="button" onClick={() => toast.success('Downloading DNS Instructions PDF...')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Download PDF"><Download className="w-4 h-4" /></button>
+                    <button type="button" onClick={() => toast.success('DNS Email instructions sent')} className="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Email Instructions"><Mail className="w-4 h-4" /></button>
+                  </div>
                 </div>
+                <div className="p-5 overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="text-gray-500 border-b border-gray-200 dark:border-slate-700">
+                      <tr>
+                        <th className="pb-2 font-medium">Type</th>
+                        <th className="pb-2 font-medium">Host</th>
+                        <th className="pb-2 font-medium">Value</th>
+                        <th className="pb-2 font-medium">TTL</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                      <tr>
+                        <td className="py-2 font-semibold">TXT</td>
+                        <td className="py-2 font-mono">_familyhub-challenge</td>
+                        <td className="py-2 font-mono text-purple-600 dark:text-purple-400 font-medium">
+                          {watchAllFields.rootDomain ? `fh_${watchAllFields.rootDomain.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 10)}` : 'fh_token_...'}
+                        </td>
+                        <td className="py-2">300</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 font-semibold">CNAME</td>
+                        <td className="py-2 font-mono">@</td>
+                        <td className="py-2 font-mono">verify.familyhub.ai</td>
+                        <td className="py-2">300</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
 
             {/* DEVOPS CHECKLIST */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
-                <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
-                    <h3 className="font-bold text-gray-900 dark:text-white text-sm">DevOps Checklist</h3>
-                </div>
-                <div className="p-5 space-y-3">
-                    {['Domain Request Submitted', 'Domain Ownership Verification', 'DNS Instructions Dispatched', 'DNS Record Propagation', 'DNS Verified', 'SSL Certificate Issuance', 'Tenant Reverse Proxy Routing', 'Website Live'].map((task, i) => (
-                        <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-600 cursor-pointer" defaultChecked={false} />
-                            <span className="text-sm text-gray-700 dark:text-slate-300 group-hover:text-purple-600 transition-colors">{task}</span>
-                        </label>
-                    ))}
-                </div>
+              <div className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">DevOps Checklist</h3>
+              </div>
+              <div className="p-5 space-y-3">
+                {['Domain Request Submitted', 'Domain Ownership Verification', 'DNS Instructions Dispatched', 'DNS Record Propagation', 'DNS Verified', 'SSL Certificate Issuance', 'Tenant Reverse Proxy Routing', 'Website Live'].map((task, i) => (
+                  <label key={i} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-600 cursor-pointer" defaultChecked={false} />
+                    <span className="text-sm text-gray-700 dark:text-slate-300 group-hover:text-purple-600 transition-colors">{task}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* COMMUNICATION TIMELINE */}
@@ -1051,25 +1051,25 @@ export default function CreateFamily() {
               <div className="p-6">
                 <div className="relative pl-6 border-l border-slate-600 space-y-6">
                   {[
-                      { title: 'Family & Domain Submitted', time: '--:--', date: 'Pending', by: 'Super Admin', status: 'Pending' },
-                      { title: 'Verification Token Dispatched', time: '--:--', date: 'Pending', by: 'System Engine', status: 'Pending' },
-                      { title: 'DNS Instructions Dispatched', time: '--:--', date: 'Pending', by: 'DevOps Worker', status: 'Pending' },
-                      { title: 'DNS Record Propagated', time: '--:--', date: 'Pending', by: 'DNS Resolver', status: 'Pending' },
-                      { title: 'DNS Verified', time: '--:--', date: 'Pending', by: 'Automated Worker', status: 'Pending' },
-                      { title: 'SSL Issued', time: '--:--', date: 'Pending', by: "Let's Encrypt", status: 'Pending' },
-                      { title: 'Website Live & Active', time: '--:--', date: 'Pending', by: 'Nginx Proxy', status: 'Pending' },
+                    { title: 'Family & Domain Submitted', time: '--:--', date: 'Pending', by: 'Super Admin', status: 'Pending' },
+                    { title: 'Verification Token Dispatched', time: '--:--', date: 'Pending', by: 'System Engine', status: 'Pending' },
+                    { title: 'DNS Instructions Dispatched', time: '--:--', date: 'Pending', by: 'DevOps Worker', status: 'Pending' },
+                    { title: 'DNS Record Propagated', time: '--:--', date: 'Pending', by: 'DNS Resolver', status: 'Pending' },
+                    { title: 'DNS Verified', time: '--:--', date: 'Pending', by: 'Automated Worker', status: 'Pending' },
+                    { title: 'SSL Issued', time: '--:--', date: 'Pending', by: "Let's Encrypt", status: 'Pending' },
+                    { title: 'Website Live & Active', time: '--:--', date: 'Pending', by: 'Nginx Proxy', status: 'Pending' },
                   ].map((step, index) => (
                     <div key={index} className="relative">
                       {/* Timeline Node */}
                       <div className={`absolute -left-[29px] w-3 h-3 rounded-full border-2 ${step.status === 'Done' ? 'bg-purple-500 border-purple-200' : 'bg-slate-800 border-slate-500'}`}></div>
-                      
+
                       {/* Timeline Content */}
                       <div className="-mt-1">
                         <div className="text-sm font-semibold text-white mb-0.5">{step.title}</div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
-                          <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3"/> {step.date}</span>
-                          <span className="flex items-center gap-1"><Clock className="w-3 h-3"/> {step.time}</span>
-                          <span className="flex items-center gap-1"><User className="w-3 h-3"/> {step.by}</span>
+                          <span className="flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> {step.date}</span>
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {step.time}</span>
+                          <span className="flex items-center gap-1"><User className="w-3 h-3" /> {step.by}</span>
                         </div>
                       </div>
                     </div>
@@ -1077,7 +1077,7 @@ export default function CreateFamily() {
                 </div>
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
