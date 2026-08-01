@@ -140,7 +140,6 @@ export default function CreateFamily() {
       domainOption: initialOption,
       dnsAccessAvailable: 'Yes',
       existingWebsiteType: 'No Website',
-      migrationRequired: '',
       migrationPriority: 'Medium',
       autoRenew: true,
       preferredExtension: '.com',
@@ -280,6 +279,7 @@ export default function CreateFamily() {
         <div className="flex-1 space-y-8">
           
           <form id="create-family-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <input type="hidden" {...register('domainOption')} value={initialOption} />
             
             {/* Section 0: Family Details (Required Context) */}
             {/* Section 0: Family Details (Required Context) */}
@@ -619,8 +619,13 @@ export default function CreateFamily() {
                         </div>
                       </div>
                       
+                      {Object.keys(errors).length > 0 && (
+                        <div className="text-red-500 text-sm font-semibold flex justify-center mb-4">
+                          Form has errors: {Object.keys(errors).join(', ')}
+                        </div>
+                      )}
                       {/* Centered Actions */}
-                      <div className="flex justify-center items-center gap-4 pt-8">
+                      <div className="flex justify-center items-center gap-4 pt-4">
                         <button 
                           type="button"
                           onClick={() => navigate('/families')}
@@ -630,7 +635,7 @@ export default function CreateFamily() {
                         </button>
                         <button 
                           type="button"
-                          onClick={handleSubmit(onSubmit)}
+                          onClick={handleSubmit(onSubmit, (err) => console.log("Form Validation Errors:", err))}
                           disabled={submitting}
                           className="px-10 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 flex items-center gap-2 shadow-md shadow-purple-600/20 cursor-pointer"
                         >
@@ -771,8 +776,13 @@ export default function CreateFamily() {
                         </div>
                       </div>
                       
+                      {Object.keys(errors).length > 0 && (
+                        <div className="text-red-500 text-sm font-semibold flex justify-center mb-4">
+                          Form has errors: {Object.keys(errors).join(', ')}
+                        </div>
+                      )}
                       {/* Centered Actions */}
-                      <div className="flex justify-center items-center gap-4 pt-8">
+                      <div className="flex justify-center items-center gap-4 pt-4">
                         <button 
                           type="button"
                           onClick={() => navigate('/families')}
@@ -782,7 +792,7 @@ export default function CreateFamily() {
                         </button>
                         <button 
                           type="button"
-                          onClick={handleSubmit(onSubmit)}
+                          onClick={handleSubmit(onSubmit, (err) => console.log("Form Validation Errors:", err))}
                           disabled={submitting}
                           className="px-10 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 flex items-center gap-2 shadow-md shadow-purple-600/20 cursor-pointer"
                         >
