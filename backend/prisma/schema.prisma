@@ -130,31 +130,31 @@ enum InviteStatus {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  memberId        String?  @unique
-  firstName       String
-  lastName        String
-  email           String?  @unique
-  phone           String?  @unique
-  password        String?  
-  role            Role     @default(MEMBER)
-  familyId        String?
-  gender          String?
-  relationship    String?
-  familyBranch    String?
-  fatherId        String?
-  motherId        String?
-  spouseId        String?
-  notes           String?
-  status          MemberStatus @default(ACTIVE)
-  
-  avatar          String?
-  isActive        Boolean  @default(true)
-  profileCompletion Int @default(25)
-  currentProfileStep String @default("Basic Information")
-  isProfileCompleted Boolean @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id           String       @id @default(cuid())
+  memberId     String?      @unique
+  firstName    String
+  lastName     String
+  email        String?      @unique
+  phone        String?      @unique
+  password     String?
+  role         Role         @default(MEMBER)
+  familyId     String?
+  gender       String?
+  relationship String?
+  familyBranch String?
+  fatherId     String?
+  motherId     String?
+  spouseId     String?
+  notes        String?
+  status       MemberStatus @default(ACTIVE)
+
+  avatar             String?
+  isActive           Boolean  @default(true)
+  profileCompletion  Int      @default(25)
+  currentProfileStep String   @default("Basic Information")
+  isProfileCompleted Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   isTemporaryPassword Boolean @default(false)
   mustChangePassword  Boolean @default(false)
@@ -163,80 +163,80 @@ model User {
   brevoErrorMessage String?
   lastEmailAttempt  DateTime?
 
-  family          Family?  @relation(fields: [familyId], references: [id])
-  memberProfile   MemberProfile?
-  memberSettings  MemberSettings?
-  invitation      Invitation?
-  documents       Document[]
-  announcements   Announcement[]
-  polls           Poll[] @relation("UserPolls")
-  
-  groupMembers    GroupMember[]
-  groupMessages   GroupMessage[]
-  sentMessages    Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  familyHistories FamilyHistory[]
-  googleCalendar  GoogleCalendarConnection?
+  family         Family?         @relation(fields: [familyId], references: [id])
+  memberProfile  MemberProfile?
+  memberSettings MemberSettings?
+  invitation     Invitation?
+  documents      Document[]
+  announcements  Announcement[]
+  polls          Poll[]          @relation("UserPolls")
 
-  groupPosts      GroupPost[]
-  groupComments   GroupPostComment[]
-  groupLikes      GroupPostLike[]
+  groupMembers     GroupMember[]
+  groupMessages    GroupMessage[]
+  sentMessages     Message[]                 @relation("SentMessages")
+  receivedMessages Message[]                 @relation("ReceivedMessages")
+  familyHistories  FamilyHistory[]
+  googleCalendar   GoogleCalendarConnection?
 
-  familyAdmins    FamilyAdmin[]
+  groupPosts    GroupPost[]
+  groupComments GroupPostComment[]
+  groupLikes    GroupPostLike[]
+
+  familyAdmins FamilyAdmin[]
 
   @@index([familyId])
   @@map("users")
 }
 
 model Family {
-  id              String   @id @default(cuid())
-  name            String
-  familyCode      String?  @unique
-  customDomain    String?  @unique
-  logo            String?
-  coverImage      String?
-  bannerImage     String?
-  themeColor      String?
-  primaryColor    String?
-  secondaryColor  String?
-  description     String?  @db.Text
-  about           String?  @db.Text
-  history         String?  @db.Text
-  contactEmail    String?
-  contactPhone    String?
-  facebook        String?
-  youtube         String?
-  instagram       String?
-  twitter         String?
-  linkedin        String?
-  website         String?
-  subscription    String?
+  id             String  @id @default(cuid())
+  name           String
+  familyCode     String? @unique
+  customDomain   String? @unique
+  logo           String?
+  coverImage     String?
+  bannerImage    String?
+  themeColor     String?
+  primaryColor   String?
+  secondaryColor String?
+  description    String? @db.Text
+  about          String? @db.Text
+  history        String? @db.Text
+  contactEmail   String?
+  contactPhone   String?
+  facebook       String?
+  youtube        String?
+  instagram      String?
+  twitter        String?
+  linkedin       String?
+  website        String?
+  subscription   String?
 
-  familyHead      String?
-  plan            String?  @default("Free")
-  status          String?  @default("Active")
-  address         String?
-  city            String?
-  state           String?
-  country         String?
-  
-  createdBy       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  familyHead String?
+  plan       String? @default("Free")
+  status     String? @default("Active")
+  address    String?
+  city       String?
+  state      String?
+  country    String?
 
-  members         User[]
-  admins          FamilyAdmin[]
-  events          Event[]         @relation("FamilyEvents")
-  documents       Document[]      @relation("FamilyDocuments")
-  announcements   Announcement[]  @relation("FamilyAnnouncements")
-  polls           Poll[]          @relation("FamilyPolls")
-  notifications   Notification[]  @relation("FamilyNotifications")
-  groups          Group[]         @relation("FamilyGroups")
-  familyHistories FamilyHistory[] @relation("FamilyHistories")
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members                   User[]
+  admins                    FamilyAdmin[]
+  events                    Event[]                    @relation("FamilyEvents")
+  documents                 Document[]                 @relation("FamilyDocuments")
+  announcements             Announcement[]             @relation("FamilyAnnouncements")
+  polls                     Poll[]                     @relation("FamilyPolls")
+  notifications             Notification[]             @relation("FamilyNotifications")
+  groups                    Group[]                    @relation("FamilyGroups")
+  familyHistories           FamilyHistory[]            @relation("FamilyHistories")
   googleCalendarConnections GoogleCalendarConnection[] @relation("FamilyGoogleCalendar")
-  feeds           FamilyFeed[]    @relation("FamilyFeeds")
-  domains         FamilyDomain[]
-  contacts        DomainContact[]
+  feeds                     FamilyFeed[]               @relation("FamilyFeeds")
+  domains                   FamilyDomain[]
+  contacts                  DomainContact[]
 
   @@map("families")
 }
@@ -648,53 +648,60 @@ model FamilyFeed {
 }
 
 model FamilyDomain {
-  id                  String             @id @default(cuid())
-  familyId            String
-  domainName          String             @unique
-  ownership           DomainOwnership    @default(FAMILY_OWNED)
-  registrar           String?
-  dnsProvider         String?
-  purchasePrice       Float?
-  renewalPrice        Float?
-  expiryDate          DateTime?
-  autoRenew           Boolean            @default(false)
-  
-  verificationToken   String?            @unique
-  verificationMethod  VerificationMethod @default(TXT)
-  verificationStatus  VerificationStatus @default(UNVERIFIED)
+  id            String          @id @default(cuid())
+  familyId      String
+  domainName    String          @unique
+  ownership     DomainOwnership @default(FAMILY_OWNED)
+  registrar     String?
+  dnsProvider   String?
+  purchasePrice Float?
+  renewalPrice  Float?
+  expiryDate    DateTime?
+  autoRenew     Boolean         @default(false)
 
-  dnsVerified         Boolean            @default(false)
-  sslStatus           SSLStatus          @default(PENDING)
-  sslIssuedAt         DateTime?
-  sslExpiresAt        DateTime?
-  sslRenewalDate      DateTime?
+  verificationToken  String?            @unique
+  verificationMethod VerificationMethod @default(TXT)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
 
-  purchaseStatus      PurchaseStatus     @default(NOT_APPLICABLE)
-  renewalStatus       RenewalStatus      @default(NONE)
-  registrationYears   Int                @default(1)
-  purchaseDate        DateTime?
+  dnsVerified    Boolean   @default(false)
+  sslStatus      SSLStatus @default(PENDING)
+  sslIssuedAt    DateTime?
+  sslExpiresAt   DateTime?
+  sslRenewalDate DateTime?
 
-  domainStatus        DomainStatus       @default(PENDING_SETUP)
-  migrationRequired   Boolean            @default(false)
-  notes               String?            @db.Text
+  purchaseStatus    PurchaseStatus @default(NOT_APPLICABLE)
+  renewalStatus     RenewalStatus  @default(NONE)
+  registrationYears Int            @default(1)
+  purchaseDate      DateTime?
 
-  connectedAt         DateTime?
-  verifiedAt          DateTime?
-  nameservers         Json?
-  dnsInstructions     String?            @db.Text
-  
-  createdBy           String?
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  deletedAt           DateTime?
-  
-  family              Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  histories           DomainHistory[]
-  contacts            DomainContact[]
-  dnsRecords          DomainDnsRecord[]
-  workflows           DomainWorkflow[]
-  events              DomainEvent[]
-  
+  domainStatus      DomainStatus @default(PENDING_SETUP)
+  migrationRequired Boolean      @default(false)
+  notes             String?      @db.Text
+
+  connectedAt     DateTime?
+  verifiedAt      DateTime?
+  nameservers     Json?
+  dnsInstructions String?   @db.Text
+
+  isPrimary         Boolean @default(true)
+  isAlias           Boolean @default(false)
+  wildcardSupported Boolean @default(false)
+  deploymentStatus  String  @default("Pending")
+
+  createdBy String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  family        Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  histories     DomainHistory[]
+  contacts      DomainContact[]
+  dnsRecords    DomainDnsRecord[]
+  workflows     DomainWorkflow[]
+  events        DomainEvent[]
+  healthChecks  DomainHealth[]
+  devOpsTickets DevOpsTicket[]
+
   @@index([familyId])
   @@index([domainName])
   @@index([domainStatus])
@@ -716,14 +723,14 @@ model DomainHistory {
 }
 
 model FamilyAdmin {
-  id          String    @id @default(cuid())
-  familyId    String
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  family      Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id        String    @id @default(cuid())
+  familyId  String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family    Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([familyId])
   @@index([userId])
@@ -753,12 +760,14 @@ model DomainDnsRecord {
   id            String       @id @default(cuid())
   domainId      String
   domain        FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  recordType    String       // TXT, CNAME, A
-  recordName    String       // familyhub-verification or @
+  recordType    String // TXT, CNAME, A
+  recordName    String // familyhub-verification or @
   expectedValue String       @db.Text
   actualValue   String?      @db.Text
   isVerified    Boolean      @default(false)
   ttl           Int          @default(300)
+  priority      Int?
+  status        String       @default("Pending")
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -788,7 +797,7 @@ model DomainEvent {
   id          String        @id @default(cuid())
   domainId    String
   domain      FamilyDomain  @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  eventType   String        // FAMILY_CREATED, ADMIN_CREATED, DOMAIN_CREATED, VERIFICATION_GENERATED, VERIFICATION_SUCCESS, VERIFICATION_FAILED, SSL_GENERATED, SSL_FAILED, DOMAIN_PURCHASED, RENEWED, TRANSFERRED, WEBSITE_ACTIVATED
+  eventType   String // FAMILY_CREATED, ADMIN_CREATED, DOMAIN_CREATED, VERIFICATION_GENERATED, VERIFICATION_SUCCESS, VERIFICATION_FAILED, SSL_GENERATED, SSL_FAILED, DOMAIN_PURCHASED, RENEWED, TRANSFERRED, WEBSITE_ACTIVATED
   severity    EventSeverity @default(INFO)
   message     String        @db.Text
   metadata    Json?
@@ -800,4 +809,50 @@ model DomainEvent {
   @@map("domain_events")
 }
 
+model DomainReservation {
+  id            String   @id @default(cuid())
+  domain        String   @unique
+  reservedBy    String
+  reservedUntil DateTime
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
 
+  @@map("domain_reservations")
+}
+
+model DomainHealth {
+  id         String       @id @default(cuid())
+  domainId   String
+  status     String       @default("Healthy")
+  latency    Int?
+  httpStatus Int?
+  sslValid   Boolean      @default(true)
+  sslExpiry  DateTime?
+  checkedAt  DateTime     @default(now())
+  domain     FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([checkedAt])
+  @@map("domain_health")
+}
+
+model DevOpsTicket {
+  id          String       @id @default(cuid())
+  domainId    String
+  queueType   String // Purchase, DNS, SSL, Deployment, Renewal, Transfer
+  status      String       @default("Pending")
+  priority    String       @default("Medium")
+  assignedTo  String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  duration    Int?
+  notes       String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  domain      FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([queueType])
+  @@index([status])
+  @@map("devops_tickets")
+}

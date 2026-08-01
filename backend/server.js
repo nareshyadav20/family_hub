@@ -85,6 +85,8 @@ app.use('/api/v1/website', websiteRouter);
 app.use('/api/v1/superadmin', superadminRouter);
 app.use('/api/v1/superadmin/domain', domainRoutes);
 app.use('/api/v1/domains', domainRoutes);
+const newDomainRoutes = require('./src/routes/domain.routes');
+app.use('/api/v1/new-domains', newDomainRoutes);
 app.use('/api/v1', domainRoutes);
 app.use('/api/google', googleCalendarRouter);
 app.use('/api/public', publicRouter);
