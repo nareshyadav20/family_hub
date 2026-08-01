@@ -53,7 +53,7 @@ export default function Support() {
 
       {loading ? (
         <div className="flex justify-center items-center h-48">
-           <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+           <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
         </div>
       ) : (
         <>
@@ -116,7 +116,7 @@ export default function Support() {
                         </td>
                         <td className="py-4 px-6">
                           <span className={`flex w-max items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                            ticket.status === 'Open' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' :
+                            ticket.status === 'Open' ? 'bg-purple-50 dark:bg-indigo-500/10 text-purple-600 dark:text-indigo-400' :
                             ticket.status === 'Pending' ? 'bg-amber-50 text-amber-600' :
                             'bg-emerald-50 text-emerald-600'
                           }`}>
@@ -125,10 +125,10 @@ export default function Support() {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center justify-end gap-1.5">
-                            <button className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="View">
+                            <button className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" title="View">
                               <Eye size={16} />
                             </button>
-                            <button className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:bg-indigo-500/10 rounded-lg transition" title="Assign">
+                            <button className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:text-indigo-400 hover:bg-purple-50 dark:bg-indigo-500/10 rounded-lg transition" title="Assign">
                               <UserPlus size={16} />
                             </button>
                             <button className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Reply">

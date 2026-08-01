@@ -51,7 +51,7 @@ export default function Notifications() {
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col min-h-[400px]">
         {loading ? (
            <div className="flex justify-center items-center h-64">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+              <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
            </div>
         ) : notifications.length === 0 ? (
            <div className="flex flex-col justify-center items-center h-64 text-slate-500 dark:text-slate-400 text-center px-4">
@@ -69,7 +69,7 @@ export default function Notifications() {
                    initial={{ opacity: 0, x: -10 }} 
                    animate={{ opacity: 1, x: 0 }} 
                    transition={{ delay: idx * 0.05 }}
-                   className={`p-5 flex gap-4 transition-colors hover:bg-slate-50 dark:bg-slate-900/50 ${!notif.isRead ? 'bg-indigo-50 dark:bg-indigo-500/10/30' : ''}`}
+                   className={`p-5 flex gap-4 transition-colors hover:bg-slate-50 dark:bg-slate-900/50 ${!notif.isRead ? 'bg-purple-50 dark:bg-indigo-500/10/30' : ''}`}
                 >
                    <div className="mt-1 shrink-0 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
                       {getIcon(notif.type)}
@@ -77,7 +77,7 @@ export default function Notifications() {
                    <div>
                       <div className="flex items-center gap-2 mb-1">
                          <h4 className="font-bold text-slate-800 dark:text-slate-100">{notif.title}</h4>
-                         {!notif.isRead && <span className="w-2 h-2 rounded-full bg-indigo-600"></span>}
+                         {!notif.isRead && <span className="w-2 h-2 rounded-full bg-purple-600"></span>}
                       </div>
                       <p className="text-slate-600 dark:text-slate-300 text-sm mb-2">{notif.message}</p>
                       <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{formatDate(notif.createdAt)}</p>

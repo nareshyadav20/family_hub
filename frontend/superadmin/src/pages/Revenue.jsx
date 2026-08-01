@@ -29,9 +29,9 @@ export default function Revenue() {
   }, []);
 
   const summaryData = [
-    { name: "Today's Revenue", value: `₹${data.summary.today?.toLocaleString() || 0}`, icon: IndianRupee, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100' },
+    { name: "Today's Revenue", value: `₹${data.summary.today?.toLocaleString() || 0}`, icon: IndianRupee, color: 'text-purple-600 dark:text-indigo-400', bg: 'bg-purple-100' },
     { name: 'This Month', value: `₹${data.summary.thisMonth?.toLocaleString() || 0}`, icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-    { name: 'This Year', value: `₹${data.summary.thisYear?.toLocaleString() || 0}`, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'This Year', value: `₹${data.summary.thisYear?.toLocaleString() || 0}`, icon: Calendar, color: 'text-purple-600', bg: 'bg-purple-100' },
     { name: 'Pending Payments', value: `₹${data.summary.pending?.toLocaleString() || 0}`, icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-100' },
   ];
 
@@ -49,7 +49,7 @@ export default function Revenue() {
 
       {loading ? (
         <div className="flex justify-center items-center h-48">
-           <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+           <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
         </div>
       ) : (
         <>
@@ -119,7 +119,7 @@ export default function Revenue() {
                           <td className="px-6 py-4">
                             <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">{tx.family}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-0.5 rounded-full">{tx.plan}</span>
+                              <span className="text-xs font-semibold text-purple-600 dark:text-indigo-400 bg-purple-50 dark:bg-indigo-500/10 px-2.5 py-0.5 rounded-full">{tx.plan}</span>
                               <span className="text-xs text-slate-500 dark:text-slate-400">{formatDate(tx.createdAt)}</span>
                             </div>
                           </td>

@@ -57,7 +57,7 @@ export default function Login() {
               <input 
                 type="email" 
                 required
-                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
+                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:ring-2 focus:ring-purple-500/20 dark:focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
                 placeholder="administrator@familyhub.os"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -72,7 +72,7 @@ export default function Login() {
               <input 
                 type={showPassword ? "text" : "password"}
                 required 
-                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/50 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
+                className="w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 pl-11 pr-12 focus:outline-none focus:ring-2 focus:ring-purple-500/20 dark:focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-sm"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -93,7 +93,7 @@ export default function Login() {
         </form>
         
         <p className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 mt-8">
-          Not a Super Admin? <Link to="/signup" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold hover:underline underline-offset-4 decoration-indigo-400/30">Request Provisioning</Link>
+          Not a Super Admin? <Link to="/signup" className="text-purple-600 dark:text-indigo-400 hover:text-purple-700 dark:hover:text-indigo-300 font-bold hover:underline underline-offset-4 decoration-indigo-400/30">Request Provisioning</Link>
         </p>
       </div>
     </div>

@@ -45,10 +45,10 @@ export default function AuditLogs() {
 
   const getColorClass = (moduleName) => {
     switch(moduleName?.toLowerCase()) {
-       case 'families': return 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100';
+       case 'families': return 'text-purple-600 dark:text-indigo-400 bg-purple-50 dark:bg-indigo-500/10 border border-indigo-100';
        case 'members': return 'text-emerald-600 bg-emerald-50 border border-emerald-100';
        case 'calendar': return 'text-amber-600 bg-amber-50 border border-amber-100';
-       case 'gallery': return 'text-blue-600 bg-blue-50 border border-blue-100';
+       case 'gallery': return 'text-purple-600 bg-purple-50 border border-blue-100';
        case 'subscription': return 'text-purple-600 bg-purple-50 border border-purple-100';
        default: return 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
     }
@@ -99,7 +99,7 @@ export default function AuditLogs() {
               <button 
                 key={filter} 
                 onClick={() => setActiveFilter(filter)} 
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${activeFilter === filter ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 hover:bg-slate-200/50'}`}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${activeFilter === filter ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 hover:bg-slate-200/50'}`}
               >
                 {filter}
               </button>
@@ -114,7 +114,7 @@ export default function AuditLogs() {
                 placeholder="Search User, Family, or Action..." 
                 className="w-full bg-transparent text-sm outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 font-medium" 
              />
-             <Filter size={18} className="text-slate-400 dark:text-slate-500 ml-2 shrink-0 self-center cursor-pointer hover:text-indigo-600 dark:text-indigo-400 transition-colors" />
+             <Filter size={18} className="text-slate-400 dark:text-slate-500 ml-2 shrink-0 self-center cursor-pointer hover:text-purple-600 dark:text-indigo-400 transition-colors" />
           </div>
         </div>
 
@@ -122,7 +122,7 @@ export default function AuditLogs() {
         <div className="overflow-x-auto min-h-[300px]">
           {loading ? (
              <div className="flex items-center justify-center h-48">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-indigo-400" />
              </div>
           ) : filteredLogs.length === 0 ? (
              <div className="flex flex-col items-center justify-center h-48 text-slate-500 dark:text-slate-400">

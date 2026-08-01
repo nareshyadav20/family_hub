@@ -72,7 +72,7 @@ export default function EmailLogs() {
         </div>
         <button 
           onClick={fetchLogs}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-indigo-500/10 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm font-medium"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh Pipeline
@@ -81,7 +81,7 @@ export default function EmailLogs() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Logged', value: filterStats.total, icon: Mail, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10' },
+          { label: 'Total Logged', value: filterStats.total, icon: Mail, color: 'text-purple-600 dark:text-indigo-400', bg: 'bg-purple-50 dark:bg-indigo-500/10' },
           { label: 'Sent', value: filterStats.sent, icon: Send, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           { label: 'Pending / Retrying', value: filterStats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Failed', value: filterStats.failed, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
@@ -112,7 +112,7 @@ export default function EmailLogs() {
                 key={s}
                 onClick={() => setStatus(s)}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  status === s ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
+                  status === s ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 {s}
@@ -126,7 +126,7 @@ export default function EmailLogs() {
                 key={t}
                 onClick={() => setTimeframe(t)}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                  timeframe === t ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
+                  timeframe === t ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
                 }`}
               >
                 {t}

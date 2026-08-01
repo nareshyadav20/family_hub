@@ -158,7 +158,7 @@ export default function Families() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => navigate(`/families/${family.id}`)} className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
+                        <button onClick={() => navigate(`/families/${family.id}`)} className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="View Details">
                           <Eye className="w-4 h-4" />
                         </button>
                         <button onClick={() => resendWelcomeEmail(family.id)} className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Resend Credentials">
@@ -227,11 +227,11 @@ export default function Families() {
                     setIsOptionModalOpen(false);
                     navigate('/families/create?domainOption=OPTION_1');
                   }}
-                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 hover:shadow-lg transition-all group relative overflow-hidden"
+                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-purple-500 hover:shadow-lg transition-all group relative overflow-hidden animate-all duration-300"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                  <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Globe className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                  <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Globe className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                   </div>
                   <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Family already owns a domain</h4>
                   <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed">
@@ -245,11 +245,11 @@ export default function Families() {
                     setIsOptionModalOpen(false);
                     navigate('/families/create?domainOption=OPTION_2');
                   }}
-                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-indigo-500 hover:shadow-lg transition-all group relative overflow-hidden"
+                  className="flex-1 text-left bg-white dark:bg-slate-800 p-8 rounded-2xl border-2 border-transparent hover:border-purple-500 hover:shadow-lg transition-all group relative overflow-hidden animate-all duration-300"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-                  <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Server className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                  <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Server className="w-7 h-7 text-purple-600 dark:text-purple-400" />
                   </div>
                   <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-3">FamilyHub purchases domain</h4>
                   <p className="text-gray-500 dark:text-slate-400 text-sm leading-relaxed">

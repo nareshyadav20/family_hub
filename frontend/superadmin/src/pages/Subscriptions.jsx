@@ -62,7 +62,7 @@ export default function Subscriptions() {
   const getPlanIcon = (planName) => {
     const p = planName.toLowerCase();
     if (p.includes('premium')) return <Crown className="w-8 h-8 text-purple-600" />;
-    if (p.includes('enterprise')) return <Diamond className="w-8 h-8 text-blue-600" />;
+    if (p.includes('enterprise')) return <Diamond className="w-8 h-8 text-purple-600" />;
     return <CheckCircle className="w-8 h-8 text-emerald-600" />;
   };
 
@@ -96,7 +96,7 @@ export default function Subscriptions() {
               </div>
             )}
             
-            <div className={`p-4 inline-flex rounded-2xl w-max mb-6 ${plan.id === 'premium' ? 'bg-purple-100' : plan.id === 'enterprise' ? 'bg-blue-100' : 'bg-emerald-100'}`}>
+            <div className={`p-4 inline-flex rounded-2xl w-max mb-6 ${plan.id === 'premium' ? 'bg-purple-100' : plan.id === 'enterprise' ? 'bg-purple-100' : 'bg-emerald-100'}`}>
               {getPlanIcon(plan.name)}
             </div>
             
