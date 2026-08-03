@@ -51,6 +51,15 @@ const publicRouter = require('./routes/publicRoutes');
 const domainRoutes = require('./src/routes/domainRoutes');
 app.use('/api/public', publicRouter);
 
+// Alias /api/tenant for generic multi-tenant spec compliance
+app.get('/api/tenant', require('./middleware/resolveFamilyByDomain'), (req, res) => {
+  if (req.family) {
+    res.json(req.family);
+  } else {
+    res.status(404).json({ error: 'Tenant not found' });
+  }
+});
+
 app.use(async (req, res, next) => {
   // Only apply to protected /api/ routes, excluding auth and superadmin
   if (req.path.startsWith('/api/') && !req.path.startsWith('/api/v1/auth') && !req.path.startsWith('/api/v1/superadmin')) {
