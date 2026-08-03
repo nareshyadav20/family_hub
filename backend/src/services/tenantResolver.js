@@ -29,12 +29,28 @@ class TenantResolver {
     // 1. Check FamilyDomain table
     const familyDomain = await prisma.familyDomain.findUnique({
       where: { domainName: hostname },
-      include: { family: true }
+      include: { 
+        family: {
+          include: {
+            members: {
+              where: { role: 'SUPER_ADMIN' },
+              take: 1
+            }
+          }
+        } 
+      }
     });
 
     if (familyDomain) {
-      // We shouldn't block CORS or routing for 'Pending' families, otherwise they can't complete onboarding or login.
-      if (familyDomain.family) {
+      // STRICT VALIDATION
+      const isDomainLive = familyDomain.domainStatus === 'LIVE';
+      const isVerified = familyDomain.verificationStatus === 'VERIFIED';
+      const isDnsVerified = familyDomain.dnsVerified === true;
+      const hasFamily = !!familyDomain.family;
+      const isFamilyActive = hasFamily && familyDomain.family.status === 'Active';
+      const hasSuperAdmin = hasFamily && familyDomain.family.members && familyDomain.family.members.length > 0;
+
+      if (isDomainLive && isVerified && isDnsVerified && hasFamily && isFamilyActive && hasSuperAdmin) {
         family = familyDomain.family;
         domainRecord = familyDomain;
       }
@@ -44,9 +60,23 @@ class TenantResolver {
     if (!family) {
       const legacyFamily = await prisma.family.findUnique({
         where: { customDomain: hostname },
+        include: {
+          members: {
+            where: { role: 'SUPER_ADMIN' },
+            take: 1
+          }
+        }
       });
-      if (legacyFamily) {
+      
+      if (legacyFamily && legacyFamily.status === 'Active' && legacyFamily.members && legacyFamily.members.length > 0) {
         family = legacyFamily;
+        domainRecord = {
+          id: 'legacy',
+          domainName: legacyFamily.customDomain,
+          domainStatus: 'LIVE',
+          verificationStatus: 'VERIFIED',
+          dnsVerified: true
+        };
       }
     }
 
