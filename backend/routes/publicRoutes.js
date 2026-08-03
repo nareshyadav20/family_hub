@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const resolveFamilyByDomain = require('../middleware/resolveFamilyByDomain');
+const resolveTenant = require('../middleware/resolveTenant');
 const {
   getHome,
   getFamily,
@@ -15,7 +15,7 @@ const {
 } = require('../controllers/publicController');
 
 // Apply middleware to all public routes
-router.use(resolveFamilyByDomain);
+router.use(resolveTenant);
 
 router.get('/home', getHome);
 

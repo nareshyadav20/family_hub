@@ -13,6 +13,7 @@ const compression = require('compression');
 
 const prisma = require('./prismaClient');
 const app = express();
+app.set('trust proxy', true);
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -25,36 +26,27 @@ const io = new Server(server, {
 app.set('socketio', io); // Keep accessible globally
 
 app.use(compression());
-const allowedOrigins = [
-  'http://localhost:5173', 
-  'http://localhost:5175', 
-  'https://family.reatchall.com',
-  'https://battula.in'
-];
-
 app.use(cors({
   origin: async function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check static list
-    if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+    if (origin.startsWith('http://localhost:')) {
       return callback(null, true);
     }
 
-    // Dynamic database check for verified tenant domains
     try {
       const hostname = new URL(origin).hostname;
-      const redisClient = require('./redisClient');
+      const tenantResolver = require('./src/services/tenantResolver');
       
-      const familyId = await redisClient.get(`tenant:${hostname}`);
-      if (familyId) return callback(null, true);
+      const tenant = await tenantResolver.resolve(hostname);
       
-      const domain = await prisma.familyDomain.findUnique({ where: { domainName: hostname } });
-      if (domain) return callback(null, true);
+      if (tenant) {
+        return callback(null, true);
+      }
       
       callback(new Error('Origin not allowed by CORS'));
     } catch (err) {
+      console.error('CORS validation error:', err);
       callback(null, false);
     }
   },
@@ -91,7 +83,7 @@ app.use('/api/v1/auth', authLimiter); // Apply auth limiter to all auth routes
 app.use('/api/v1/superadmin/domain', domainOnboardingLimiter); // Protect onboarding
 
 // Alias /api/tenant for generic multi-tenant spec compliance
-app.get('/api/tenant', publicApiLimiter, require('./middleware/resolveFamilyByDomain'), (req, res) => {
+app.get('/api/tenant', publicApiLimiter, require('./middleware/resolveTenant'), (req, res) => {
   if (req.family) {
     res.json(req.family);
   } else {

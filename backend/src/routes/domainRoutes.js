@@ -68,8 +68,9 @@ router.get('/history/:familyId', async (req, res) => {
   }
 });
 
-router.put('/update-status', async (req, res) => {
-  const { domainId, status } = req.body;
+router.put('/domains/:id', async (req, res) => {
+  const domainId = req.params.id;
+  const { status } = req.body;
   try {
     const domainService = require('../services/domainService');
     const prisma = require('../../prismaClient');
@@ -81,8 +82,8 @@ router.put('/update-status', async (req, res) => {
     // Cache invalidation
     try {
       const redisClient = require('../../redisClient');
-      await redisClient.del(`tenant:${updated.domainName}`);
-      console.log(`[Cache] Cleared tenant:${updated.domainName} due to status update`);
+      await redisClient.del(`tenant-domain:${updated.domainName}`);
+      console.log(`[Cache] Cleared tenant-domain:${updated.domainName} due to status update`);
     } catch(e) {}
 
     res.json({ success: true, data: updated, message: `Status updated to ${status}` });
@@ -91,19 +92,19 @@ router.put('/update-status', async (req, res) => {
   }
 });
 
-router.delete('/delete/:domainId', async (req, res) => {
+router.delete('/domains/:id', async (req, res) => {
   try {
     const prisma = require('../../prismaClient');
     // Fetch the domain first to get the domainName for cache invalidation
-    const domain = await prisma.familyDomain.findUnique({ where: { id: req.params.domainId } });
+    const domain = await prisma.familyDomain.findUnique({ where: { id: req.params.id } });
     if (domain) {
-      await prisma.familyDomain.delete({ where: { id: req.params.domainId } });
+      await prisma.familyDomain.delete({ where: { id: req.params.id } });
       
       // Cache invalidation
       try {
         const redisClient = require('../../redisClient');
-        await redisClient.del(`tenant:${domain.domainName}`);
-        console.log(`[Cache] Cleared tenant:${domain.domainName} due to deletion`);
+        await redisClient.del(`tenant-domain:${domain.domainName}`);
+        console.log(`[Cache] Cleared tenant-domain:${domain.domainName} due to deletion`);
       } catch(e) {}
     }
     res.json({ success: true, message: 'Domain deleted' });
