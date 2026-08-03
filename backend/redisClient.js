@@ -4,9 +4,11 @@ const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: {
     reconnectStrategy: (retries) => {
-      // Exponential backoff, max 3 seconds
-      const delay = Math.min(retries * 100, 3000);
-      return delay;
+      if (retries > 5) {
+        console.warn('❌ [Redis] Max connection retries reached. Redis cache is disabled.');
+        return new Error('Max retries reached'); // Stops further reconnect attempts
+      }
+      return Math.min(retries * 100, 3000);
     }
   }
 });

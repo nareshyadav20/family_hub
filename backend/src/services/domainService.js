@@ -94,7 +94,7 @@ class DomainService {
         await domainRepository.updateDomainStatus(tx, domainId, {
           dnsVerified: true,
           verificationStatus: 'VERIFIED',
-          domainStatus: 'DNS_VERIFIED',
+          domainStatus: 'DNS_CONFIGURED',
           verifiedAt: new Date()
         });
 

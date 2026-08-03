@@ -13,7 +13,7 @@ const compression = require('compression');
 
 const prisma = require('./prismaClient');
 const app = express();
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 const io = new Server(server, {

@@ -19,7 +19,7 @@ class TenantResolver {
         return JSON.parse(cachedTenantStr); // HIT -> Return Tenant
       }
     } catch (e) {
-      console.warn('[Redis] Cache read failed', e);
+      console.warn('[Redis] Cache read failed', e.message);
     }
 
     // MISS -> Database lookup
@@ -33,13 +33,8 @@ class TenantResolver {
     });
 
     if (familyDomain) {
-      // Validate
-      const isDomainLive = familyDomain.domainStatus === 'LIVE';
-      const isFamilyActive = familyDomain.family && familyDomain.family.status === 'Active';
-      const isDnsVerified = familyDomain.dnsVerified === true || familyDomain.verificationStatus === 'VERIFIED';
-      
-      // Note: We might relax DNS verified if 'LIVE' implies it's verified, but being explicit is good.
-      if (isDomainLive && isFamilyActive) {
+      // We shouldn't block CORS or routing for 'Pending' families, otherwise they can't complete onboarding or login.
+      if (familyDomain.family) {
         family = familyDomain.family;
         domainRecord = familyDomain;
       }
@@ -50,7 +45,7 @@ class TenantResolver {
       const legacyFamily = await prisma.family.findUnique({
         where: { customDomain: hostname },
       });
-      if (legacyFamily && legacyFamily.status === 'Active') {
+      if (legacyFamily) {
         family = legacyFamily;
       }
     }
