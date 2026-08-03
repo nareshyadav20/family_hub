@@ -1330,6 +1330,18 @@ app.get('/api/test/brevo', async (req, res) => {
   }
 });
 
+// --- Frontend SPA Serving & Tenant Validation ---
+// We serve static assets (js, css, images) without index.html so we can strictly validate tenants on page load.
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath, { index: false }));
+
+// The SPA fallback MUST validate the tenant before serving the React application.
+const resolveTenant = require('./middleware/resolveTenant');
+app.get(/(.*)/, resolveTenant, (req, res) => {
+  // If resolveTenant fails, it returns 404 and this code is never reached.
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 const domainWorker = require('./workers/domainWorker');
 domainWorker();
 
