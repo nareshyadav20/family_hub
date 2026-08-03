@@ -8,9 +8,8 @@ export default defineConfig({
   server: {
     port: 5175,
     strictPort: true,
-    allowedHosts: ["family.reatchall.com"],
+    allowedHosts: ["family.reatchall.com", "battula.in"],
     
-
   },
   css: {
     postcss: {}
