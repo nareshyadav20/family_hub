@@ -77,6 +77,14 @@ router.put('/update-status', async (req, res) => {
       where: { id: domainId },
       data: { domainStatus: status }
     });
+    
+    // Cache invalidation
+    try {
+      const redisClient = require('../../redisClient');
+      await redisClient.del(`tenant:${updated.domainName}`);
+      console.log(`[Cache] Cleared tenant:${updated.domainName} due to status update`);
+    } catch(e) {}
+
     res.json({ success: true, data: updated, message: `Status updated to ${status}` });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -86,7 +94,18 @@ router.put('/update-status', async (req, res) => {
 router.delete('/delete/:domainId', async (req, res) => {
   try {
     const prisma = require('../../prismaClient');
-    await prisma.familyDomain.delete({ where: { id: req.params.domainId } });
+    // Fetch the domain first to get the domainName for cache invalidation
+    const domain = await prisma.familyDomain.findUnique({ where: { id: req.params.domainId } });
+    if (domain) {
+      await prisma.familyDomain.delete({ where: { id: req.params.domainId } });
+      
+      // Cache invalidation
+      try {
+        const redisClient = require('../../redisClient');
+        await redisClient.del(`tenant:${domain.domainName}`);
+        console.log(`[Cache] Cleared tenant:${domain.domainName} due to deletion`);
+      } catch(e) {}
+    }
     res.json({ success: true, message: 'Domain deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

@@ -8,6 +8,7 @@ const nginxService = require('./nginxService');
 const workflowService = require('./workflowService');
 const eventService = require('./eventService');
 const { sendInstantEmail } = require('../../services/emailService');
+const redisClient = require('../../redisClient');
 
 class DomainService {
   generateVerificationToken() {
@@ -247,6 +248,14 @@ class DomainService {
 
       return d;
     });
+
+    // Invalidate Redis Cache
+    try {
+      await redisClient.del(`tenant:${domain.domainName}`);
+      console.log(`[Domain Service] Cleared Redis cache for tenant:${domain.domainName}`);
+    } catch (err) {
+      console.error(`[Domain Service] Failed to clear Redis cache for tenant:${domain.domainName}`, err);
+    }
 
     // Notify Super Admins
     try {
