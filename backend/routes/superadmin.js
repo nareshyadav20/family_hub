@@ -256,6 +256,13 @@ router.put('/families/:id/status', async (req, res) => {
       data: { user: 'Super Admin', action: 'Updated Family Status', module: 'Families', details: `Updated Family ID: ${id} status to ${status}` }
     });
 
+    // Invalidate caches for all domains associated with this family
+    const familyDomains = await prisma.familyDomain.findMany({ where: { familyId: id } });
+    const tenantResolver = require('../src/services/tenantResolver');
+    for (const d of familyDomains) {
+      await tenantResolver.invalidateTenantCache(d.domainName);
+    }
+
     res.json({ success: true, data: updatedFamily, message: 'Family status updated successfully' });
   } catch (error) {
     console.error('Error updating family status:', error);

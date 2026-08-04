@@ -108,6 +108,15 @@ class TenantResolver {
       return null;
     }
   }
+  async invalidateTenantCache(domainName) {
+    if (!domainName) return;
+    try {
+      await redisClient.del(`tenant-domain:${domainName}`);
+      console.log(`[Redis] Cleared cache for ${domainName}`);
+    } catch (err) {
+      console.error('[Redis] Cache invalidation failed', err);
+    }
+  }
 }
 
 module.exports = new TenantResolver();

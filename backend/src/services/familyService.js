@@ -140,6 +140,10 @@ class FamilyService {
       return { family, adminUser, domain: createdDomain, dnsRecords: [txtRecord, cnameRecord] };
     }, { maxWait: 10000, timeout: 20000 });
 
+    // Clear stale cache for newly created domain
+    const tenantResolver = require('./tenantResolver');
+    await tenantResolver.invalidateTenantCache(cleanDomain);
+
     // Send Welcome Email Async
     try {
       await sendFamilyAdminEmail(

@@ -7,6 +7,7 @@ const sslService = require('./sslService');
 const nginxService = require('./nginxService');
 const workflowService = require('./workflowService');
 const eventService = require('./eventService');
+const tenantResolver = require('./tenantResolver');
 const { sendInstantEmail } = require('../../services/emailService');
 const redisClient = require('../../redisClient');
 
@@ -50,6 +51,7 @@ class DomainService {
       return d;
     });
 
+    await tenantResolver.invalidateTenantCache(domain.domainName);
     return updated;
   }
 
@@ -114,6 +116,8 @@ class DomainService {
           triggeredBy: req.user ? req.user.userId : 'SYSTEM_WORKER'
         });
       });
+
+      await tenantResolver.invalidateTenantCache(domain.domainName);
 
       // Automatically trigger SSL provisioning
       return this.provisionSsl(domainId, req);
@@ -180,6 +184,7 @@ class DomainService {
         return d;
       });
 
+      await tenantResolver.invalidateTenantCache(domain.domainName);
       // Automatically trigger Website Activation
       return this.activateWebsite(domainId, req);
     } catch (err) {
@@ -249,13 +254,8 @@ class DomainService {
       return d;
     });
 
-    // Invalidate Redis Cache
-    try {
-      await redisClient.del(`tenant:${domain.domainName}`);
-      console.log(`[Domain Service] Cleared Redis cache for tenant:${domain.domainName}`);
-    } catch (err) {
-      console.error(`[Domain Service] Failed to clear Redis cache for tenant:${domain.domainName}`, err);
-    }
+    // Invalidate Redis Cache using helper
+    await tenantResolver.invalidateTenantCache(domain.domainName);
 
     // Notify Super Admins
     try {
