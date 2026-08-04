@@ -79,6 +79,7 @@ export default function TenantGuard({ children }) {
 
       // 2. Fetch from Backend
       const response = await axios.get(`${API_BASE_URL}/api/tenant`, {
+        params: { domain: hostname },
         // Prevent axios interceptors from redirecting to login on 401/403 for this call
         validateStatus: (status) => status < 500
       });

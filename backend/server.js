@@ -36,8 +36,13 @@ app.use(cors({
 
     try {
       const hostname = new URL(origin).hostname;
-      const tenantResolver = require('./src/services/tenantResolver');
       
+      // Allow main domain and all its subdomains to proceed so that endpoints can handle the 404 logic
+      if (hostname === 'brevolt.in' || hostname.endsWith('.brevolt.in') || hostname === 'familyhub.com' || hostname.endsWith('.familyhub.com')) {
+        return callback(null, true);
+      }
+
+      const tenantResolver = require('./src/services/tenantResolver');
       const tenant = await tenantResolver.resolve(hostname);
       
       if (tenant) {
