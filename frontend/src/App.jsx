@@ -7,6 +7,7 @@ import { globalLogout } from './utils/auth';
 
 import PageLoader from './components/loaders/PageLoader';
 import Splash from './components/Splash';
+import TenantGuard from './components/TenantGuard';
 
 /* --- CRITICAL ROUTES (Static Imports) --- */
 import AdminMainLayout from './layouts/MainLayout';
@@ -430,7 +431,9 @@ function App() {
          <Splash onFinish={() => setShowSplash(false)} />
        ) : (
          <Suspense fallback={<PageLoader />}>
-           <AppLayer />
+           <TenantGuard>
+             <AppLayer />
+           </TenantGuard>
          </Suspense>
        )}
        <Toaster position="top-right" />

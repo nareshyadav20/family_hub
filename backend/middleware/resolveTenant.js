@@ -22,7 +22,7 @@ const resolveTenant = async (req, res, next) => {
     const tenant = await tenantResolver.resolve(hostname);
 
     if (!tenant) {
-      const isMainDomain = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'familyhub.com' || hostname.includes('localhost:');
+      const isMainDomain = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'familyhub.com' || hostname === 'brevolt.in' || hostname === 'www.brevolt.in' || hostname.includes('localhost:');
       if (isMainDomain) {
         return res.status(200).json({
           success: true,
