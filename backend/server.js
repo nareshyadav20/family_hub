@@ -1333,6 +1333,17 @@ app.get('/api/test/brevo', async (req, res) => {
 // --- Frontend SPA Serving & Tenant Validation ---
 // We serve static assets (js, css, images) without index.html so we can strictly validate tenants on page load.
 const frontendPath = path.join(__dirname, '../frontend/dist');
+
+// ROOT CAUSE FIX: Prevent direct access to index.html from SPA fallbacks (Nginx/CloudFront).
+// If a proxy catches a 404 and asks for /index.html directly, express.static would serve it, bypassing tenant validation.
+app.use((req, res, next) => {
+  if (req.path === '/index.html') {
+    // Rewrite to '/' so express.static ignores it (due to index: false) and it falls through to resolveTenant
+    req.url = '/';
+  }
+  next();
+});
+
 app.use(express.static(frontendPath, { index: false }));
 
 // The SPA fallback MUST validate the tenant before serving the React application.

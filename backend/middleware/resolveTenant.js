@@ -37,7 +37,7 @@ const resolveTenant = async (req, res, next) => {
           members: []
         });
       }
-      return res.status(404).json({ success: false, message: 'Tenant not found' });
+      return res.status(404).json({ success: false, message: 'Family Not Found' });
     }
 
     req.tenant = tenant;
