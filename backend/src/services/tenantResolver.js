@@ -33,7 +33,11 @@ class TenantResolver {
         family: {
           include: {
             members: {
-              where: { role: 'SUPER_ADMIN' },
+              where: {
+                role: {
+                  in: ['SUPER_ADMIN', 'ADMIN']
+                }
+              },
               take: 1
             }
           }

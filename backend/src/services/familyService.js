@@ -56,7 +56,7 @@ class FamilyService {
           email: admin.email,
           phone: admin.phone || null,
           password: hashedPassword,
-          role: 'ADMIN',
+          role: 'SUPER_ADMIN',
           isTemporaryPassword: true,
           mustChangePassword: true,
           status: 'ACTIVE'

@@ -63,7 +63,7 @@ router.post('/families', async (req, res) => {
           email: adminEmail,
           phone: adminMobile || null,
           password: hashedPassword,
-          role: 'ADMIN', // Wait, earlier schema says role ADMIN for family admin
+          role: 'SUPER_ADMIN', // changed from ADMIN to SUPER_ADMIN to fix tenant validation
           familyId: family.id,
           isTemporaryPassword: true,
           mustChangePassword: true,
@@ -98,7 +98,7 @@ router.post('/families/resend-email', async (req, res) => {
   try {
     const family = await prisma.family.findUnique({
       where: { id: familyId },
-      include: { members: { where: { role: 'ADMIN' } } }
+      include: { members: { where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } } }
     });
 
     if (!family || !family.members || family.members.length === 0) {
@@ -148,7 +148,7 @@ router.get('/families', async (req, res) => {
     const families = await prisma.family.findMany({
       include: {
         members: {
-          where: { role: 'ADMIN' }
+          where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } }
         },
         _count: {
           select: { members: true }
@@ -267,7 +267,7 @@ router.put('/families/:id/status', async (req, res) => {
 router.get('/dashboard/stats', async (req, res) => {
   try {
     const totalFamilies = await prisma.family.count();
-    const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
+    const totalAdmins = await prisma.user.count({ where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } });
     const totalMembers = await prisma.user.count({ where: { role: 'MEMBER' } });
 
     // Mock other values for now
@@ -636,7 +636,7 @@ router.delete('/support/:id', async (req, res) => {
 router.get('/settings', async (req, res) => {
   try {
     const totalFamilies = await prisma.family.count();
-    const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
+    const totalAdmins = await prisma.user.count({ where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } });
     const totalMembers = await prisma.user.count({ where: { role: 'MEMBER' } });
     const totalEvents = await prisma.event.count();
     const totalDocuments = await prisma.document.count();

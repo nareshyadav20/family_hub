@@ -5,7 +5,7 @@ class FamilyRepository {
     return prisma.family.findUnique({
       where: { id },
       include: {
-        members: { where: { role: 'ADMIN' } },
+        members: { where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } } },
         domains: true
       }
     });
