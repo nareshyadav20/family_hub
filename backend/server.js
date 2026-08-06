@@ -37,6 +37,10 @@ app.use(cors({
     try {
       const hostname = new URL(origin).hostname;
       
+      if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '13.204.75.91') {
+        return callback(null, true);
+      }
+
       // Allow main domain and all its subdomains to proceed so that endpoints can handle the 404 logic
       if (hostname === 'brevolt.in' || hostname.endsWith('.brevolt.in') || hostname === 'familyhub.com' || hostname.endsWith('.familyhub.com')) {
         return callback(null, true);
