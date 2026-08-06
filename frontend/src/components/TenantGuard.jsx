@@ -14,16 +14,10 @@ function DomainNotFound() {
         <div className="w-20 h-20 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
           <ShieldAlert className="w-10 h-10 text-rose-600 dark:text-rose-400" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Domain Not Found</h1>
-        <p className="text-slate-500 dark:text-slate-400 mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">404 Not Found</h1>
+        <p className="text-slate-500 dark:text-slate-400 mb-4">
           The requested family workspace could not be found. Please check the URL and try again.
         </p>
-        <button
-          onClick={() => window.location.href = 'https://brevolt.in'}
-          className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold rounded-xl transition-all duration-200 shadow-lg"
-        >
-          Go to Homepage
-        </button>
       </div>
     </div>
   );
