@@ -140,12 +140,29 @@ class DomainService {
   }
 
   async provisionSsl(domainId, req) {
+    // We redirect to the new sequential provisionAndActivate workflow
+    return this.provisionAndActivate(domainId, req);
+  }
+
+  async provisionAndActivate(domainId, req) {
     const domain = await domainRepository.findDomainById(domainId);
     if (!domain) throw new Error('Domain not found');
 
     const io = req.app ? req.app.get('socketio') : null;
 
     try {
+      // 1. Generate HTTP-only Nginx Config (for Certbot webroot)
+      await workflowService.advanceStep(prisma, io, {
+        domainId,
+        familyId: domain.familyId,
+        step: 'TENANT_MAPPING',
+        status: 'IN_PROGRESS',
+        remarks: 'Creating HTTP Nginx config for Certbot verification'
+      });
+
+      await nginxService.applyTenantMapping(domain.domainName, domain.familyId, false); // sslReady = false
+
+      // 2. Generate SSL Certificate
       await workflowService.advanceStep(prisma, io, {
         domainId,
         familyId: domain.familyId,
@@ -156,13 +173,31 @@ class DomainService {
 
       const sslResult = await sslService.provisionSslCertificate(domain.domainName);
 
+      // 3. Generate HTTPS Nginx Config (now that Certbot generated certs)
+      await workflowService.advanceStep(prisma, io, {
+        domainId,
+        familyId: domain.familyId,
+        step: 'TENANT_MAPPING',
+        status: 'IN_PROGRESS',
+        remarks: 'Upgrading Nginx config to HTTPS'
+      });
+
+      await nginxService.applyTenantMapping(domain.domainName, domain.familyId, true); // sslReady = true
+
+      // 4. Update Database Status to ACTIVE
       const updated = await prisma.$transaction(async (tx) => {
         const d = await domainRepository.updateDomainStatus(tx, domainId, {
           sslStatus: 'ACTIVE',
           sslIssuedAt: sslResult.sslIssuedAt,
           sslExpiresAt: sslResult.sslExpiresAt,
           sslRenewalDate: sslResult.sslRenewalDate,
-          domainStatus: 'SSL_ENABLED'
+          domainStatus: 'LIVE',
+          connectedAt: new Date()
+        });
+
+        await tx.family.update({
+          where: { id: domain.familyId },
+          data: { status: 'Active' }
         });
 
         await workflowService.advanceStep(tx, io, {
@@ -173,109 +208,82 @@ class DomainService {
           remarks: 'SSL certificate issued successfully'
         });
 
+        await workflowService.advanceStep(tx, io, {
+          domainId,
+          familyId: domain.familyId,
+          step: 'TENANT_MAPPING',
+          status: 'COMPLETED',
+          remarks: 'HTTPS Tenant mapping applied to reverse proxy'
+        });
+
+        await workflowService.advanceStep(tx, io, {
+          domainId,
+          familyId: domain.familyId,
+          step: 'WEBSITE_LIVE',
+          status: 'COMPLETED',
+          remarks: `Website is live at https://${domain.domainName}`
+        });
+
         await eventService.logEvent(tx, io, {
           domainId,
           familyId: domain.familyId,
-          eventType: 'SSL_GENERATED',
-          message: `SSL certificate issued by ${sslResult.issuer}. Expires: ${sslResult.sslExpiresAt.toISOString()}`,
+          eventType: 'WEBSITE_ACTIVATED',
+          message: `Website is now LIVE at https://${domain.domainName}`,
           triggeredBy: req.user ? req.user.userId : 'SYSTEM_WORKER'
         });
 
         return d;
       });
 
+      // 5. Invalidate Tenant Cache
       await tenantResolver.invalidateTenantCache(domain.domainName);
-      // Automatically trigger Website Activation
-      return this.activateWebsite(domainId, req);
+
+      // 6. Send Success Email ONLY after full success
+      try {
+        const superAdmins = await prisma.user.findMany({ where: { role: 'SUPER_ADMIN' } });
+        for (const sa of superAdmins) {
+          await sendInstantEmail(
+            sa.email,
+            `FamilyHub Website Live: ${domain.domainName}`,
+            `<p>Domain <strong>${domain.domainName}</strong> has completed full onboarding and is now LIVE!</p>`
+          );
+        }
+      } catch (err) {
+        console.error('Failed sending activation alert email:', err);
+      }
+
+      return {
+        success: true,
+        domain: updated,
+        message: `Domain ${domain.domainName} is now live!`
+      };
+
     } catch (err) {
+      // 7. Rollback on Failure
+      console.error(`[DomainService] Provisioning failed for ${domain.domainName}:`, err.message);
       await eventService.logEvent(prisma, io, {
         domainId,
         familyId: domain.familyId,
-        eventType: 'SSL_FAILED',
+        eventType: 'PROVISIONING_FAILED',
         severity: 'ERROR',
-        message: `SSL provisioning failed for ${domain.domainName}: ${err.message}`,
+        message: `Provisioning failed: ${err.message}. Rolling back.`,
         triggeredBy: req.user ? req.user.userId : 'SYSTEM_WORKER'
       });
+
+      await nginxService.rollbackTenantMapping(domain.domainName);
+      
+      await prisma.familyDomain.update({
+        where: { id: domainId },
+        data: { domainStatus: 'FAILED', errorCode: 'PROVISIONING_ERROR', errorMessage: err.message }
+      });
+
       throw err;
     }
   }
 
   async activateWebsite(domainId, req) {
-    const domain = await domainRepository.findDomainById(domainId);
-    if (!domain) throw new Error('Domain not found');
-
-    const io = req.app ? req.app.get('socketio') : null;
-
-    await workflowService.advanceStep(prisma, io, {
-      domainId,
-      familyId: domain.familyId,
-      step: 'TENANT_MAPPING',
-      status: 'IN_PROGRESS',
-      remarks: 'Updating reverse proxy routing table'
-    });
-
-    const nginxResult = await nginxService.applyTenantMapping(domain.domainName, domain.familyId);
-
-    const updated = await prisma.$transaction(async (tx) => {
-      const d = await domainRepository.updateDomainStatus(tx, domainId, {
-        domainStatus: 'LIVE',
-        connectedAt: new Date()
-      });
-
-      await tx.family.update({
-        where: { id: domain.familyId },
-        data: { status: 'Active' }
-      });
-
-      await workflowService.advanceStep(tx, io, {
-        domainId,
-        familyId: domain.familyId,
-        step: 'TENANT_MAPPING',
-        status: 'COMPLETED',
-        remarks: 'Tenant mapping applied to reverse proxy'
-      });
-
-      await workflowService.advanceStep(tx, io, {
-        domainId,
-        familyId: domain.familyId,
-        step: 'WEBSITE_LIVE',
-        status: 'COMPLETED',
-        remarks: `Website is live at https://${domain.domainName}`
-      });
-
-      await eventService.logEvent(tx, io, {
-        domainId,
-        familyId: domain.familyId,
-        eventType: 'WEBSITE_ACTIVATED',
-        message: `Website is now LIVE at https://${domain.domainName}`,
-        triggeredBy: req.user ? req.user.userId : 'SYSTEM_WORKER'
-      });
-
-      return d;
-    });
-
-    // Invalidate Redis Cache using helper
-    await tenantResolver.invalidateTenantCache(domain.domainName);
-
-    // Notify Super Admins
-    try {
-      const superAdmins = await prisma.user.findMany({ where: { role: 'SUPER_ADMIN' } });
-      for (const sa of superAdmins) {
-        await sendInstantEmail(
-          sa.email,
-          `FamilyHub Website Live: ${domain.domainName}`,
-          `<p>Domain <strong>${domain.domainName}</strong> has completed full onboarding and is now LIVE!</p>`
-        );
-      }
-    } catch (err) {
-      console.error('Failed sending activation alert email:', err);
-    }
-
-    return {
-      success: true,
-      domain: updated,
-      message: `Domain ${domain.domainName} is now live!`
-    };
+    // Deprecated. Handled by provisionAndActivate.
+    return { success: true, message: 'Deprecated' };
   }
 
   async purchaseDomainWorkflow(req, { familyId, domainName, registrationYears, contacts }) {
