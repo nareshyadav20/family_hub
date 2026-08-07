@@ -5,8 +5,9 @@ const fs = require('fs');
 const prisma = require('../../prismaClient');
 
 // The IP address of this server that domains should point to.
-const SERVER_IP = process.env.SERVER_PUBLIC_IP || '13.204.75.91'; 
-const LOG_FILE_PATH = '/var/log/domain-provisioning.log';
+const SERVER_IP = process.env.SERVER_PUBLIC_IP || '13.204.75.91';
+const isLinux = process.platform === 'linux';
+const LOG_FILE_PATH = isLinux ? '/var/log/domain-provisioning.log' : path.join(__dirname, '../../domain-provisioning.log');
 
 // Helper for DB and File logging
 async function dbLog(domainId, step, status, message) {
@@ -43,6 +44,11 @@ function isValidDomainFormat(domain) {
  * Supports A, AAAA, and CNAME.
  */
 async function verifyDNS(domain) {
+  // Allow local testing to bypass DNS checks
+  if (process.env.NODE_ENV !== 'production') {
+    return true;
+  }
+
   try {
     // 1. Try A record
     try {
@@ -101,7 +107,7 @@ async function processDomain(domainData) {
   // 1. DNS Verification
   await dbLog(id, 'DNS_CHECK', 'PENDING', `Verifying DNS for ${domainName}`);
   const dnsValid = await verifyDNS(domainName);
-  
+
   if (!dnsValid) {
     await prisma.familyDomain.update({
       where: { id },
@@ -122,7 +128,7 @@ async function processDomain(domainData) {
   return new Promise((resolve, reject) => {
     // Determine script path (using the one in our local structure)
     const scriptPath = path.resolve(__dirname, '../../../scripts/provision-domain.sh');
-    
+
     // Spawn the script with the domain name as an argument
     const provisionProcess = spawn('bash', [scriptPath, domainName]);
 
@@ -139,9 +145,9 @@ async function processDomain(domainData) {
 
     provisionProcess.on('close', async (code) => {
       console.log(`[ProvisioningService] Script exited with code ${code}`);
-      
+
       const fullLog = `STDOUT:\n${stdoutData}\nSTDERR:\n${stderrData}`;
-      
+
       if (code === 0) {
         // Success
         await prisma.familyDomain.update({
@@ -159,7 +165,7 @@ async function processDomain(domainData) {
         // Handle failure codes
         let errorStatus = 'FAILED';
         let errorCodeStr = 'UNKNOWN_ERROR';
-        
+
         switch (code) {
           case 10: errorCodeStr = 'INVALID_DOMAIN'; break;
           case 11: errorCodeStr = 'DNS_NOT_CONFIGURED'; break;
@@ -169,8 +175,8 @@ async function processDomain(domainData) {
           case 15: errorCodeStr = 'NGINX_TEST_FAILED'; break;
           case 16: errorCodeStr = 'SSL_CERT_FAILED'; break;
           case 17: errorCodeStr = 'NGINX_RELOAD_FAILED'; break;
-          case 18: 
-            errorCodeStr = 'ROLLBACK_FAILED'; 
+          case 18:
+            errorCodeStr = 'ROLLBACK_FAILED';
             errorStatus = 'ROLLBACK_FAILED';
             break;
           default: errorCodeStr = `EXIT_CODE_${code}`; break;
@@ -185,7 +191,7 @@ async function processDomain(domainData) {
             errorMessage: `Script failed with code ${code}. Check logs.`
           }
         });
-        
+
         await dbLog(id, 'BASH_SCRIPT', 'FAILED', fullLog.substring(0, 4000)); // Store truncated logs
         reject(new Error(errorCodeStr));
       }
