@@ -77,7 +77,7 @@ server {
 
   async applyTenantMapping(domainName, familyId, sslReady = false) {
     const cleanDomain = domainName.replace(/^(https?:\/\/)?(www\.)?/, '').trim().toLowerCase();
-    const configContent = this.generateVhostConfig(cleanDomain, familyId, 5000, sslReady);
+    const configContent = this.generateVhostConfig(cleanDomain, familyId, 5173, sslReady);
 
     const availablePath = path.join(this.nginxAvailableDir, `${cleanDomain}.conf`);
     const enabledPath = path.join(this.nginxEnabledDir, `${cleanDomain}.conf`);
