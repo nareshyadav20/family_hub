@@ -12,6 +12,9 @@ const crypto = require('crypto');
 const compression = require('compression');
 
 const prisma = require('./prismaClient');
+
+// Initialize background workers
+require('./src/jobs/domainProvisioningQueue');
 const app = express();
 app.set('trust proxy', 1);
 const server = http.createServer(app);

@@ -5,6 +5,7 @@ const familyRepository = require('../repositories/familyRepository');
 const domainRepository = require('../repositories/domainRepository');
 const workflowService = require('./workflowService');
 const eventService = require('./eventService');
+const { enqueueDomainProvisioning } = require('../jobs/domainProvisioningQueue');
 const { sendFamilyAdminEmail } = require('../../services/emailService');
 
 class FamilyService {
@@ -143,6 +144,15 @@ class FamilyService {
     // Clear stale cache for newly created domain
     const tenantResolver = require('./tenantResolver');
     await tenantResolver.invalidateTenantCache(cleanDomain);
+
+    // Queue Domain Provisioning
+    if (result.domain && result.domain.id) {
+      try {
+        await enqueueDomainProvisioning(result.domain.id, cleanDomain);
+      } catch (queueErr) {
+        console.error('[Family Service] Failed to queue domain provisioning:', queueErr);
+      }
+    }
 
     // Send Welcome Email Async
     try {

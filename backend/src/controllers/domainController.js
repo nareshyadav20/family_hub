@@ -44,16 +44,18 @@ class DomainController {
       });
       return res.status(201).json({
         success: true,
-        message: 'Domain created successfully',
-        data: result.domain,
-        errors: null
+        status: "QUEUED",
+        code: "PROVISIONING_QUEUED",
+        message: "Provisioning started.",
+        data: result.domain
       });
     } catch (err) {
       return res.status(400).json({
         success: false,
+        status: "FAILED",
+        code: "CREATION_FAILED",
         message: err.message,
-        data: null,
-        errors: [err.message]
+        data: null
       });
     }
   }

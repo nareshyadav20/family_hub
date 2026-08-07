@@ -44,6 +44,16 @@ enum DomainStatus {
   FAILED
 }
 
+enum ProvisioningStatus {
+  PENDING
+  DNS_PENDING
+  QUEUED
+  PROVISIONING
+  ACTIVE
+  FAILED
+  ROLLBACK_FAILED
+}
+
 enum SSLStatus {
   PENDING
   ACTIVE
@@ -675,6 +685,15 @@ model FamilyDomain {
   purchaseDate      DateTime?
 
   domainStatus      DomainStatus @default(PENDING_SETUP)
+  provisioningStatus ProvisioningStatus @default(PENDING)
+  errorCode          String?
+  errorMessage       String?     @db.Text
+  provisionStartedAt DateTime?
+  provisionCompletedAt DateTime?
+  retryCount         Int         @default(0)
+  lastCheckedAt      DateTime?
+  isLocked           Boolean     @default(false)
+
   migrationRequired Boolean      @default(false)
   notes             String?      @db.Text
 
@@ -694,19 +713,35 @@ model FamilyDomain {
   deletedAt DateTime?
 
   family        Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  histories     DomainHistory[]
-  contacts      DomainContact[]
-  dnsRecords    DomainDnsRecord[]
-  workflows     DomainWorkflow[]
-  events        DomainEvent[]
-  healthChecks  DomainHealth[]
-  devOpsTickets DevOpsTicket[]
+  histories         DomainHistory[]
+  contacts          DomainContact[]
+  dnsRecords        DomainDnsRecord[]
+  workflows         DomainWorkflow[]
+  events            DomainEvent[]
+  healthChecks      DomainHealth[]
+  devOpsTickets     DevOpsTicket[]
+  provisioningLogs  ProvisioningLog[]
 
   @@index([familyId])
   @@index([domainName])
   @@index([domainStatus])
+  @@index([provisioningStatus])
   @@index([deletedAt])
   @@map("family_domains")
+}
+
+model ProvisioningLog {
+  id             String       @id @default(cuid())
+  domainId       String
+  step           String
+  status         String
+  message        String?      @db.Text
+  createdAt      DateTime     @default(now())
+  
+  familyDomain   FamilyDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@map("provisioning_logs")
 }
 
 model DomainHistory {
