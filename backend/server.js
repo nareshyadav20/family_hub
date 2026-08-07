@@ -42,7 +42,7 @@ app.use(cors({
       }
 
       // Allow main domain and all its subdomains to proceed so that endpoints can handle the 404 logic
-      if (hostname === 'brevolt.in' || hostname.endsWith('.brevolt.in') || hostname === 'familyhub.com' || hostname.endsWith('.familyhub.com')) {
+      if (hostname === 'careertransform.in' || hostname.endsWith('.careertransform.in') || hostname === 'brevolt.in' || hostname.endsWith('.brevolt.in') || hostname === 'familyhub.com' || hostname.endsWith('.familyhub.com')) {
         return callback(null, true);
       }
 
@@ -144,6 +144,14 @@ app.use('/api/v1/new-domains', newDomainRoutes);
 app.use('/api/v1', domainRoutes);
 app.use('/api/google', googleCalendarRouter);
 app.use('/api/public', publicRouter);
+
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    service: "CareerTransform API",
+    version: "1.0"
+  });
+});
 
 app.get('/api/test-instant-email', async (req, res) => {
   try {

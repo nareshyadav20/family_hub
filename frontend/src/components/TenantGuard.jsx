@@ -51,8 +51,27 @@ export default function TenantGuard({ children }) {
   const checkTenant = async () => {
     setStatus('loading');
     try {
-      // 1. Check Cache
       const hostname = window.location.hostname;
+      
+      const MAIN_DOMAINS = [
+        "careertransform.in",
+        "www.careertransform.in",
+        "superadmin.careertransform.in",
+        "api.careertransform.in",
+        "localhost",
+        "127.0.0.1",
+        "familyhub.com",
+        "brevolt.in",
+        "www.brevolt.in",
+        "13.204.75.91"
+      ];
+
+      if (MAIN_DOMAINS.includes(hostname) || hostname.includes('localhost:')) {
+        setStatus('valid');
+        return;
+      }
+
+      // 1. Check Cache
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         try {

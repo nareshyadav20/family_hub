@@ -21,8 +21,21 @@ const resolveTenant = async (req, res, next) => {
 
     const tenant = await tenantResolver.resolve(hostname);
 
+    const MAIN_DOMAINS = [
+      "careertransform.in",
+      "www.careertransform.in",
+      "superadmin.careertransform.in",
+      "api.careertransform.in",
+      "localhost",
+      "127.0.0.1",
+      "familyhub.com",
+      "brevolt.in",
+      "www.brevolt.in",
+      "13.204.75.91"
+    ];
+
     if (!tenant) {
-      const isMainDomain = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'familyhub.com' || hostname === 'brevolt.in' || hostname === 'www.brevolt.in' || hostname === '13.204.75.91' || hostname.includes('localhost:');
+      const isMainDomain = MAIN_DOMAINS.includes(hostname) || hostname.includes('localhost:');
       if (isMainDomain) {
         return res.status(200).json({
           success: true,
