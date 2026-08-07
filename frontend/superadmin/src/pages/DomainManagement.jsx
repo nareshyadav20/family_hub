@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Globe, CheckCircle, Clock, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 const DomainManagement = ({ familyId }) => {
   const [domains, setDomains] = useState([]);
@@ -11,7 +12,7 @@ const DomainManagement = ({ familyId }) => {
   const fetchDomains = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/v1/superadmin/domain/history/${familyId}`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/superadmin/domain/history/${familyId}`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` }
       });
       if (res.data.success) {
@@ -31,7 +32,7 @@ const DomainManagement = ({ familyId }) => {
   const updateDomainStatus = async (domainId, newStatus) => {
     try {
       setVerifying(true);
-      const res = await axios.put('http://localhost:5000/api/v1/superadmin/domain/update-status', { domainId, status: newStatus }, {
+      const res = await axios.put(`${API_BASE_URL}/api/v1/superadmin/domain/update-status`, { domainId, status: newStatus }, {
          headers: { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` }
       });
       if (res.data.success) {
@@ -48,7 +49,7 @@ const DomainManagement = ({ familyId }) => {
   const deleteDomain = async (domainId) => {
     if (!window.confirm("Are you sure you want to delete this domain record permanently?")) return;
     try {
-      const res = await axios.delete(`http://localhost:5000/api/v1/superadmin/domain/delete/${domainId}`, {
+      const res = await axios.delete(`${API_BASE_URL}/api/v1/superadmin/domain/delete/${domainId}`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('superadmin_token')}` }
       });
       if (res.data.success) {

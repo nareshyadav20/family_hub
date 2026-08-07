@@ -13,6 +13,7 @@ import {
   Upload, FileText, Send, Mail, PlayCircle, ShieldCheck, Download, Copy, AlertTriangle, Eye, EyeOff
 } from 'lucide-react';
 import useDomainStore from '../store/useDomainStore';
+import API_BASE_URL from '../config/api';
 
 const schema = z.object({
   // Family Details
@@ -164,7 +165,7 @@ export default function CreateFamily() {
     setActionLoading(prev => ({ ...prev, [endpoint]: true }));
     try {
       const token = localStorage.getItem('superadmin_token');
-      const response = await axios.put(`http://localhost:5000/api/v1/new-domains/devops/${endpoint}`, { domainId }, {
+      const response = await axios.put(`${API_BASE_URL}/api/v1/new-domains/devops/${endpoint}`, { domainId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
@@ -188,7 +189,7 @@ export default function CreateFamily() {
       const fetchStatus = async () => {
         try {
           const token = localStorage.getItem('superadmin_token');
-          const response = await axios.get(`http://localhost:5000/api/v1/domains/status/${domainId}`, {
+          const response = await axios.get(`${API_BASE_URL}/api/v1/domains/status/${domainId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (response.data.success && response.data.data?.domainStatus) {
@@ -248,7 +249,7 @@ export default function CreateFamily() {
       };
 
       const token = localStorage.getItem('superadmin_token');
-      const response = await axios.post('http://localhost:5000/api/v1/families', payload, {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/families`, payload, {
         headers: {
           Authorization: token ? `Bearer ${token}` : undefined
         }
