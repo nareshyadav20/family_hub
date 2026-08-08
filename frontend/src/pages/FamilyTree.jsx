@@ -1,42 +1,99 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import ReactFlow, { 
-  MiniMap, Controls, Background, useNodesState, useEdgesState 
+  MiniMap, Controls, Background, useNodesState, useEdgesState, MarkerType
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-
+import dagre from 'dagre';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import API_BASE_URL from '../config/api';
 
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const getLayoutedElements = (nodes, edges, direction = 'TB') => {
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: 200, height: 80 });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    node.targetPosition = direction === 'TB' ? 'top' : 'left';
+    node.sourcePosition = direction === 'TB' ? 'bottom' : 'right';
+
+    // Shift to top-left to center nodes around dagre coordinates
+    node.position = {
+      x: nodeWithPosition.x - 200 / 2,
+      y: nodeWithPosition.y - 80 / 2,
+    };
+    return node;
+  });
+
+  return { nodes, edges };
+};
+
 export default function FamilyTree() {
-  const { data: members = [], isLoading } = useQuery({
-    queryKey: ['members'],
+  const { data = {}, isLoading } = useQuery({
+    queryKey: ['familyTree'],
     queryFn: async () => {
-      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/family/tree`, {
          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       return res.data;
     }
   });
 
-  const dynamicNodes = useMemo(() => {
-    return members.map((m, i) => ({
-      id: String(m.id),
-      position: { x: (i % 4) * 250 + 100, y: Math.floor(i / 4) * 180 + 100 },
-      data: { label: `${m.firstName} ${m.lastName}\n(${m.relationship || 'Member'})` },
-      type: m.status === 'INVITATION_SENT' ? 'default' : 'output'
-    }));
-  }, [members]);
-
-  const dynamicEdges = useMemo(() => [], [members]);
+  const { members = [], relationships = [] } = data;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
-    setNodes(dynamicNodes);
-    setEdges(dynamicEdges);
-  }, [dynamicNodes, dynamicEdges, setNodes, setEdges]);
+    if (members.length === 0) return;
+
+    const initialNodes = members.map((m) => {
+      return {
+        id: String(m.id),
+        data: { label: `${m.firstName} ${m.lastName}\n(${m.role || 'Member'})` },
+        type: 'default',
+        style: { width: 200, background: '#fff', border: '1px solid #7C5CFC', borderRadius: '8px', padding: '10px' }
+      };
+    });
+
+    const initialEdges = relationships.map((rel) => {
+      const isSpouse = rel.relationship === 'SPOUSE';
+      return {
+        id: `e-${rel.id}`,
+        source: String(rel.fromMemberId),
+        target: String(rel.toMemberId),
+        label: rel.relationship === 'CUSTOM' ? rel.customRelationship : rel.relationship,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: isSpouse ? '#E83A82' : '#7C5CFC', strokeWidth: 2 },
+        labelStyle: { fill: '#6B7280', fontWeight: 700 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: isSpouse ? '#E83A82' : '#7C5CFC',
+        },
+      };
+    });
+
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      initialNodes,
+      initialEdges
+    );
+
+    setNodes([...layoutedNodes]);
+    setEdges([...layoutedEdges]);
+  }, [members, relationships, setNodes, setEdges]);
 
   return (
     <div className="h-full w-full flex flex-col space-y-6 animate-in fade-in duration-500">

@@ -1,24 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, X, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Save, X, User, Lock, Eye, EyeOff, Search, ChevronDown } from 'lucide-react';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import API_BASE_URL from '../config/api';
+
+const RELATIONSHIP_OPTIONS = [
+  'SPOUSE', 'SON', 'DAUGHTER', 'FATHER', 'MOTHER', 'BROTHER', 'SISTER', 
+  'GRANDFATHER', 'GRANDMOTHER', 'GRANDSON', 'GRANDDAUGHTER', 
+  'UNCLE', 'AUNT', 'NEPHEW', 'NIECE', 'OTHER'
+];
+
+function SearchableMemberDropdown({ label, name, value, onChange, members, required, placeholder = "Search family member..." }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredMembers = members.filter(m => 
+    `${m.firstName} ${m.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (m.relationship && m.relationship.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const selectedMember = members.find(m => m.id === value);
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label} {required && '*'}</label>
+      <div 
+        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 cursor-pointer flex justify-between items-center"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={selectedMember ? 'text-slate-900' : 'text-slate-400'}>
+          {selectedMember ? `${selectedMember.firstName} ${selectedMember.lastName} ${selectedMember.relationship ? `— ${selectedMember.relationship}` : ''}` : 'Select Family Member'}
+        </span>
+        <ChevronDown size={16} className="text-slate-400" />
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+          <div className="p-2 border-b border-slate-100 flex items-center gap-2">
+            <Search size={16} className="text-slate-400" />
+            <input 
+              type="text" 
+              className="w-full text-sm outline-none bg-transparent" 
+              placeholder={placeholder}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto">
+            {filteredMembers.length === 0 ? (
+              <div className="p-3 text-sm text-slate-500 text-center">No members found</div>
+            ) : (
+              filteredMembers.map(m => (
+                <div 
+                  key={m.id}
+                  className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center gap-3"
+                  onClick={() => {
+                    onChange({ target: { name, value: m.id } });
+                    setIsOpen(false);
+                    setSearchTerm('');
+                  }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                    <User size={14} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900">{m.firstName} {m.lastName}</div>
+                    <div className="text-[11px] text-slate-500">{m.relationship || 'Member'}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AddMember() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const { data: familyMembers = [] } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
+         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     gender: '',
     dob: '',
+    relatedToMemberId: '',
     relationship: '',
+    customRelationship: '',
     role: 'MEMBER',
     fatherId: '',
     motherId: '',
@@ -57,8 +153,12 @@ export default function AddMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.gender || !formData.relationship || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
-      toast.error('Please fill all required fields, including password and phone number.');
+    if (!isDraft && (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.gender || !formData.relatedToMemberId || !formData.relationship)) {
+      toast.error('Please fill all required fields, including relationship and phone number.');
+      return;
+    }
+    if (formData.relationship === 'CUSTOM' && !formData.customRelationship) {
+      toast.error('Please specify the custom relationship.');
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,27 +166,19 @@ export default function AddMember() {
       toast.error('Please enter a valid email address.');
       return;
     }
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match.');
-      return;
-    }
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!pwdRegex.test(formData.password)) {
-      toast.error('Password must be at least 8 characters long, contain an uppercase letter, lowercase letter, number, and special character.');
-      return;
-    }
+    
     mutation.mutate({ payload: { ...formData, isDraft } });
   };
 
   return (
     <div className="max-w-4xl mx-auto pb-20 animate-in fade-in duration-500 pt-8 px-6 lg:px-8">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 :bg-slate-800 rounded-full transition-colors text-slate-500">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500">
           <ArrowLeft size={20} />
         </button>
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Add Family Member</h1>
-          <p className="text-sm text-slate-500 ">Create a family member record manually (e.g. children, elders). No invitation link will be generated.</p>
+          <p className="text-sm text-slate-500">Create a family member record manually and establish their position in the family tree.</p>
         </div>
       </div>
 
@@ -130,76 +222,100 @@ export default function AddMember() {
 
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
-              <Lock size={18} className="text-blue-500" /> Account Credentials
+              Family Relationship
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password *</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                    style={{ WebkitTextSecurity: showPassword ? 'none' : 'disc' }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    placeholder="Minimum 8 characters"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Belongs To / Related To *</label>
+                <select name="relatedToMemberId" value={formData.relatedToMemberId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="">Select Family Member</option>
+                  {familyMembers.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.firstName} {m.lastName} {m.role === 'ADMIN' || m.role === 'SUPER_ADMIN' ? '— Family Head' : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Confirm Password *</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                    style={{ WebkitTextSecurity: showConfirmPassword ? 'none' : 'disc' }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-11 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    placeholder="Type password again"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
-                  >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship *</label>
+                <select name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="">Select Relationship</option>
+                  <option value="SPOUSE">Spouse</option>
+                  <option value="SON">Son</option>
+                  <option value="DAUGHTER">Daughter</option>
+                  <option value="FATHER">Father</option>
+                  <option value="MOTHER">Mother</option>
+                  <option value="BROTHER">Brother</option>
+                  <option value="SISTER">Sister</option>
+                  <option value="GRANDFATHER">Grandfather</option>
+                  <option value="GRANDMOTHER">Grandmother</option>
+                  <option value="GRANDSON">Grandson</option>
+                  <option value="GRANDDAUGHTER">Granddaughter</option>
+                  <option value="UNCLE">Uncle</option>
+                  <option value="AUNT">Aunt</option>
+                  <option value="NEPHEW">Nephew</option>
+                  <option value="NIECE">Niece</option>
+                  <option value="CUSTOM">Custom</option>
+                </select>
               </div>
-            </div>
-          </div>
+              
+              {formData.relationship === 'CUSTOM' && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Specify Relationship *</label>
+                  <input type="text" name="customRelationship" value={formData.customRelationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Cousin" />
+                </div>
+              )}
+              
+              {formData.relatedToMemberId && formData.relationship && (
+                <div className="md:col-span-2 bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col items-center justify-center space-y-2 mt-2">
+                  <span className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">Relationship Preview</span>
+                  {formData.relationship === 'SPOUSE' ? (
+                     <div className="flex items-center space-x-4 text-sm font-medium text-slate-800">
+                        <span>{familyMembers.find(m => m.id === formData.relatedToMemberId)?.firstName}</span>
+                        <span className="text-blue-500">───── Spouse ─────</span>
+                        <span>{formData.firstName || 'New Member'}</span>
+                     </div>
+                  ) : (
+                     <div className="flex flex-col items-center text-sm font-medium text-slate-800">
+                        <span>{familyMembers.find(m => m.id === formData.relatedToMemberId)?.firstName}</span>
+                        <div className="flex flex-col items-center text-blue-500 my-1">
+                          <span className="text-xs border-x-2 border-blue-300 h-3"></span>
+                          <span className="bg-blue-100 px-2 py-0.5 rounded-full text-xs">{formData.relationship === 'CUSTOM' ? formData.customRelationship || 'Custom' : formData.relationship}</span>
+                          <span className="text-xs border-x-2 border-blue-300 h-3"></span>
+                          <span>▼</span>
+                        </div>
+                        <span>{formData.firstName || 'New Member'}</span>
+                     </div>
+                  )}
+                </div>
+              )}
 
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
-              Family Placement
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Head *</label>
-                <input type="text" name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Son, Daughter, Ancestor" />
-              </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Father (Optional)</label>
-                <input type="text" name="fatherId" value={formData.fatherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
+                <select name="fatherId" value={formData.fatherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="">Select Family Member</option>
+                  {familyMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mother (Optional)</label>
-                <input type="text" name="motherId" value={formData.motherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
+                <select name="motherId" value={formData.motherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="">Select Family Member</option>
+                  {familyMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Spouse (Optional)</label>
-                <input type="text" name="spouseId" value={formData.spouseId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="Existing member ID" />
+                <select name="spouseId" value={formData.spouseId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="">Select Family Member</option>
+                  {familyMembers.map(m => (
+                    <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status *</label>

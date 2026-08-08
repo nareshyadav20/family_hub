@@ -399,7 +399,9 @@ app.get('/api/v1/admin/members', authenticateToken, async (req, res) => {
         where: { familyId },
         include: {
            invitation: true,
-           memberProfile: true
+           memberProfile: true,
+           relationshipsFrom: true,
+           relationshipsTo: true
         },
         orderBy: { createdAt: 'desc' }
      });
@@ -407,6 +409,50 @@ app.get('/api/v1/admin/members', authenticateToken, async (req, res) => {
   } catch (err) {
      console.error('Fetch members error:', err);
      res.status(500).json({ error: 'Failed to fetch members' });
+  }
+});
+
+// Family Tree API
+app.get('/api/v1/admin/family/tree', authenticateToken, async (req, res) => {
+  try {
+     const familyId = req.user.familyId;
+     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
+
+     const family = await prisma.family.findUnique({ where: { id: familyId } });
+     const members = await prisma.user.findMany({
+        where: { familyId },
+        select: {
+           id: true,
+           firstName: true,
+           lastName: true,
+           avatar: true,
+           gender: true,
+           status: true,
+           role: true
+        }
+     });
+
+     const relationships = await prisma.familyRelationship.findMany({
+        where: { familyId }
+     });
+
+     let familyHead = null;
+     if (family && family.familyHead) {
+       familyHead = members.find(m => m.id === family.familyHead);
+     }
+     if (!familyHead && members.length > 0) {
+       // fallback to SUPER_ADMIN or ADMIN or just first member
+       familyHead = members.find(m => m.role === 'SUPER_ADMIN' || m.role === 'ADMIN') || members[0];
+     }
+
+     res.status(200).json({
+        familyHead,
+        members,
+        relationships
+     });
+  } catch (err) {
+     console.error('Fetch family tree error:', err);
+     res.status(500).json({ error: 'Failed to fetch family tree' });
   }
 });
 
@@ -565,24 +611,45 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
   const familyId = req.user.familyId;
   if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
-  const { firstName, lastName, email, phone, gender, relationship, familyBranch, role, status, isDraft, fatherId, motherId, spouseId, password } = req.body;
+  const { firstName, lastName, email, phone, gender, relationship, customRelationship, relatedToMemberId, familyBranch, role, status, isDraft, fatherId, motherId, spouseId } = req.body;
   if (!firstName?.trim()) {
     console.log("WARN: Add Validation skipped. Payload:", req.body);
   }
   
-  if (!email || !password) {
-    return res.status(200).json({ success: false, error: 'Email and Password are required' });
+  if (!email) {
+    return res.status(200).json({ success: false, error: 'Email is required' });
   }
 
+  // Auto-generate password
+  const password = Math.random().toString(36).slice(-10) + 'Aa1!'; 
+
+
   try {
-     const existing = await prisma.user.findFirst({
+     const existingEmail = await prisma.user.findFirst({
         where: { email }
      });
-     if (existing) {
+     if (existingEmail) {
         return res.status(200).json({ success: false, error: 'Email already exists' });
+     }
+
+     const existingPhone = await prisma.user.findFirst({
+        where: { phone }
+     });
+     if (existingPhone) {
+        return res.status(200).json({ success: false, error: 'Phone number already exists' });
      }
      
      const family = await prisma.family.findUnique({ where: { id: familyId } });
+
+     let relatedMember = null;
+     if (relatedToMemberId) {
+        relatedMember = await prisma.user.findFirst({
+           where: { id: relatedToMemberId, familyId }
+        });
+        if (!relatedMember) {
+           return res.status(200).json({ success: false, error: 'Related member does not exist or does not belong to your family.' });
+        }
+     }
 
      const hashedPassword = await bcrypt.hash(password, 10);
      const memberId = 'MEM-' + Math.floor(1000 + Math.random() * 9000);
@@ -608,6 +675,54 @@ app.post('/api/v1/admin/members/add', authenticateToken, async (req, res) => {
            }
         });
         
+        if (relatedToMemberId && relationship) {
+           let fromId = u.id;
+           let toId = relatedToMemberId;
+           let canonicalRel = relationship.toUpperCase();
+           
+           if (canonicalRel === 'SON' || canonicalRel === 'DAUGHTER') {
+             fromId = relatedToMemberId;
+             toId = u.id;
+             canonicalRel = relatedMember.gender === 'Female' ? 'MOTHER' : (relatedMember.gender === 'Male' ? 'FATHER' : 'PARENT');
+           } else if (canonicalRel === 'FATHER' || canonicalRel === 'MOTHER') {
+             fromId = u.id;
+             toId = relatedToMemberId;
+             canonicalRel = canonicalRel;
+           } else if (canonicalRel === 'BROTHER' || canonicalRel === 'SISTER') {
+             fromId = relatedToMemberId;
+             toId = u.id;
+             canonicalRel = 'SIBLING';
+           } else if (canonicalRel === 'GRANDFATHER' || canonicalRel === 'GRANDMOTHER') {
+             fromId = u.id;
+             toId = relatedToMemberId;
+             canonicalRel = canonicalRel;
+           } else if (canonicalRel === 'GRANDSON' || canonicalRel === 'GRANDDAUGHTER') {
+             fromId = relatedToMemberId;
+             toId = u.id;
+             canonicalRel = relatedMember.gender === 'Female' ? 'GRANDMOTHER' : (relatedMember.gender === 'Male' ? 'GRANDFATHER' : 'GRANDPARENT');
+           } else if (canonicalRel === 'UNCLE' || canonicalRel === 'AUNT') {
+             fromId = u.id;
+             toId = relatedToMemberId;
+             canonicalRel = canonicalRel;
+           } else if (canonicalRel === 'NEPHEW' || canonicalRel === 'NIECE') {
+             fromId = relatedToMemberId;
+             toId = u.id;
+             canonicalRel = relatedMember.gender === 'Female' ? 'AUNT' : (relatedMember.gender === 'Male' ? 'UNCLE' : 'UNCLE_OR_AUNT');
+           } else if (canonicalRel === 'CUSTOM') {
+             canonicalRel = 'CUSTOM';
+           }
+
+           await tx.familyRelationship.create({
+              data: {
+                 familyId,
+                 fromMemberId: fromId,
+                 toMemberId: toId,
+                 relationship: canonicalRel,
+                 customRelationship: canonicalRel === 'CUSTOM' ? (customRelationship || null) : null
+              }
+           });
+        }
+
         return u;
      });
      
