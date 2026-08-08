@@ -304,6 +304,7 @@ function AppLayer() {
           <Route path="/live/:streamId" element={<LiveStreamPage />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<Navigate to="/login?mode=signup" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/member/login" element={<Navigate to="/login" replace />} />
           <Route path="/dashboard" element={<Navigate to="/" replace />} />

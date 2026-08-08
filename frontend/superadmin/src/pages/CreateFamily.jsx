@@ -192,6 +192,9 @@ export default function CreateFamily() {
           }
         } catch (e) {
           console.error('Failed to fetch domain status', e);
+          if (e.response?.status === 404) {
+            useDomainStore.getState().clearDomain();
+          }
         }
       };
       fetchStatus();

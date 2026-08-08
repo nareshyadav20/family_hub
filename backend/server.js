@@ -92,7 +92,7 @@ const {
 
 app.use('/api/public', publicApiLimiter, publicRouter);
 app.use('/api/v1/auth', authLimiter); // Apply auth limiter to all auth routes
-app.use('/api/v1/superadmin/domain', domainOnboardingLimiter); // Protect onboarding
+// Deprecated route; routes have been moved to superadmin.js
 
 // Alias /api/tenant for generic multi-tenant spec compliance
 app.get('/api/tenant', publicApiLimiter, require('./middleware/resolveTenant'), (req, res) => {
