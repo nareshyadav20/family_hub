@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import ReactFlow, {
   MiniMap, Controls, Background, useNodesState, useEdgesState, MarkerType
 } from 'reactflow';
@@ -7,6 +7,9 @@ import dagre from 'dagre';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import API_BASE_URL from '../config/api';
+import FamilyTreeGrid from '../components/FamilyTreeGrid';
+import { Search } from 'lucide-react';
+import { buildFamilyGraph } from '../utils/familyGraph';
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -56,10 +59,22 @@ export default function FamilyTree() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('family_tree_view_mode') || 'tree';
+  });
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('family_tree_view_mode', viewMode);
+  }, [viewMode]);
+
   useEffect(() => {
     if (members.length === 0) return;
 
-    const initialNodes = members.map((m) => {
+    const { calculatedMembers, normalizedRelationships } = buildFamilyGraph(members, relationships, data.familyHead?.id);
+
+    const initialNodes = calculatedMembers.map((m) => {
       return {
         id: String(m.id),
         data: { label: m.role === 'SUPER_ADMIN' ? `👑 ${m.firstName} ${m.lastName}` : `${m.firstName} ${m.lastName}` },
@@ -68,20 +83,20 @@ export default function FamilyTree() {
       };
     });
 
-    const initialEdges = relationships.map((rel) => {
-      const isSpouse = rel.relationship === 'SPOUSE';
+    const initialEdges = normalizedRelationships.map((rel) => {
+      const isSpouse = rel.type === 'SPOUSE';
       return {
-        id: `e-${rel.id}`,
-        source: String(rel.fromMemberId),
-        target: String(rel.toMemberId),
-        label: rel.relationship === 'CUSTOM' ? rel.customRelationship : rel.relationship,
+        id: `e-${rel.originalId || `${rel.source}-${rel.target}`}`,
+        source: rel.source,
+        target: rel.target,
+        label: isSpouse ? 'SPOUSE' : rel.label,
         type: 'smoothstep',
-        animated: true,
-        style: { stroke: isSpouse ? '#E83A82' : '#7C5CFC', strokeWidth: 2 },
+        animated: !isSpouse,
+        style: { stroke: isSpouse ? '#E83A82' : '#7C5CFC', strokeWidth: 2, strokeDasharray: isSpouse ? '5,5' : '0' },
         labelStyle: { fill: '#6B7280', fontWeight: 700 },
-        markerEnd: {
+        markerEnd: isSpouse ? undefined : {
           type: MarkerType.ArrowClosed,
-          color: isSpouse ? '#E83A82' : '#7C5CFC',
+          color: '#7C5CFC',
         },
       };
     });
@@ -93,14 +108,48 @@ export default function FamilyTree() {
 
     setNodes([...layoutedNodes]);
     setEdges([...layoutedEdges]);
-  }, [members, relationships, setNodes, setEdges]);
+  }, [members, relationships, setNodes, setEdges, data.familyHead]);
 
   return (
     <div className="h-full w-full flex flex-col space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-end">
         <div>
           <h1 className="text-[28px] font-bold tracking-tight text-[#1F2430]">Family Tree</h1>
           <p className="text-[#6B7280] text-[15px] font-semibold mt-1">Interactive visualization of your lineage.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search member..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-white border border-[#E9E5F8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/20 w-64 shadow-sm"
+            />
+          </div>
+          <div className="flex bg-[#F3F4F6] p-1 rounded-xl shadow-inner">
+            <button
+              onClick={() => setViewMode('tree')}
+              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                viewMode === 'tree' 
+                  ? 'bg-white text-[#7C5CFC] shadow-sm' 
+                  : 'text-[#6B7280] hover:text-[#4B5563]'
+              }`}
+            >
+              Tree View
+            </button>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                viewMode === 'grid' 
+                  ? 'bg-white text-[#7C5CFC] shadow-sm' 
+                  : 'text-[#6B7280] hover:text-[#4B5563]'
+              }`}
+            >
+              Grid View
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex-1 bg-white rounded-[24px] border border-[#E9E5F8] shadow-sm overflow-hidden min-h-[600px] relative">
@@ -112,26 +161,36 @@ export default function FamilyTree() {
             </div>
           </div>
         )}
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          fitView
-          className="bg-[#FAF8FF]"
-        >
-          <Controls />
-          <MiniMap
-            nodeColor={(node) => {
-              switch (node.type) {
-                case 'input': return '#7C5CFC';
-                case 'output': return '#2EB67D';
-                default: return '#7C5CFC';
-              }
-            }}
+        
+        {viewMode === 'tree' ? (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            fitView
+            className="bg-[#FAF8FF]"
+          >
+            <Controls />
+            <MiniMap
+              nodeColor={(node) => {
+                switch (node.type) {
+                  case 'input': return '#7C5CFC';
+                  case 'output': return '#2EB67D';
+                  default: return '#7C5CFC';
+                }
+              }}
+            />
+            <Background variant="dots" gap={12} size={1} />
+          </ReactFlow>
+        ) : (
+          <FamilyTreeGrid 
+             members={members} 
+             relationships={relationships} 
+             familyHead={data.familyHead} 
+             searchQuery={searchQuery}
           />
-          <Background variant="dots" gap={12} size={1} />
-        </ReactFlow>
+        )}
       </div>
     </div>
   );
