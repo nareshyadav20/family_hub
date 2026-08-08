@@ -62,7 +62,7 @@ export default function FamilyTree() {
     const initialNodes = members.map((m) => {
       return {
         id: String(m.id),
-        data: { label: `${m.firstName} ${m.lastName}\n(${m.role || 'Member'})` },
+        data: { label: m.role === 'SUPER_ADMIN' ? `👑 ${m.firstName} ${m.lastName}` : `${m.firstName} ${m.lastName}` },
         type: 'default',
         style: { width: 200, background: '#fff', border: '1px solid #7C5CFC', borderRadius: '8px', padding: '10px' }
       };

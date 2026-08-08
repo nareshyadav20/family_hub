@@ -145,7 +145,8 @@ router.get('/', async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Server Error' });
+        require('fs').writeFileSync('dashboard_error.txt', JSON.stringify({ message: err.message, stack: err.stack }));
+        res.status(500).json({ error: 'Server Error', details: err.message, stack: err.stack });
     }
 });
 

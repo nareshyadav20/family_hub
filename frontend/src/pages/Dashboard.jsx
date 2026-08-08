@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, UserPlus, CalendarDays, Gift, CheckCircle, Image as ImageIcon,
-  Bell, TrendingUp, Activity, Plus, Link, Check, FileText, Heart, MessageSquare
+  Bell, TrendingUp, Activity, Plus, Link, Check, FileText, Heart, MessageSquare,
+  Settings, Shield, ChevronRight
 } from 'lucide-react';
 import { CardSkeleton } from '../components/loaders/SkeletonLoaders';
 import {
@@ -191,39 +192,64 @@ export default function Dashboard() {
         {/* Charts */}
         <div className="lg:col-span-2 bg-white rounded-[24px] p-6 shadow-sm border border-[#E9E5F8]">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-[#1F2430]">Growth & Engagement</h3>
-            <select className="bg-[#FAF8FF] border border-[#E9E5F8] rounded-[12px] px-3.5 py-2 text-sm font-semibold text-[#7C5CFC] outline-none transition-all focus:ring-2 focus:ring-[#7C5CFC]/10 focus:border-[#7C5CFC] cursor-pointer">
-              <option>Last 6 Months</option>
-            </select>
+            <h3 className="text-lg font-bold text-[#1F2430]">Family Settings</h3>
+            <button onClick={() => navigate('/admin/dashboard/settings')} className="text-sm font-semibold text-[#7C5CFC] hover:text-[#5B3EE8] transition-colors">
+              View All Settings
+            </button>
           </div>
 
-          <div className="h-[300px] w-full">
-            {chartLoading ? (
-              <div className="w-full h-full bg-[#FAF8FF] rounded-xl animate-pulse"></div>
-            ) : chartData && chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7C5CFC" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#7C5CFC" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2EB67D" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#2EB67D" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E9E5F8" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 600 }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 600 }} />
-                  <Tooltip contentStyle={{ borderRadius: '16px', border: '1px solid #E9E5F8', boxShadow: '0 4px 20px rgba(124,92,252,0.06)' }} />
-                  <Area type="monotone" dataKey="members" stroke="#7C5CFC" strokeWidth={3} fillOpacity={1} fill="url(#colorMembers)" />
-                  <Area type="monotone" dataKey="events" stroke="#2EB67D" strokeWidth={3} fillOpacity={1} fill="url(#colorEvents)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#6B7280] text-sm font-semibold">No activity data available</div>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div onClick={() => navigate('/admin/dashboard/settings')} className="p-4 border border-[#E9E5F8] rounded-[16px] hover:border-[#7C5CFC]/30 transition-colors cursor-pointer group flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#FAF8FF] flex items-center justify-center text-[#7C5CFC] group-hover:bg-[#7C5CFC] group-hover:text-white transition-all">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#1F2430]">General Details</p>
+                  <p className="text-xs font-semibold text-[#6B7280]">Update family name & info</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#7C5CFC] transition-colors" />
+            </div>
+            
+            <div onClick={() => navigate('/admin/dashboard/settings')} className="p-4 border border-[#E9E5F8] rounded-[16px] hover:border-[#2EB67D]/30 transition-colors cursor-pointer group flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#F0FDF4] flex items-center justify-center text-[#2EB67D] group-hover:bg-[#2EB67D] group-hover:text-white transition-all">
+                  <Shield className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#1F2430]">Privacy & Security</p>
+                  <p className="text-xs font-semibold text-[#6B7280]">Manage access controls</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#2EB67D] transition-colors" />
+            </div>
+
+            <div onClick={() => navigate('/admin/dashboard/members/pending')} className="p-4 border border-[#E9E5F8] rounded-[16px] hover:border-[#F59E0B]/30 transition-colors cursor-pointer group flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#FFFBEB] flex items-center justify-center text-[#F59E0B] group-hover:bg-[#F59E0B] group-hover:text-white transition-all">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#1F2430]">Member Approvals</p>
+                  <p className="text-xs font-semibold text-[#6B7280]">Review pending requests</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#F59E0B] transition-colors" />
+            </div>
+
+            <div onClick={() => navigate('/admin/dashboard/settings')} className="p-4 border border-[#E9E5F8] rounded-[16px] hover:border-[#EF4444]/30 transition-colors cursor-pointer group flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#FEF2F2] flex items-center justify-center text-[#EF4444] group-hover:bg-[#EF4444] group-hover:text-white transition-all">
+                  <Bell className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#1F2430]">Notifications</p>
+                  <p className="text-xs font-semibold text-[#6B7280]">Configure alerts & emails</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-[#9CA3AF] group-hover:text-[#EF4444] transition-colors" />
+            </div>
           </div>
         </div>
 
