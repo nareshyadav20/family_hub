@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
    Search, Filter, Plus, Mail, MessageCircle, MoreHorizontal, Edit2, Trash2, ShieldAlert,
@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { buildFamilyGraph } from '../utils/familyGraph';
 import { Button } from '../components/ui/Button';
 import { TableRowSkeleton } from '../components/loaders/SkeletonLoaders';
 import API_BASE_URL from '../config/api';
@@ -163,6 +164,37 @@ export default function Members() {
       }
    });
 
+   const { generationMap } = useMemo(() => {
+      const allRels = [];
+      const seenRels = new Set();
+      
+      rawMembers.forEach(m => {
+         const addRel = (r) => {
+            if (!seenRels.has(r.id)) {
+               seenRels.add(r.id);
+               allRels.push(r);
+            }
+         };
+         if (m.relationshipsFrom) m.relationshipsFrom.forEach(addRel);
+         if (m.relationshipsTo) m.relationshipsTo.forEach(addRel);
+      });
+
+      // We can use buildFamilyGraph to determine generations
+      // The API doesn't return familyHead directly here, so we let buildFamilyGraph infer the root
+      const { calculatedMembers } = buildFamilyGraph(rawMembers, allRels, null);
+      
+      const genMap = new Map();
+      calculatedMembers.forEach(m => {
+         if (m.generation === 99) {
+            genMap.set(String(m.id), 'Disconnected');
+         } else {
+            // Display G1, G2, etc based on calculated 0-indexed generations
+            genMap.set(String(m.id), `G${m.generation + 1}`);
+         }
+      });
+      return { generationMap: genMap };
+   }, [rawMembers]);
+
    const liveMembers = rawMembers.map(m => ({
       id: m.id,
       memId: m.memberId || 'MEM-0000',
@@ -171,7 +203,7 @@ export default function Members() {
       phone: m.phone || (m.memberProfile?.phone) || 'No Phone',
       relation: m.relationship || 'Member',
       branch: m.familyBranch || 'Main',
-      gen: 'G2', // dynamic generation logic
+      gen: generationMap.get(String(m.id)) || 'Unknown',
       role: m.role,
       status: m.status,
       progress: typeof m.profileCompletion === 'number' ? m.profileCompletion : 25,
