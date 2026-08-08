@@ -22,6 +22,7 @@ class DomainController {
       });
     } catch (err) {
       console.error('[DomainController] createFamily error:', err);
+      require('fs').writeFileSync('domain_error.txt', JSON.stringify({ message: err.message, stack: err.stack }));
       const isConflict = err.message?.includes('already exists') || err.message?.includes('already registered');
       const statusCode = isConflict ? 409 : 400;
       return res.status(statusCode).json({

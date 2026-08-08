@@ -11,6 +11,7 @@ const validateRequest = (schema) => {
           message: e.message
         }));
         console.error('Validation failed:', formattedErrors);
+        require('fs').writeFileSync('validation_errors.txt', JSON.stringify(formattedErrors));
         return res.status(400).json({
           success: false,
           message: 'Validation failed',

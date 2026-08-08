@@ -38,7 +38,6 @@ const schema = z.object({
   adminName: z.string().min(1, 'Admin Name is required'),
   adminMobile: z.string().min(1, 'Admin Mobile is required'),
   adminEmail: z.string().email('Invalid email address'),
-  adminPassword: z.string().min(8, 'Password must be at least 8 characters'),
 
   // Domain Management Option
   domainOption: z.enum(['OPTION_1', 'OPTION_2']).default('OPTION_1'),
@@ -120,7 +119,6 @@ export default function CreateFamily() {
   const navigate = useNavigate();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
 
   const queryParams = new URLSearchParams(location.search);
@@ -241,7 +239,7 @@ export default function CreateFamily() {
           firstName: firstName || "Admin",
           lastName: lastName || "User",
           email: data.adminEmail || "admin@example.com",
-          password: data.adminPassword || data.password || "Password123!",
+          password: Math.random().toString(36).slice(-8) + "A1!",
           phone: cleanPhone || undefined
         },
         domain: {
@@ -323,8 +321,8 @@ export default function CreateFamily() {
 
           <form id="create-family-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <input type="hidden" {...register('domainOption')} value={initialOption} />
+            <input type="hidden" {...register('logo')} />
 
-            {/* Section 0: Family Details (Required Context) */}
             {/* Section 0: Family Details (Required Context) */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-[0_2px_10px_-3px_rgba(124,58,237,0.1)] border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="p-8 space-y-8">
@@ -392,26 +390,6 @@ export default function CreateFamily() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Email <span className="text-red-500 ml-0.5">*</span></label>
                     <input type="email" {...register('adminEmail')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.adminEmail ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="admin@example.com" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Admin Password <span className="text-red-500 ml-0.5">*</span></label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="new-password"
-                        {...register('adminPassword')}
-                        className={`w-full pl-4 pr-11 py-2.5 rounded-xl border ${errors.adminPassword ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`}
-                        placeholder="••••••••"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 rounded-lg transition-colors cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
-                      </button>
-                    </div>
-                    {errors.adminPassword && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.adminPassword.message}</p>}
                   </div>
                 </div>
               </div>
