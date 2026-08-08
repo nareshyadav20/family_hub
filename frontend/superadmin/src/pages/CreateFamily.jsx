@@ -46,10 +46,7 @@ const schema = z.object({
   // Option 1 Fields
   rootDomain: z.string().optional(),
   currentRegistrar: z.string().optional(),
-  domainExpiryDate: z.string().optional(),
-  currentNameservers: z.string().optional(),
   hostingProvider: z.string().optional(),
-  currentWebsite: z.string().optional(),
 
   // Ownership
   confirmOwnership: z.boolean().optional(),
@@ -60,19 +57,8 @@ const schema = z.object({
   techContactEmail: z.string().optional(),
   techContactMobile: z.string().optional(),
 
-  // DNS
-  dnsAccessAvailable: z.enum(['Yes', 'No', 'Need Help']).optional(),
-  registrarUsername: z.string().optional(),
-  registrarEmail: z.string().optional(),
-  dnsNotes: z.string().optional(),
 
-  // Migration
-  existingWebsiteType: z.enum(['No Website', 'Static Website', 'WordPress', 'React', 'NextJS', 'Custom', 'Other']).optional(),
-  migrationRequired: z.enum(['Yes', 'No']).optional(),
-  migrationPriority: z.enum(['Low', 'Medium', 'High']).optional(),
-  expectedGoLiveDate: z.string().optional(),
 
-  specialInstructions: z.string().optional(),
 
   // Option 2 Fields
   preferredDomain: z.string().optional(),
@@ -101,12 +87,6 @@ const schema = z.object({
     }
     if (!data.techContactMobile) {
       ctx.addIssue({ path: ['techContactMobile'], message: 'Technical Contact Phone is required', code: z.ZodIssueCode.custom });
-    }
-    if (!data.dnsAccessAvailable) {
-      ctx.addIssue({ path: ['dnsAccessAvailable'], message: 'Please select if family can access DNS', code: z.ZodIssueCode.custom });
-    }
-    if (!data.migrationRequired) {
-      ctx.addIssue({ path: ['migrationRequired'], message: 'Please select if migration is required', code: z.ZodIssueCode.custom });
     }
   } else if (data.domainOption === 'OPTION_2') {
     if (!data.preferredDomain) {
@@ -501,10 +481,6 @@ export default function CreateFamily() {
                             {errors.rootDomain && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.rootDomain.message}</p>}
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Current Website <span className="text-gray-400 font-normal ml-1">(Optional)</span></label>
-                            <input type="url" {...register('currentWebsite')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" placeholder="Example: https://panga.com" />
-                          </div>
-                          <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Current Domain Registrar <span className="text-red-500">*</span></label>
                             <div className="relative">
                               <select {...register('currentRegistrar')} className={`appearance-none w-full px-4 py-2.5 rounded-xl border ${errors.currentRegistrar ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`}>
@@ -520,14 +496,6 @@ export default function CreateFamily() {
                               <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
                             </div>
                             {errors.currentRegistrar && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.currentRegistrar.message}</p>}
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Domain Expiry Date</label>
-                            <input type="date" {...register('domainExpiryDate')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-gray-600 dark:text-gray-300" />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Current Nameservers</label>
-                            <textarea {...register('currentNameservers')} rows="2" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none" placeholder="ns01.domaincontrol.com&#10;ns02.domaincontrol.com"></textarea>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Current Hosting Provider <span className="text-red-500">*</span></label>
@@ -606,118 +574,8 @@ export default function CreateFamily() {
                         </div>
                       </div>
 
-                      <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><Server className="w-5 h-5 text-purple-500" /> DNS Access</h3>
-                        <div className="space-y-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">Can Family Access DNS? <span className="text-red-500">*</span></label>
-                            <div className="flex gap-4">
-                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Yes' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                <input type="radio" value="Yes" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Yes</span>
-                              </label>
-                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'No' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                <input type="radio" value="No" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">No</span>
-                              </label>
-                              <label className={`flex-1 flex items-center gap-3 p-4 cursor-pointer rounded-xl border-2 transition-all ${watchAllFields.dnsAccessAvailable === 'Need Help' ? 'border-purple-600 bg-purple-50/50 dark:bg-purple-900/10' : 'border-gray-200 dark:border-slate-700 hover:border-purple-300 bg-white dark:bg-slate-800'}`}>
-                                <input type="radio" value="Need Help" {...register('dnsAccessAvailable')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Need Help</span>
-                              </label>
-                            </div>
-                            {errors.dnsAccessAvailable && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.dnsAccessAvailable.message}</p>}
-                          </div>
 
-                          <AnimatePresence mode="wait">
-                            {watchAllFields.dnsAccessAvailable === 'Yes' && (
-                              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-700">
-                                <div className="flex items-center gap-2 mb-4">
-                                  <CheckCircle className="w-4 h-4 text-green-500" />
-                                  <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">DNS Login Available</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Username</label>
-                                    <input {...register('registrarUsername')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Registrar Email</label>
-                                    <input type="email" {...register('registrarEmail')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all" />
-                                  </div>
-                                  <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Notes</label>
-                                    <textarea {...register('dnsNotes')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none"></textarea>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                            {(watchAllFields.dnsAccessAvailable === 'No' || watchAllFields.dnsAccessAvailable === 'Need Help') && (
-                              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="p-4 bg-purple-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl flex items-start gap-3">
-                                <Info className="w-5 h-5 text-purple-600 mt-0.5" />
-                                <p className="text-sm text-purple-800 dark:text-blue-200">FamilyHub DevOps Team will configure DNS after receiving temporary access.</p>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </div>
 
-                      <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><RefreshCw className="w-5 h-5 text-blue-500" /> Migration Information</h3>
-                        <div className="space-y-8">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">Existing Website</label>
-                            <div className="flex flex-wrap gap-3">
-                              {['No Website', 'Static Website', 'WordPress', 'React', 'NextJS', 'Custom', 'Other'].map(type => (
-                                <label key={type} className={`px-4 py-2 rounded-full border cursor-pointer text-sm font-medium transition-all ${watchAllFields.existingWebsiteType === type ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}>
-                                  <input type="radio" value={type} {...register('existingWebsiteType')} className="hidden" />
-                                  {type}
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-6 pt-6 border-t border-gray-100 dark:border-slate-800">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Migration Required? <span className="text-red-500 ml-0.5">*</span></label>
-                              <div className="flex gap-4">
-                                <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'Yes' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
-                                  <input type="radio" value="Yes" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                  <span className="text-sm font-medium text-gray-900 dark:text-white">Yes</span>
-                                </label>
-                                <label className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border transition-all ${watchAllFields.migrationRequired === 'No' ? 'border-purple-600 bg-purple-50/30 dark:bg-purple-900/10' : 'border-gray-250 dark:border-slate-700'}`}>
-                                  <input type="radio" value="No" {...register('migrationRequired')} className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-600" />
-                                  <span className="text-sm font-medium text-gray-900 dark:text-white">No</span>
-                                </label>
-                              </div>
-                              {errors.migrationRequired && <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.migrationRequired.message}</p>}
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Migration Priority</label>
-                              <div className="relative">
-                                <select {...register('migrationPriority')} className="appearance-none w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-sm">
-                                  <option value="Low">Low</option>
-                                  <option value="Medium">Medium</option>
-                                  <option value="High">High</option>
-                                </select>
-                                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Expected Go Live Date</label>
-                              <input type="date" {...register('expectedGoLiveDate')} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all text-gray-600 dark:text-gray-300 text-sm" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-6 rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Notes</h3>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Special Instructions</label>
-                          <textarea {...register('specialInstructions')} rows="3" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 bg-white dark:bg-slate-800 outline-none transition-all resize-none" placeholder="Example: The family website is currently hosted on GoDaddy. DNS changes must be scheduled after 8 PM."></textarea>
-                        </div>
-                      </div>
 
                       {Object.keys(errors).length > 0 && (
                         <div className="text-red-500 text-sm font-semibold flex justify-center mb-4">

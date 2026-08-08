@@ -533,6 +533,17 @@ router.get('/audit-logs', async (req, res) => {
   }
 });
 
+// Delete Audit Log
+router.delete('/audit-logs/:id', async (req, res) => {
+  try {
+    await prisma.auditLog.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Audit log deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error deleting audit log' });
+  }
+});
+
 // GET /revenue
 router.get('/revenue', async (req, res) => {
   try {

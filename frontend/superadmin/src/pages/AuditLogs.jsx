@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Shield, User, Users, Calendar, Image as ImageIcon, CreditCard, Activity, Settings, Loader2 } from 'lucide-react';
+import { Search, Filter, Shield, User, Users, Calendar, Image as ImageIcon, CreditCard, Activity, Settings, Loader2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import API_BASE_URL from '../config/api';
@@ -29,6 +29,19 @@ export default function AuditLogs() {
     };
     fetchLogs();
   }, []);
+
+  const handleDeleteLog = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this log?')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/${id}`);
+      if (res.data.success) {
+        setLogs(logs.filter((log) => log.id !== id));
+        toast.success('Log deleted successfully');
+      }
+    } catch (err) {
+      toast.error('Failed to delete log.');
+    }
+  };
 
   const getIcon = (moduleName) => {
     switch(moduleName?.toLowerCase()) {
@@ -137,6 +150,7 @@ export default function AuditLogs() {
                    <th className="py-4 px-6 font-semibold">User</th>
                    <th className="py-4 px-6 font-semibold">Action</th>
                    <th className="py-4 px-6 font-semibold">Module</th>
+                   <th className="py-4 px-6 font-semibold text-right">Actions</th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-slate-50">
@@ -155,6 +169,15 @@ export default function AuditLogs() {
                          {getIcon(log.module)}
                          <span className="text-xs font-bold tracking-wide uppercase">{log.module}</span>
                        </div>
+                     </td>
+                     <td className="py-4 px-6 text-right">
+                       <button
+                         onClick={() => handleDeleteLog(log.id)}
+                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                         title="Delete Log"
+                       >
+                         <Trash2 size={16} />
+                       </button>
                      </td>
                    </tr>
                  ))}
