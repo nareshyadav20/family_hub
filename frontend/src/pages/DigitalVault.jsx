@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Upload, FileText, Download, Eye, Search, Lock, Plus, Folder } from 'lucide-react';
 
-const vaultItems = [
-  { id: 1, name: 'Property Deed — Springfield House', type: 'Property', size: '2.4 MB', date: 'June 10, 2026', owner: 'Robert Smith', icon: '🏠', color: '#4F46E5', sensitive: true },
-  { id: 2, name: 'Smith Family Will & Testament', type: 'Legal', size: '890 KB', date: 'May 5, 2026', owner: 'Legal Team', icon: '⚖️', color: '#EF4444', sensitive: true },
-  { id: 3, name: 'Birth Certificates — All Children', type: 'Certificate', size: '3.1 MB', date: 'April 12, 2026', owner: 'Martha Smith', icon: '📜', color: '#7C3AED', sensitive: true },
-  { id: 4, name: 'Investment Portfolio 2025', type: 'Finance', size: '1.8 MB', date: 'March 20, 2026', owner: 'Robert Smith', icon: '📈', color: '#10B981', sensitive: true },
-  { id: 5, name: 'Vehicle Registrations', type: 'Property', size: '1.2 MB', date: 'Feb 14, 2026', owner: 'William Smith', icon: '🚗', color: '#14B8A6', sensitive: false },
-  { id: 6, name: 'Insurance Policies Bundle', type: 'Insurance', size: '4.7 MB', date: 'Jan 8, 2026', owner: 'James Smith', icon: '🛡️', color: '#F59E0B', sensitive: false },
-];
+const vaultItems = [];
 
 const vaultCategories = ['All', 'Property', 'Legal', 'Certificate', 'Finance', 'Insurance'];
 
@@ -50,7 +43,7 @@ export default function DigitalVault() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[['📁', '6', 'Documents'], ['🔒', '4', 'Sensitive Files'], ['💾', '14.1 MB', 'Total Size'], ['📂', '5', 'Categories']].map(([emoji, val, label]) => (
+        {[['📁', '0', 'Documents'], ['🔒', '0', 'Sensitive Files'], ['💾', '0 MB', 'Total Size'], ['📂', '0', 'Categories']].map(([emoji, val, label]) => (
           <div key={label} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm text-center">
             <div className="text-3xl mb-3">{emoji}</div>
             <div className="text-2xl font-black text-slate-900 ">{val}</div>

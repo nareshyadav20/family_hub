@@ -2,33 +2,11 @@ import React, { useState } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Wallet, PiggyBank, CreditCard, ArrowUpRight, ArrowDownRight, Plus, Filter } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const accounts = [
-  { name: 'Family Trust Fund', balance: '$4,250,000', change: '+2.3%', type: 'Trust', icon: PiggyBank, iconColor: 'text-blue-500', bg: 'bg-blue-50 ', up: true },
-  { name: 'Investment Portfolio', balance: '$3,120,000', change: '+5.1%', type: 'Investment', icon: TrendingUp, iconColor: 'text-emerald-500', bg: 'bg-emerald-50 ', up: true },
-  { name: 'Real Estate Holdings', balance: '$3,800,000', change: '+1.8%', type: 'Property', icon: Wallet, iconColor: 'text-violet-500', bg: 'bg-violet-50 ', up: true },
-  { name: 'Operating Account', balance: '$530,000', change: '-0.5%', type: 'Checking', icon: CreditCard, iconColor: 'text-orange-500', bg: 'bg-orange-50 ', up: false },
-];
+const accounts = [];
 
-const transactions = [
-  { id: 1, desc: 'Property Tax — Springfield House', amount: '-$12,500', date: 'Jul 5, 2026', category: 'Tax', status: 'completed' },
-  { id: 2, desc: 'Dividend — Apple Inc.', amount: '+$3,200', date: 'Jul 3, 2026', category: 'Dividend', status: 'completed' },
-  { id: 3, desc: 'Family Reunion Catering Deposit', amount: '-$2,800', date: 'Jul 1, 2026', category: 'Events', status: 'pending' },
-  { id: 4, desc: 'Rental Income — LA Property', amount: '+$4,500', date: 'Jun 30, 2026', category: 'Rental', status: 'completed' },
-  { id: 5, desc: 'Insurance Premium — Q3', amount: '-$8,900', date: 'Jun 28, 2026', category: 'Insurance', status: 'completed' },
-  { id: 6, desc: 'Dividend — Vanguard ETF', amount: '+$1,850', date: 'Jun 25, 2026', category: 'Dividend', status: 'completed' },
-  { id: 7, desc: 'Education Fund — College Tuition', amount: '-$5,200', date: 'Jun 20, 2026', category: 'Education', status: 'completed' },
-  { id: 8, desc: 'Trust Distribution — Q2', amount: '+$15,000', date: 'Jun 15, 2026', category: 'Trust', status: 'completed' },
-];
+const transactions = [];
 
-const chartData = [
-  { month: 'Jan', income: 22000, expense: 8000 },
-  { month: 'Feb', income: 18000, expense: 12000 },
-  { month: 'Mar', income: 25000, expense: 9000 },
-  { month: 'Apr', income: 19000, expense: 14000 },
-  { month: 'May', income: 28000, expense: 10000 },
-  { month: 'Jun', income: 24000, expense: 11000 },
-  { month: 'Jul', income: 21000, expense: 8000 },
-];
+const chartData = [];
 
 export default function Finance() {
   const [txFilter, setTxFilter] = useState('all');
@@ -43,7 +21,7 @@ export default function Finance() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">Finance</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Total Family Net Worth: <span className="font-bold text-emerald-600">$11,700,000</span>
+            Total Family Net Worth: <span className="font-bold text-emerald-600">$0</span>
           </p>
         </div>
         <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-emerald-500/30">
@@ -131,7 +109,7 @@ export default function Finance() {
 
           {/* Summary */}
           <div className="mt-5 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3">
-            {[['Total Income', '+$157,000', 'text-emerald-600'], ['Total Expense', '-$62,900', 'text-red-500']].map(([label, val, cls]) => (
+            {[['Total Income', '$0', 'text-emerald-600'], ['Total Expense', '$0', 'text-red-500']].map(([label, val, cls]) => (
               <div key={label} className="bg-slate-50 rounded-xl p-3 text-center">
                 <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">{label}</div>
                 <div className={`text-lg font-black ${cls}`}>{val}</div>

@@ -19,7 +19,6 @@ export default function AddMember() {
     gender: '',
     dob: '',
     relationship: '',
-    familyBranch: '',
     role: 'MEMBER',
     fatherId: '',
     motherId: '',
@@ -58,7 +57,7 @@ export default function AddMember() {
 
   const handleSubmit = (e, isDraft = false) => {
     e.preventDefault();
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.gender || !formData.relationship || !formData.familyBranch || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.gender || !formData.relationship || !formData.status || !formData.role || !formData.password || !formData.confirmPassword) {
       toast.error('Please fill all required fields, including password and phone number.');
       return;
     }
@@ -189,13 +188,6 @@ export default function AddMember() {
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Head *</label>
                 <input type="text" name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" placeholder="e.g. Son, Daughter, Ancestor" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Family Branch *</label>
-                <select name="familyBranch" value={formData.familyBranch} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                   <option value="">Select Branch</option>
-                   <option value="Main">Main Branch</option>
-                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Father (Optional)</label>

@@ -2,23 +2,12 @@ import React, { useState } from 'react';
 import { Home, Car, TrendingUp, Plus, MoreVertical, Edit2, Trash2, DollarSign, MapPin } from 'lucide-react';
 
 const assets = {
-  property: [
-    { id: 1, name: 'Springfield Family Mansion', type: 'Residential', value: '$1,200,000', location: 'Springfield, IL', owner: 'Robert Smith', area: '4,200 sq ft', icon: '🏡', color: '#4F46E5' },
-    { id: 2, name: 'Los Angeles Investment Property', type: 'Investment', value: '$850,000', location: 'Los Angeles, CA', owner: 'James Smith', area: '2,100 sq ft', icon: '🏢', color: '#7C3AED' },
-  ],
-  vehicles: [
-    { id: 1, name: '2023 Mercedes GLE 580', type: 'SUV', value: '$72,000', year: '2023', plate: 'CA-9834-X', owner: 'James Smith', icon: '🚙', color: '#3B82F6' },
-    { id: 2, name: '2022 BMW 7 Series', type: 'Sedan', value: '$98,000', year: '2022', plate: 'IL-3421-A', owner: 'Robert Smith', icon: '🚘', color: '#8B5CF6' },
-    { id: 3, name: '2024 Tesla Model X', type: 'Electric SUV', value: '$110,000', year: '2024', plate: 'CA-7762-T', owner: 'William Smith', icon: '⚡', color: '#14B8A6' },
-  ],
-  investments: [
-    { id: 1, name: 'Smith Growth Portfolio', type: 'Stocks', value: '$420,000', return: '+12.4%', broker: 'Fidelity Investments', icon: '📈', color: '#10B981' },
-    { id: 2, name: 'Real Estate Investment Fund', type: 'REIT', value: '$280,000', return: '+8.7%', broker: 'BlackRock', icon: '🏦', color: '#F59E0B' },
-    { id: 3, name: 'Family Gold Reserve', type: 'Commodities', value: '$95,000', return: '+5.2%', broker: 'HDFC Securities', icon: '🥇', color: '#EF4444' },
-  ],
+  property: [],
+  vehicles: [],
+  investments: [],
 };
 
-const totalValue = '$3,125,000';
+const totalValue = '$0';
 
 const tabIcons = { property: Home, vehicles: Car, investments: TrendingUp };
 
@@ -48,7 +37,7 @@ export default function Assets() {
             <p className="text-white/60 text-sm mt-2">Across all properties, vehicles & investments</p>
           </div>
           <div className="grid grid-cols-3 gap-6 text-center">
-            {[['🏡', '$2,050,000', 'Properties'], ['🚙', '$280,000', 'Vehicles'], ['📈', '$795,000', 'Investments']].map(([emoji, val, label]) => (
+            {[['🏡', '$0', 'Properties'], ['🚙', '$0', 'Vehicles'], ['📈', '$0', 'Investments']].map(([emoji, val, label]) => (
               <div key={label}>
                 <div className="text-2xl mb-1">{emoji}</div>
                 <div className="text-xl font-black">{val}</div>
