@@ -12,6 +12,8 @@ const ContactSchema = z.object({
 const CreateFamilySchema = z.object({
   familyName: z.string().min(2, 'Family name must be at least 2 characters').max(100),
   familyCode: z.string().max(50).optional(),
+  logo: z.string().optional(),
+  themeColor: z.string().optional(),
   admin: z.object({
     firstName: z.string().min(1, 'First name is required').max(50),
     lastName: z.string().min(1, 'Last name is required').max(50),

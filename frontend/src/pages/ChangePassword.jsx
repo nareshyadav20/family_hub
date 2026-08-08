@@ -7,13 +7,11 @@ import api from '../services/api'; // Or use axios
 import API_BASE_URL from '../config/api';
 
 export default function ChangePassword() {
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
   
-  const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -44,7 +42,6 @@ export default function ChangePassword() {
       const token = localStorage.getItem('token');
       const API_URL = `${API_BASE_URL}/api/v1`;
       const response = await axios.post(`${API_URL}/auth/change-password`, {
-        currentPassword,
         newPassword
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -119,26 +116,6 @@ export default function ChangePassword() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Current Password</label>
-              <div className="mt-1 relative rounded-lg shadow-sm">
-                <input
-                  required
-                  type={showCurrent ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-purple-500 focus:border-purple-500 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrent(!showCurrent)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                >
-                  {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            
             <div>
               <label className="block text-sm font-medium text-gray-700">New Password</label>
               <div className="mt-1 relative rounded-lg shadow-sm">

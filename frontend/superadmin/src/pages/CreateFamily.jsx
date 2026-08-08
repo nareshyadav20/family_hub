@@ -15,10 +15,25 @@ import {
 import useDomainStore from '../store/useDomainStore';
 import API_BASE_URL from '../config/api';
 
+const themeOptions = [
+  { name: 'Ocean Blue', color: '#2563EB' },
+  { name: 'Royal Purple', color: '#7C3AED' },
+  { name: 'Emerald Green', color: '#059669' },
+  { name: 'Sunset Orange', color: '#EA580C' },
+  { name: 'Ruby Red', color: '#DC2626' },
+  { name: 'Rose Pink', color: '#E11D48' },
+  { name: 'Sky Blue', color: '#0284C7' },
+  { name: 'Golden Amber', color: '#D97706' },
+  { name: 'Midnight', color: '#1F2937' },
+  { name: 'Slate', color: '#475569' }
+];
+
 const schema = z.object({
   // Family Details
   familyName: z.string().min(1, 'Family Name is required'),
   familyCode: z.string().optional(),
+  logo: z.any().optional(),
+  themeColor: z.string().optional(),
   familyHead: z.string().min(1, 'Family Head is required'),
   adminName: z.string().min(1, 'Admin Name is required'),
   adminMobile: z.string().min(1, 'Admin Mobile is required'),
@@ -126,6 +141,7 @@ export default function CreateFamily() {
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   const queryParams = new URLSearchParams(location.search);
   const initialOption = queryParams.get('domainOption') === 'OPTION_2' ? 'OPTION_2' : 'OPTION_1';
@@ -148,7 +164,8 @@ export default function CreateFamily() {
       autoRenew: true,
       preferredExtension: '.com',
       registrationPeriod: '1 Year',
-      purchaseAccount: 'FamilyHub Business Account'
+      purchaseAccount: 'FamilyHub Business Account',
+      themeColor: '#2563EB'
     }
   });
 
@@ -203,6 +220,18 @@ export default function CreateFamily() {
     }
   }, [domainId, setDomainStatus]);
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+        setValue('logo', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   const onSubmit = async (data) => {
     setSubmitting(true);
@@ -226,6 +255,8 @@ export default function CreateFamily() {
 
       const payload = {
         familyName: data.familyName || "Unnamed Family",
+        logo: data.logo || undefined,
+        themeColor: data.themeColor || undefined,
         admin: {
           firstName: firstName || "Admin",
           lastName: lastName || "User",
@@ -258,7 +289,7 @@ export default function CreateFamily() {
       if (response.data.success) {
         toast.success('Family and Custom Domain onboarding created successfully!');
         setFamilyAndDomain(response.data.familyId, response.data.domainId);
-        // Do not navigate immediately so the user can use the DevOps Panel
+        navigate('/families');
       } else {
         toast.error(response.data.message || 'Error creating family');
       }
@@ -326,6 +357,43 @@ export default function CreateFamily() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">Family Head <span className="text-red-500 ml-0.5">*</span></label>
                     <input {...register('familyHead')} className={`w-full px-4 py-2.5 rounded-xl border ${errors.familyHead ? 'border-red-300 focus:ring-red-500 bg-red-50' : 'border-gray-200 dark:border-slate-700 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10'} bg-white dark:bg-slate-800 outline-none transition-all`} placeholder="Name of family head" />
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Family Logo <span className="text-gray-400 font-normal ml-1">(Optional)</span></label>
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-slate-800">
+                        {logoPreview ? (
+                          <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Upload className="w-6 h-6 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <label className="inline-flex items-center justify-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl cursor-pointer transition-colors border border-purple-200 text-sm font-medium">
+                          <span>Upload Logo</span>
+                          <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-2">Recommended size: 256x256px. PNG, JPG or SVG.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Theme Selection</label>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">Choose a color theme for this family portal.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                      {themeOptions.map((theme) => (
+                        <label 
+                          key={theme.color} 
+                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${watchAllFields.themeColor === theme.color ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-300'}`}
+                        >
+                          <input type="radio" value={theme.color} {...register('themeColor')} className="hidden" />
+                          <div className="w-5 h-5 rounded-full shadow-sm border border-gray-200 dark:border-slate-600" style={{ backgroundColor: theme.color }}></div>
+                          <span className="text-xs font-semibold text-gray-700 dark:text-slate-300">{theme.name}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="md:col-span-2 pt-4 border-t border-gray-100 dark:border-slate-800">

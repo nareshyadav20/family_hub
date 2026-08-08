@@ -14,7 +14,7 @@ class FamilyService {
   }
 
   async createFamilyWorkflow(req, dtoData) {
-    const { familyName, familyCode, admin, domain, contacts } = dtoData;
+    const { familyName, familyCode, admin, domain, contacts, logo, themeColor } = dtoData;
     const cleanDomain = domain.rootDomain.replace(/^(https?:\/\/)?(www\.)?/, '').trim().toLowerCase();
 
     // 1. Validation checks
@@ -47,6 +47,8 @@ class FamilyService {
           name: familyName,
           familyCode: code,
           customDomain: cleanDomain,
+          logo: logo || null,
+          themeColor: themeColor || '#2563EB',
           plan: 'Free',
           status: 'Pending',
           createdBy: 'SUPER_ADMIN'

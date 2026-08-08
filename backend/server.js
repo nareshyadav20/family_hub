@@ -366,13 +366,10 @@ app.post('/api/v1/auth/change-password', async (req, res) => {
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { currentPassword, newPassword } = req.body;
+    const { newPassword } = req.body;
     
     const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Incorrect current password' });
     
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
@@ -1413,3 +1410,4 @@ const gracefulShutdown = async (signal) => {
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
