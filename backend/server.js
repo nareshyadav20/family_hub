@@ -584,19 +584,43 @@ app.put('/api/v1/admin/members/:id', authenticateToken, async (req, res) => {
     const familyId = req.user.familyId;
     if (!familyId) return res.status(401).json({ error: 'Family ID missing' });
 
-    const { firstName, lastName, email, phone, role, familyBranch, relationship } = req.body;
+    const { firstName, lastName, email, phone, role, relationship, relatedToMemberId } = req.body;
+    const memberId = req.params.id;
 
-    const updated = await prisma.user.update({
-      where: { id: req.params.id, familyId },
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        role,
-        familyBranch,
-        relationship
+    const updated = await prisma.$transaction(async (tx) => {
+      const member = await tx.user.update({
+        where: { id: memberId, familyId },
+        data: { firstName, lastName, email, phone, role, relationship }
+      });
+
+      // Update relationship if relatedToMemberId is provided
+      if (relatedToMemberId && relationship && relationship !== 'Member') {
+        // Delete old relationships for this member
+        await tx.familyRelationship.deleteMany({
+          where: {
+            familyId,
+            OR: [{ fromMemberId: memberId }, { toMemberId: memberId }]
+          }
+        });
+
+        const relName = relationship.toUpperCase();
+        let fromId = memberId;
+        let toId = relatedToMemberId;
+        let canonicalRel = relName;
+
+        // Normalize direction: if member is the CHILD, flip so parent->child
+        if (['SON', 'DAUGHTER', 'CHILD', 'GRANDSON', 'GRANDDAUGHTER'].includes(relName)) {
+          fromId = relatedToMemberId;
+          toId = memberId;
+          canonicalRel = relName;
+        }
+
+        await tx.familyRelationship.create({
+          data: { familyId, fromMemberId: fromId, toMemberId: toId, relationship: canonicalRel }
+        });
       }
+
+      return member;
     });
 
     res.json({ success: true, member: updated });

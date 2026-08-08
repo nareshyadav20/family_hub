@@ -59,8 +59,8 @@ export default function Members() {
       email: '',
       phone: '',
       role: 'MEMBER',
-      familyBranch: 'Main',
-      relationship: 'Member'
+      relationship: 'Member',
+      relatedToMemberId: ''
    });
 
    const deleteMutation = useMutation({
@@ -565,13 +565,36 @@ export default function Members() {
                         </div>
                         <div>
                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Relationship</label>
-                           <input type="text" value={editForm.relationship} onChange={e => setEditForm({...editForm, relationship: e.target.value})} placeholder="e.g. Son, Daughter, Spouse" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                           <select value={editForm.relationship} onChange={e => setEditForm({...editForm, relationship: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30">
+                              <option value="FATHER">Father</option>
+                              <option value="MOTHER">Mother</option>
+                              <option value="SON">Son</option>
+                              <option value="DAUGHTER">Daughter</option>
+                              <option value="SPOUSE">Spouse</option>
+                              <option value="BROTHER">Brother</option>
+                              <option value="SISTER">Sister</option>
+                              <option value="GRANDFATHER">Grandfather</option>
+                              <option value="GRANDMOTHER">Grandmother</option>
+                              <option value="GRANDSON">Grandson</option>
+                              <option value="GRANDDAUGHTER">Granddaughter</option>
+                              <option value="UNCLE">Uncle</option>
+                              <option value="AUNT">Aunt</option>
+                              <option value="NEPHEW">Nephew</option>
+                              <option value="NIECE">Niece</option>
+                              <option value="COUSIN">Cousin</option>
+                              <option value="Member">Member (No Relation)</option>
+                           </select>
                         </div>
                      </div>
 
                      <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Family Branch</label>
-                        <input type="text" value={editForm.familyBranch} onChange={e => setEditForm({...editForm, familyBranch: e.target.value})} placeholder="e.g. North, South, West" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30" />
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Belongs To / Related To</label>
+                        <select value={editForm.relatedToMemberId} onChange={e => setEditForm({...editForm, relatedToMemberId: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#7C5CFC]/30">
+                           <option value="">-- Select Member --</option>
+                           {rawMembers.filter(rm => rm.id !== editingMember?.id).map(rm => (
+                              <option key={rm.id} value={rm.id}>{rm.firstName} {rm.lastName}</option>
+                           ))}
+                        </select>
                      </div>
                   </div>
                   
