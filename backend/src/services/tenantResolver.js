@@ -54,7 +54,10 @@ class TenantResolver {
       const isFamilyActive = hasFamily && familyDomain.family.status === 'Active';
       const hasSuperAdmin = hasFamily && familyDomain.family.members && familyDomain.family.members.length > 0;
 
-      if (isDomainLive && isVerified && isDnsVerified && hasFamily && isFamilyActive && hasSuperAdmin) {
+      const isDev = process.env.NODE_ENV !== 'production';
+      const isDomainValid = isDev ? true : (isDomainLive && isVerified && isDnsVerified);
+
+      if (isDomainValid && hasFamily && isFamilyActive && hasSuperAdmin) {
         family = familyDomain.family;
         domainRecord = familyDomain;
       }
