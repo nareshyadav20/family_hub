@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import API_BASE_URL from '../config/api';
 
 export default function InviteMember() {
@@ -18,8 +18,18 @@ export default function InviteMember() {
   const [inviteResult, setInviteResult] = useState(null);
   const [showQrModal, setShowQrModal] = useState(false);
 
+  const { data: familyMembers = [] } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/members`, {
+         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      return res.data;
+    }
+  });
+
   const [formData, setFormData] = useState({
-    fullName: '', phone: '', email: '', gender: '', relationship: '', familyBranch: '', role: 'MEMBER',
+    fullName: '', phone: '', email: '', gender: '', relationship: '', customRelationship: '', relatedToMemberId: '', role: 'MEMBER',
     fatherId: '', motherId: '', spouseId: '',
     expiry: '7 Days',
     sendVia: { whatsapp: true, sms: true, email: false },
@@ -96,7 +106,11 @@ export default function InviteMember() {
       email: formData.email,
       gender: formData.gender,
       relationship: formData.relationship,
-      familyBranch: formData.familyBranch,
+      customRelationship: formData.relationship === 'CUSTOM' ? formData.customRelationship : '',
+      relatedToMemberId: formData.relatedToMemberId,
+      fatherId: formData.fatherId,
+      motherId: formData.motherId,
+      spouseId: formData.spouseId,
       role: formData.role,
       isDraft
     });
@@ -152,20 +166,45 @@ export default function InviteMember() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Family *</label>
-                  <select name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
-                    <option value="">▼ Select Relationship</option>
-                    {['Father','Mother','Son','Daughter','Brother','Sister','Husband','Wife','Grandfather','Grandmother','Uncle','Aunt','Cousin','Nephew','Niece','Friend','Other'].map(r => <option key={r} value={r}>{r}</option>)}
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Belongs To / Related To *</label>
+                  <select name="relatedToMemberId" value={formData.relatedToMemberId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
+                    <option value="">▼ Select Family Member</option>
+                    {familyMembers.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.firstName} {m.lastName} {m.role === 'ADMIN' || m.role === 'SUPER_ADMIN' ? '— Family Head' : ''}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Family Branch *</label>
-                  <select name="familyBranch" value={formData.familyBranch} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
-                    <option value="">▼ Select Branch</option>
-                    <option value="Hyderabad Branch">Hyderabad Branch</option>
-                    <option value="Main Branch">Main Branch</option>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Relationship to Family *</label>
+                  <select name="relationship" value={formData.relationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
+                    <option value="">▼ Select Relationship</option>
+                    <option value="SPOUSE">Spouse</option>
+                    <option value="SON">Son</option>
+                    <option value="DAUGHTER">Daughter</option>
+                    <option value="FATHER">Father</option>
+                    <option value="MOTHER">Mother</option>
+                    <option value="BROTHER">Brother</option>
+                    <option value="SISTER">Sister</option>
+                    <option value="GRANDFATHER">Grandfather</option>
+                    <option value="GRANDMOTHER">Grandmother</option>
+                    <option value="GRANDSON">Grandson</option>
+                    <option value="GRANDDAUGHTER">Granddaughter</option>
+                    <option value="UNCLE">Uncle</option>
+                    <option value="AUNT">Aunt</option>
+                    <option value="NEPHEW">Nephew</option>
+                    <option value="NIECE">Niece</option>
+                    <option value="CUSTOM">Custom</option>
                   </select>
                 </div>
+                
+                {formData.relationship === 'CUSTOM' && (
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Specify Relationship *</label>
+                    <input type="text" name="customRelationship" value={formData.customRelationship} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" placeholder="e.g. Cousin" />
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Role *</label>
                   <select name="role" value={formData.role} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
@@ -186,23 +225,55 @@ export default function InviteMember() {
                <div className="space-y-5">
                  <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Father</label>
-                    <input type="text" name="fatherId" value={formData.fatherId} onChange={handleChange} placeholder="Search Existing Member..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm" />
+                    <select name="fatherId" value={formData.fatherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                      <option value="">▼ Select Father</option>
+                      {familyMembers.map(m => (
+                        <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                      ))}
+                    </select>
                  </div>
                  <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mother</label>
-                    <input type="text" name="motherId" value={formData.motherId} onChange={handleChange} placeholder="Search Existing Member..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm" />
+                    <select name="motherId" value={formData.motherId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                      <option value="">▼ Select Mother</option>
+                      {familyMembers.map(m => (
+                        <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                      ))}
+                    </select>
                  </div>
                  <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Spouse</label>
-                    <input type="text" name="spouseId" value={formData.spouseId} onChange={handleChange} placeholder="Search Existing Member..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm" />
+                    <select name="spouseId" value={formData.spouseId} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                      <option value="">▼ Select Spouse</option>
+                      {familyMembers.map(m => (
+                        <option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>
+                      ))}
+                    </select>
                  </div>
                </div>
                
                <div className="bg-slate-50 rounded-xl p-5 border border-slate-200 flex flex-col items-center justify-center text-center">
                   <div className="mb-2"><Users size={32} className="text-slate-300 mx-auto" /></div>
                   <h4 className="text-sm font-bold text-slate-800 mb-1">Family Tree Preview</h4>
-                  <p className="text-xs text-slate-500 mb-3">Generation: <span className="font-semibold text-slate-700">Auto-calculated</span></p>
-                  <p className="text-xs text-slate-400">Position preview will appear here upon assigning relatives.</p>
+                  {formData.relatedToMemberId && formData.relationship ? (
+                    <div className="mt-2 text-sm font-medium text-slate-800">
+                      {formData.relationship === 'SPOUSE' ? (
+                         <div className="flex items-center space-x-2">
+                            <span>{familyMembers.find(m => m.id === formData.relatedToMemberId)?.firstName}</span>
+                            <span className="text-blue-500">─ Spouse ─</span>
+                            <span>{formData.fullName || 'Invitee'}</span>
+                         </div>
+                      ) : (
+                         <div className="flex flex-col items-center">
+                            <span>{familyMembers.find(m => m.id === formData.relatedToMemberId)?.firstName}</span>
+                            <div className="text-blue-500 my-1 text-xs">{formData.relationship === 'CUSTOM' ? formData.customRelationship : formData.relationship}</div>
+                            <span>{formData.fullName || 'Invitee'}</span>
+                         </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400">Position preview will appear here upon assigning relatives.</p>
+                  )}
                </div>
              </div>
           </section>
